@@ -1,0 +1,123 @@
+*{
+    margin:0;
+    padding:0;
+
+}
+body{
+    /* width: 100vw;
+    height: 100vh; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: azure;
+    animation: 1s reloadTransition;
+    }
+    @keyframes reloadTransition {
+        from{
+          opacity: 0;
+          transform:rotateX('-10deg')
+      
+        }
+        to{
+          opacity:1;
+          transform: rotateX('0deg');
+        }
+        
+      }
+form{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
+    background-color: rgba(0, 0, 0, 0.448);
+    color: white;
+    font-family: system-ui;;
+   
+   
+}
+.donationContainer{
+    display: flex;
+    flex-direction: column;
+    margin-top: 8rem;
+    /* overflow-y: scroll; */
+}
+#donateForm{
+    padding:3rem;
+}
+form label
+{
+    font-weight: bold;
+}
+form select,label{
+    margin-top: 0.5rem;
+    font-size: 1.2rem;
+    border-radius: 10px;
+
+}
+
+form select{
+    padding:5px;
+}
+
+form button{
+    margin-top: 1rem;
+    font-size: 1rem;
+    padding:0.7rem;
+    text-align: center;
+    border-radius: 8px;
+    transition: all 0.7s;
+}
+form button:hover{
+    box-shadow: 2px 4px 2px 2px rgb(242, 240, 240);
+}
+
+.notifySuccess{
+    position: absolute;
+    top:-5rem;
+    margin:auto;
+    padding:20px 40px;
+    background-color: green;
+    color: white;
+    font-size: 1rem;
+    border-radius: 10px;
+    animation:3s transitionMessage
+}
+@keyframes transitionMessage{
+    25%{
+        /* left:30rem; */
+        top:1rem;
+    }
+    
+    
+    100%{
+        /* left:-100px; */
+        top:-5rem;
+        display:none;
+        
+    }
+}
+.tableContainer{
+    margin-top: 2rem;
+    overflow:hidden;
+    overflow-y: scroll;
+    height: 30vh;
+   
+}
+.tableContainer::-webkit-scrollbar{
+    display: none;
+}
+
+.productsTable{
+    width: 70vh;
+    margin:20px;
+   border:1px solid white;
+   
+}
+.productsTable td{
+    padding:4px;
+    text-align: center;
+   color:yellow;
+   border: 1px solid white;
+   
+}

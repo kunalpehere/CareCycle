@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My donations | CareCycle</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/donor.css">
+  <script src="/transitions.js" defer></script>
+  <script src="/app-nav.js" defer></script>
+</head>
+<body>
+  <%- include('partials/app-nav', { activePage: 'donations' }) %>
+
+  <main class="app-main donor-page">
+    <header class="dashboard-heading">
+      <div><h1>My donation listings</h1><p>Manage available listings and review their status.</p></div>
+      <a href="/donate" class="primary-button">Create listing</a>
+    </header>
+    <% if (message) { %><p class="form-message"><%= message %></p><% } %>
+
+    <% if (!donations.length && !legacyDonations.length) { %>
+      <section class="donor-panel empty-state"><h2>No listings yet</h2><p>Create your first medical-equipment donation listing.</p></section>
+    <% } %>
+
+    <section class="donation-grid">
+      <% donations.forEach((donation) => { %>
+        <article class="donor-panel donation-card">
+          <% if (donation.images?.length) { %><img class="card-image" src="/donations/images/<%= donation.images[0].filename %>" alt="<%= donation.equipment %>"><% } %>
+          <div class="card-content">
+            <div class="card-title"><h2><%= donation.equipment %></h2><span class="status status-<%= donation.status %>"><%= donation.status %></span></div>
+            <p><strong>Condition:</strong> <%= donation.condition %></p>
+            <p><strong>Quantity:</strong> <%= donation.quantity %><% if (donation.allocatedQuantity) { %> · <%= donation.allocatedQuantity %> matched<% } %></p>
+            <p><strong>Location:</strong> <%= donation.location.city %>, <%= donation.location.state %> <%= donation.location.postalCode %></p>
+            <p><%= donation.description %></p>
+            <p class="field-note">Created <%= new Date(donation.createdAt).toLocaleDateString() %></p>
+            <% if (donation.status === "available") { %>
+              <div class="card-actions">
+                <a href="/donations/<%= donation._id %>/edit" class="secondary-button">Edit</a>
+                <form method="post" action="/donations/<%= donation._id %>/withdraw" data-confirm="Withdraw this listing? It will remain in your history.">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <button type="submit" class="danger-button">Withdraw</button>
+                </form>
+              </div>
+            <% } %>
+            <% if (["requested", "matched"].includes(donation.status)) { %><div class="card-actions"><a href="/donor/requests" class="secondary-button">Review matches</a></div><% } %>
+          </div>
+        </article>
+      <% }) %>
+    </section>
+
+    <% if (legacyDonations.length) { %>
+      <section class="donor-panel legacy-panel"><h2>Legacy donation history</h2><p>Run the documented Release 0.2 migration before these records can be managed.</p>
+        <ul><% legacyDonations.forEach((item) => { %><li><%= item.equipment %> — <%= item.condition %></li><% }) %></ul>
+      </section>
+    <% } %>
+  </main>
+</body>
+</html>

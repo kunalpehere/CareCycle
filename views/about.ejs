@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Learn why CareCycle keeps useful medical equipment in motion.">
+  <title>About | CareCycle</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/content-pages.css">
+  <script src="/transitions.js" defer></script>
+  <script src="/app-nav.js" defer></script>
+</head>
+<body>
+  <%- include('partials/app-nav', { activePage: 'about' }) %>
+  <main class="app-main about-page">
+    <section class="about-hero">
+      <div><span class="page-eyebrow">About CareCycle</span><h1 class="page-title">Useful equipment should never sit unused.</h1><p class="page-intro">CareCycle gives donors a clear, responsible way to extend the useful life of medical equipment and prepare it for the people and organizations who need it next.</p></div>
+      <div class="about-image surface"><img src="/images/walker.jpg" alt="A walker ready for responsible reuse"><span>Keep care in motion</span></div>
+    </section>
+
+    <section class="mission-grid">
+      <article class="surface mission-main"><span class="page-eyebrow">Our mission</span><h2>Turn spare equipment into practical support.</h2><p>Medical equipment can remain valuable long after its first owner no longer needs it. We are building a dependable path for donors to describe, manage, and eventually transfer that equipment with clarity.</p></article>
+      <article class="value-card"><span>01</span><h3>Responsible reuse</h3><p>Good equipment stays in circulation instead of becoming unnecessary waste.</p></article>
+      <article class="value-card"><span>02</span><h3>Clear information</h3><p>Condition, quantity, location, and history help every listing remain trustworthy.</p></article>
+      <article class="value-card"><span>03</span><h3>Human impact</h3><p>Every completed cycle can make mobility, recovery, or daily care easier.</p></article>
+    </section>
+
+    <section class="about-cta"><div><span class="page-eyebrow">Ready to contribute?</span><h2>Start with the equipment you already have.</h2></div><a href="/donate">Create a donation listing →</a></section>
+  </main>
+</body>
+</html>

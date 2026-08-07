@@ -1,0 +1,8 @@
+/node_modules
+.env
+*.log
+/.local-data/
+/uploads/donations/*
+!/uploads/donations/.gitkeep
+/uploads/verification-documents/*
+!/uploads/verification-documents/.gitkeep

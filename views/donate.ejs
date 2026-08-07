@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= formTitle %> | CareCycle</title>
+  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/donor.css">
+  <script src="/transitions.js" defer></script>
+  <script src="/app-nav.js" defer></script>
+</head>
+<body>
+  <%- include('partials/app-nav', { activePage: 'create' }) %>
+
+  <main class="app-main donor-page">
+    <section class="donor-panel form-panel">
+      <h1><%= formTitle %></h1>
+      <% if (message) { %><p class="form-message"><%= message %></p><% } %>
+
+      <form action="<%= formAction %>" method="post" enctype="multipart/form-data" class="listing-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+        <label for="equipment">Equipment type</label>
+        <select name="equipment" id="equipment" required>
+          <% equipmentTypes.forEach((type) => { %>
+            <option value="<%= type %>" <%= donation && donation.equipment === type ? "selected" : "" %>><%= type %></option>
+          <% }) %>
+        </select>
+
+        <label for="quality">Condition</label>
+        <select name="quality" id="quality" required>
+          <% conditions.forEach((condition) => { %>
+            <option value="<%= condition %>" <%= donation && (donation.condition === condition || donation.quality === condition) ? "selected" : "" %>><%= condition %></option>
+          <% }) %>
+        </select>
+
+        <label for="quantity">Quantity</label>
+        <input type="number" name="quantity" id="quantity" min="1" max="100" value="<%= donation?.quantity || 1 %>" required>
+
+        <label for="description">Description</label>
+        <textarea name="description" id="description" minlength="10" maxlength="1000" required placeholder="Describe the equipment, its age, and any relevant details"><%= donation?.description || "" %></textarea>
+
+        <div class="form-grid">
+          <div><label for="city">City</label><input name="city" id="city" minlength="2" maxlength="100" value="<%= donation?.location?.city || donation?.city || "" %>" required></div>
+          <div><label for="state">State</label><input name="state" id="state" minlength="2" maxlength="100" value="<%= donation?.location?.state || donation?.state || "" %>" required></div>
+          <div><label for="postalCode">Postal code</label><input name="postalCode" id="postalCode" minlength="3" maxlength="20" value="<%= donation?.location?.postalCode || donation?.postalCode || "" %>" required></div>
+        </div>
+
+        <label for="images">Equipment images (JPEG, PNG, or WebP; maximum 3 files and 5 MB each)</label>
+        <input type="file" name="images" id="images" accept="image/jpeg,image/png,image/webp" multiple>
+        <% if (donation?.images?.length) { %>
+          <div class="image-row">
+            <% donation.images.forEach((image) => { %>
+              <label class="existing-image"><img src="/donations/images/<%= image.filename %>" alt="Existing image of <%= donation.equipment %>"><span><input type="checkbox" name="removeImages" value="<%= image.filename %>"> Remove</span></label>
+            <% }) %>
+          </div>
+          <p class="field-note">New images are added to the existing set. A listing can contain at most three.</p>
+        <% } %>
+
+        <button type="submit" class="primary-button"><%= submitLabel %></button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

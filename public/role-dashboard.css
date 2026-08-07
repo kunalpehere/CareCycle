@@ -1,0 +1,17 @@
+.role-dashboard>header { max-width:850px; }
+.role-summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-top:3.5rem; }
+.role-summary { display:flex; align-items:center; gap:1rem; padding:1.4rem; }
+.summary-icon { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; border-radius:12px; color:var(--green); background:var(--mint); font-weight:800; }
+.role-summary strong,.role-summary p { display:block; margin:0; }
+.role-summary p { margin-top:.25rem; color:var(--muted); font-size:.88rem; }
+.next-release-card { display:flex; align-items:center; justify-content:space-between; gap:2rem; margin-top:1.2rem; padding:clamp(1.5rem,4vw,3rem); }
+.next-release-card h2 { margin:.5rem 0; font:700 clamp(1.6rem,3vw,2.5rem) "Manrope"; }
+.next-release-card p { max-width:720px; margin:.5rem 0 0; color:var(--muted); line-height:1.7; }
+.locked-label { flex:none; padding:.55rem .8rem; border-radius:999px; color:#6e5731; background:#f3ead8; font-size:.78rem; font-weight:700; }
+@media(max-width:800px){.role-summary-grid{grid-template-columns:1fr}.next-release-card{align-items:flex-start;flex-direction:column}}
+.access-denied-card { max-width:720px; margin:4rem auto 0; padding:clamp(2rem,5vw,4rem); text-align:center; }
+.access-denied-card .summary-icon { margin:0 auto 1.2rem; color:#8a2929; background:#f7e5e5; }
+.access-denied-card h1 { margin:.6rem 0 1rem; font:800 clamp(2rem,4vw,3.4rem)/1.08 "Manrope"; letter-spacing:-.04em; }
+.access-denied-card p { color:var(--muted); line-height:1.65; }
+.access-denied-card .role-note { font-size:.86rem; }
+.access-denied-card a { display:inline-flex; margin-top:1rem; padding:.85rem 1rem; border-radius:9px; color:white; background:var(--deep); font-weight:700; text-decoration:none; }

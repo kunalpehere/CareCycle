@@ -1,0 +1,35 @@
+<% const navRole = typeof currentUser !== 'undefined' && currentUser?.role ? currentUser.role : 'donor'; %>
+<% if (navRole === 'admin') { %><link rel="stylesheet" href="/admin-identity.css"><% } %>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<header class="site-header">
+  <nav class="home-nav" aria-label="Main navigation">
+    <a class="home-brand" href="<%= navRole === 'admin' ? '/admin/dashboard' : '/home' %>"><span class="home-brand-mark" aria-hidden="true">C</span><span><%= navRole === 'admin' ? 'CareCycle Administration' : 'CareCycle' %></span></a>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
+    <div class="nav-links" id="primary-nav">
+      <% if (navRole !== 'admin') { %><a href="/home" class="<%= activePage === 'home' ? 'active' : '' %>">Home</a><% } %>
+      <% if (navRole === 'donor') { %>
+        <a href="/about" class="<%= activePage === 'about' ? 'active' : '' %>">About</a>
+        <a href="/contact" class="<%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
+        <a href="/donor/dashboard" class="<%= activePage === 'donations' ? 'active' : '' %>">My donations</a>
+        <a href="/donor/requests" class="<%= activePage === 'donor-requests' ? 'active' : '' %>">Requests</a>
+      <% } else if (navRole === 'ngo') { %>
+        <a href="/about" class="<%= activePage === 'about' ? 'active' : '' %>">About</a>
+        <a href="/contact" class="<%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
+        <a href="/ngo/dashboard" class="<%= activePage === 'ngo-dashboard' ? 'active' : '' %>">NGO dashboard</a>
+        <a href="/ngo/equipment" class="<%= activePage === 'equipment' ? 'active' : '' %>">Find equipment</a>
+        <a href="/ngo/requests" class="<%= activePage === 'requests' ? 'active' : '' %>">My requests</a>
+      <% } else if (navRole === 'admin') { %>
+        <a href="/admin/dashboard" class="<%= activePage === 'admin-dashboard' ? 'active' : '' %>">Admin dashboard</a>
+        <a href="/admin/users" class="<%= activePage === 'admin-users' ? 'active' : '' %>">Accounts</a>
+      <% } %>
+    </div>
+    <div class="nav-actions">
+      <form method="post" action="/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="text-button" type="submit">Sign out</button>
+      </form>
+      <% if (navRole === 'donor') { %><a class="nav-cta <%= activePage === 'create' ? 'active-cta' : '' %>" href="/donate">Donate equipment</a><% } %>
+    </div>
+  </nav>
+</header>
+<script src="/accessibility.js" defer></script>

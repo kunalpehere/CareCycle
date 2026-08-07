@@ -1,0 +1,86 @@
+(() => {
+  const main = document.querySelector('main');
+  if (main) {
+    if (!main.id) main.id = 'main-content';
+    if (!main.hasAttribute('tabindex')) main.tabIndex = -1;
+  }
+  document.querySelectorAll('.nav-links a.active').forEach((link) => link.setAttribute('aria-current', 'page'));
+  document.querySelectorAll('[role="status"], .form-message, .request-message').forEach((node) => {
+    if (!node.hasAttribute('aria-live')) node.setAttribute('aria-live', 'polite');
+  });
+
+  let invalidTimer;
+  document.addEventListener('invalid', (event) => {
+    event.target.setAttribute('aria-invalid', 'true');
+    clearTimeout(invalidTimer);
+    invalidTimer = setTimeout(() => {
+      const form = event.target.form;
+      if (!form) return;
+      form.querySelector('.validation-summary')?.remove();
+      const fields = [...form.querySelectorAll(':invalid')];
+      const summary = document.createElement('div');
+      summary.className = 'validation-summary';
+      summary.setAttribute('role', 'alert');
+      summary.tabIndex = -1;
+      const heading = document.createElement('strong');
+      heading.textContent = 'Please correct the highlighted fields:';
+      const list = document.createElement('ul');
+      fields.forEach((field, index) => {
+        if (!field.id) field.id = `field-${Date.now()}-${index}`;
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = `#${field.id}`;
+        link.textContent = field.labels?.[0]?.textContent?.trim() || field.name || 'Required field';
+        item.append(link); list.append(item);
+      });
+      summary.append(heading, list);
+      form.prepend(summary);
+      summary.focus();
+    }, 0);
+  }, true);
+  document.addEventListener('input', (event) => {
+    if (event.target.matches('input,select,textarea') && event.target.validity?.valid) event.target.removeAttribute('aria-invalid');
+  });
+
+  document.querySelectorAll('input[type="file"]').forEach((input) => input.addEventListener('change', () => {
+    input.parentElement.querySelector('.file-preview')?.remove();
+    if (!input.files?.length) return;
+    const preview = document.createElement('div');
+    preview.className = 'file-preview';
+    preview.setAttribute('aria-live', 'polite');
+    [...input.files].forEach((file) => {
+      const item = document.createElement('span');
+      if (file.type.startsWith('image/')) {
+        const image = document.createElement('img');
+        image.src = URL.createObjectURL(file);
+        image.alt = `Preview of ${file.name}`;
+        image.addEventListener('load', () => URL.revokeObjectURL(image.src), { once: true });
+        item.append(image);
+      }
+      item.append(document.createTextNode(`${file.name} (${Math.ceil(file.size / 1024)} KB)`));
+      preview.append(item);
+    });
+    input.insertAdjacentElement('afterend', preview);
+  }));
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'confirm-dialog';
+  dialog.innerHTML = '<form method="dialog"><h2>Confirm action</h2><p></p><div><button value="cancel">Cancel</button><button class="confirm-action" value="confirm">Continue</button></div></form>';
+  document.body.append(dialog);
+  let pendingForm;
+  document.querySelectorAll('form[data-confirm]').forEach((form) => form.addEventListener('submit', (event) => {
+    if (form.dataset.confirmed === 'true') return;
+    event.preventDefault();
+    pendingForm = form;
+    dialog.querySelector('p').textContent = form.dataset.confirm;
+    dialog.showModal();
+    dialog.querySelector('button[value="cancel"]').focus();
+  }));
+  dialog.addEventListener('close', () => {
+    if (dialog.returnValue === 'confirm' && pendingForm) {
+      pendingForm.dataset.confirmed = 'true';
+      pendingForm.requestSubmit();
+    } else pendingForm?.querySelector('button[type="submit"]')?.focus();
+    pendingForm = null;
+  });
+})();

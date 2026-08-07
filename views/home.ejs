@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CareCycle helps useful medical equipment reach people and organizations that need it.">
+  <title>CareCycle | Give equipment a second life</title>
+  <link rel="stylesheet" href="/home.css">
+  <link rel="stylesheet" href="/app.css">
+  <script src="/transitions.js" defer></script>
+  <script src="/app-nav.js" defer></script>
+</head>
+<body>
+  <%- include('partials/app-nav', { activePage: 'home' }) %>
+
+  <main>
+    <section class="hero">
+      <div class="hero-glow hero-glow-one"></div><div class="hero-glow hero-glow-two"></div>
+      <div class="hero-copy">
+        <span class="hero-kicker"><span></span> Medical equipment, thoughtfully recirculated</span>
+        <h1>Pass care<br>forward.</h1>
+        <p>Give useful medical equipment a second life and help essential support reach the people who need it next.</p>
+        <div class="hero-actions">
+          <% if (currentUser.role === 'donor') { %>
+            <a class="button-primary" href="/donate">List equipment <span aria-hidden="true">→</span></a>
+            <a class="button-secondary" href="/donor/dashboard">View my donations</a>
+          <% } else if (currentUser.role === 'ngo') { %>
+            <a class="button-primary" href="/ngo/dashboard">Open NGO dashboard <span aria-hidden="true">→</span></a>
+          <% } else { %>
+            <a class="button-primary" href="/admin/dashboard">Open admin dashboard <span aria-hidden="true">→</span></a>
+          <% } %>
+        </div>
+        <div class="trust-row">
+          <div class="trust-avatars" aria-hidden="true"><span>CC</span><span>+</span><span>♥</span></div>
+          <p><strong>Built for responsible giving</strong><br>Simple listings. Clear ownership. Lasting history.</p>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-label="Medical equipment donation collection">
+        <div class="visual-card main-equipment-card">
+          <span class="card-label">Ready to help again</span>
+          <img src="/images/wheelchair.jpg" alt="Wheelchair ready for donation">
+          <div class="equipment-caption"><div><strong>Mobility support</strong><span>Equipment in good condition</span></div><span class="condition-dot">Available</span></div>
+        </div>
+        <div class="floating-card float-impact"><span class="float-icon">↻</span><div><strong>A better cycle</strong><span>Reuse before replacement</span></div></div>
+        <div class="floating-card float-step"><span>01</span><div><strong>Create a listing</strong><small>Add condition and location</small></div></div>
+      </div>
+    </section>
+
+    <section class="process-section" aria-labelledby="process-title">
+      <div class="section-heading"><span>How CareCycle works</span><h2 id="process-title">From unused to invaluable.</h2><p>A clear path for giving equipment responsibly.</p></div>
+      <div class="process-grid">
+        <article><span class="step-number">01</span><div class="step-icon">＋</div><h3>List your equipment</h3><p>Add the condition, quantity, location, and helpful photos.</p></article>
+        <article><span class="step-number">02</span><div class="step-icon">⌕</div><h3>Keep it visible</h3><p>Manage availability and maintain a reliable donation record.</p></article>
+        <article><span class="step-number">03</span><div class="step-icon">✓</div><h3>Complete the cycle</h3><p>Track the listing as it moves toward its next useful chapter.</p></article>
+      </div>
+    </section>
+
+    <section class="equipment-strip">
+      <div><span class="strip-label">Commonly donated</span><h2>Useful equipment deserves more useful years.</h2></div>
+      <div class="equipment-pills"><span>Wheelchairs</span><span>Walkers</span><span>Canes</span><span>Stethoscopes</span></div>
+    </section>
+  </main>
+
+  <footer><a class="home-brand footer-brand" href="/home"><span class="home-brand-mark">C</span><span>CareCycle</span></a><p>Keep care in motion.</p></footer>
+</body>
+</html>

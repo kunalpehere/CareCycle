@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create a CareCycle donor account.">
+  <title>Create account | CareCycle</title>
+  <link rel="stylesheet" href="/defaultEntry.css">
+  <script src="/transitions.js" defer></script>
+  <script src="/accessibility.js" defer></script>
+</head>
+<body class="auth-page">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <main class="auth-shell" id="main-content" tabindex="-1">
+    <section class="auth-story register-story" aria-labelledby="carecycle-title">
+      <a class="brand brand-light" href="/login" aria-label="CareCycle home">
+        <span class="brand-mark" aria-hidden="true">C</span><span>CareCycle</span>
+      </a>
+      <div class="story-content">
+        <span class="eyebrow">Start a care cycle</span>
+        <h1 id="carecycle-title">One listing can make everyday life easier.</h1>
+        <p>Share equipment you no longer need and keep valuable resources in active use.</p>
+        <ul class="story-checks">
+          <li>Securely manage your donation listings</li>
+          <li>Add useful equipment and location details</li>
+          <li>Track each listing from one dashboard</li>
+        </ul>
+      </div>
+      <p class="story-note">Your equipment still has meaningful work to do.</p>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-card">
+        <div class="mobile-brand"><span class="brand-mark" aria-hidden="true">C</span><span>CareCycle</span></div>
+        <span class="eyebrow eyebrow-dark">Join CareCycle</span>
+        <h2>Create your CareCycle account</h2>
+        <p class="auth-subtitle">It takes less than a minute to get started.</p>
+        <% if (message) { %><div class="auth-message" role="status" aria-live="polite"><%= message %></div><% } %>
+        <form action="/register" method="post" class="auth-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <fieldset class="role-picker">
+            <legend>I am joining as</legend>
+            <label class="role-option">
+              <input type="radio" name="role" value="donor" checked>
+              <span><strong>Equipment donor</strong><small>List and manage equipment you want to give.</small></span>
+            </label>
+            <label class="role-option">
+              <input type="radio" name="role" value="ngo">
+              <span><strong>NGO member</strong><small>Represent an organization seeking equipment.</small></span>
+            </label>
+          </fieldset>
+          <label for="name">Full name</label>
+          <input id="name" name="name" autocomplete="name" minlength="2" maxlength="80" placeholder="Your full name" required>
+          <label for="email">Email address</label>
+          <input id="email" type="email" name="email" autocomplete="email" placeholder="you@example.com" required>
+          <label for="password">Password</label>
+          <input id="password" type="password" name="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="At least 8 characters" required>
+          <button type="submit" class="auth-primary">Create account</button>
+        </form>
+        <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
