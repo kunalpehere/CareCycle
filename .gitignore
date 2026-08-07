@@ -1,4 +1,5 @@
 /node_modules
+.github-sync/
 .env
 *.log
 /.local-data/
@@ -6,3 +7,5 @@
 !/uploads/donations/.gitkeep
 /uploads/verification-documents/*
 !/uploads/verification-documents/.gitkeep
+
+.github-sync/
