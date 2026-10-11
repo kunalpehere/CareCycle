@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Access denied | CareCycle</title>
   <link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/role-dashboard.css">
-  <script src="/transitions.js" defer></script><script src="/app-nav.js" defer></script>
+  <script src="/app-nav.js" defer></script>
 </head>
 <body>
   <%- include('partials/app-nav', { activePage: '' }) %>
@@ -13,7 +13,7 @@
       <span class="summary-icon">!</span><span class="page-eyebrow">Access denied</span>
       <h1>This area is not available to your account.</h1><p><%= message %></p>
       <p class="role-note">Signed in role: <strong><%= role %></strong></p>
-      <a href="<%= dashboardPath %>">Return to my dashboard →</a>
+      <a href="<%= dashboardPath %>">Return to my dashboard</a>
     </section>
   </main>
 </body>

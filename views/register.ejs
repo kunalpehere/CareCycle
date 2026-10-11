@@ -3,10 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Create a CareCycle donor account.">
+  <meta name="description" content="Create a CareCycle donor or NGO account.">
   <title>Create account | CareCycle</title>
   <link rel="stylesheet" href="/defaultEntry.css">
-  <script src="/transitions.js" defer></script>
   <script src="/accessibility.js" defer></script>
 </head>
 <body class="auth-page">
@@ -17,16 +16,16 @@
         <span class="brand-mark" aria-hidden="true">C</span><span>CareCycle</span>
       </a>
       <div class="story-content">
-        <span class="eyebrow">Start a care cycle</span>
-        <h1 id="carecycle-title">One listing can make everyday life easier.</h1>
-        <p>Share equipment you no longer need and keep valuable resources in active use.</p>
+        <span class="eyebrow">Donor and NGO accounts</span>
+        <h1 id="carecycle-title">Create a donor or NGO account.</h1>
+        <p>Donors list equipment. NGOs submit an organization profile for verification before discovering equipment.</p>
         <ul class="story-checks">
           <li>Securely manage your donation listings</li>
           <li>Add useful equipment and location details</li>
           <li>Track each listing from one dashboard</li>
         </ul>
       </div>
-      <p class="story-note">Your equipment still has meaningful work to do.</p>
+      <p class="story-note">Organization verification does not certify equipment condition.</p>
     </section>
 
     <section class="auth-panel">
@@ -34,7 +33,7 @@
         <div class="mobile-brand"><span class="brand-mark" aria-hidden="true">C</span><span>CareCycle</span></div>
         <span class="eyebrow eyebrow-dark">Join CareCycle</span>
         <h2>Create your CareCycle account</h2>
-        <p class="auth-subtitle">It takes less than a minute to get started.</p>
+        <p class="auth-subtitle">Choose your role and enter your account details.</p>
         <% if (message) { %><div class="auth-message" role="status" aria-live="polite"><%= message %></div><% } %>
         <form action="/register" method="post" class="auth-form">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">

@@ -1,7 +1,7 @@
 <% const navRole = typeof currentUser !== 'undefined' && currentUser?.role ? currentUser.role : 'donor'; %>
 <% if (navRole === 'admin') { %><link rel="stylesheet" href="/admin-identity.css"><% } %>
 <a class="skip-link" href="#main-content">Skip to main content</a>
-<header class="site-header">
+<header class="site-header <%= navRole === 'admin' ? 'admin-header' : '' %>">
   <nav class="home-nav" aria-label="Main navigation">
     <a class="home-brand" href="<%= navRole === 'admin' ? '/admin/dashboard' : '/home' %>"><span class="home-brand-mark" aria-hidden="true">C</span><span><%= navRole === 'admin' ? 'CareCycle Administration' : 'CareCycle' %></span></a>
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>

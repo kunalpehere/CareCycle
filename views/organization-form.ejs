@@ -4,7 +4,7 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><%= formTitle %> | CareCycle</title>
   <link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/organization.css">
-  <script src="/transitions.js" defer></script><script src="/app-nav.js" defer></script>
+  <script src="/app-nav.js" defer></script>
 </head>
 <body>
   <%- include('partials/app-nav', { activePage: 'ngo-dashboard' }) %>
@@ -17,7 +17,7 @@
       <section><div class="form-section-title"><span>01</span><div><h2>Organization identity</h2><p>Use the name and number shown on your registration document.</p></div></div>
         <div class="form-grid"><label class="wide">Organization name<input name="name" required minlength="2" maxlength="150" value="<%= value.name || '' %>"></label><label>Registration number<input name="registrationNumber" required minlength="3" maxlength="100" value="<%= value.registrationNumber || '' %>"></label><label>Website <small>(optional)</small><input type="url" name="website" maxlength="300" placeholder="https://example.org" value="<%= value.website || '' %>"></label><label class="wide">What does your organization do?<textarea name="description" required minlength="20" maxlength="1500" rows="5" placeholder="Describe your mission, communities served, and equipment needs."><%= value.description || '' %></textarea></label></div>
       </section>
-      <section><div class="form-section-title"><span>02</span><div><h2>Primary contact</h2><p>This person will receive verification and donation-request updates.</p></div></div>
+      <section><div class="form-section-title"><span>02</span><div><h2>Primary contact</h2><p>Provide the contact person donors can coordinate with after a request is accepted.</p></div></div>
         <div class="form-grid"><label>Contact person<input name="contactPerson" required minlength="2" maxlength="100" value="<%= value.contactPerson || '' %>"></label><label>Contact email<input type="email" name="contactEmail" required maxlength="254" value="<%= value.contactEmail || '' %>"></label><label>Phone number<input type="tel" name="phone" required minlength="7" maxlength="30" value="<%= value.phone || '' %>"></label></div>
       </section>
       <section><div class="form-section-title"><span>03</span><div><h2>Registered address</h2><p>Enter the address connected to the organization.</p></div></div>

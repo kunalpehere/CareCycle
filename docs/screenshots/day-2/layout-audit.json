@@ -1,0 +1,387 @@
+[
+  {
+    "name": "home",
+    "size": "mobile",
+    "animations": 0,
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "about",
+    "size": "mobile",
+    "animations": 0,
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "signOut": 78.75000762939453,
+    "width": 390
+  },
+  {
+    "name": "contact",
+    "size": "mobile",
+    "animations": 0,
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "signOut": 78.75000762939453,
+    "width": 390
+  },
+  {
+    "name": "login",
+    "size": "mobile",
+    "animations": 0,
+    "client": 390,
+    "gradients": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "name": "register",
+    "size": "mobile",
+    "animations": 0,
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "admin-login",
+    "size": "mobile",
+    "animations": 0,
+    "client": 390,
+    "gradients": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "name": "admin-access-request",
+    "size": "mobile",
+    "animations": 0,
+    "client": 390,
+    "gradients": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "name": "donate",
+    "size": "mobile",
+    "animations": 0,
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "signOut": 78.75000762939453,
+    "width": 390
+  },
+  {
+    "name": "donor-dashboard",
+    "size": "mobile",
+    "animations": 0,
+    "client": 390,
+    "gradients": 0,
+    "scroll": 390,
+    "signOut": 78.75000762939453,
+    "width": 390
+  },
+  {
+    "name": "donor-requests",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [
+      "6px"
+    ],
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "ngo-requests",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [
+      "6px",
+      "6px"
+    ],
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "equipment-discovery",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [
+      "6px"
+    ],
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "equipment-detail",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [
+      "6px"
+    ],
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "organization-form",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [
+      "6px"
+    ],
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "organization-profile",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [
+      "6px"
+    ],
+    "client": 390,
+    "gradients": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "name": "ngo-dashboard",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [],
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "admin-dashboard",
+    "size": "mobile",
+    "animations": 0,
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "admin-organization-review",
+    "size": "mobile",
+    "animations": 0,
+    "client": 375,
+    "gradients": 0,
+    "scroll": 375,
+    "width": 390
+  },
+  {
+    "name": "admin-users",
+    "size": "mobile",
+    "animations": 0,
+    "client": 390,
+    "gradients": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "name": "access-denied",
+    "size": "mobile",
+    "animations": 0,
+    "badges": [],
+    "client": 390,
+    "gradients": 0,
+    "scroll": 390,
+    "width": 390
+  },
+  {
+    "name": "home",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "about",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "contact",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "login",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  },
+  {
+    "name": "register",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "admin-login",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  },
+  {
+    "name": "admin-access-request",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "donate",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "donor-dashboard",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  },
+  {
+    "name": "donor-requests",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "ngo-requests",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  },
+  {
+    "name": "equipment-discovery",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "equipment-detail",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "organization-form",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "organization-profile",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  },
+  {
+    "name": "ngo-dashboard",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  },
+  {
+    "name": "admin-dashboard",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "admin-organization-review",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1351,
+    "gradients": 0,
+    "scroll": 1351,
+    "width": 1367
+  },
+  {
+    "name": "admin-users",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  },
+  {
+    "name": "access-denied",
+    "size": "desktop",
+    "animations": 0,
+    "client": 1367,
+    "gradients": 0,
+    "scroll": 1367,
+    "width": 1367
+  }
+]

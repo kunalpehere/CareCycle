@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="CareCycle helps useful medical equipment reach people and organizations that need it.">
-  <title>CareCycle | Give equipment a second life</title>
+  <meta name="description" content="List medical equipment for donation or request equipment as a verified NGO.">
+  <title>CareCycle | Medical equipment donations</title>
   <link rel="stylesheet" href="/home.css">
   <link rel="stylesheet" href="/app.css">
-  <script src="/transitions.js" defer></script>
   <script src="/app-nav.js" defer></script>
 </head>
 <body>
@@ -15,53 +14,50 @@
 
   <main>
     <section class="hero">
-      <div class="hero-glow hero-glow-one"></div><div class="hero-glow hero-glow-two"></div>
       <div class="hero-copy">
-        <span class="hero-kicker"><span></span> Medical equipment, thoughtfully recirculated</span>
-        <h1>Pass care<br>forward.</h1>
-        <p>Give useful medical equipment a second life and help essential support reach the people who need it next.</p>
+        <span class="hero-kicker">Donors and verified NGOs</span>
+        <h1>Donate medical equipment.</h1>
+        <p>List equipment you want to give, review requests from verified NGOs, and exchange contact details after accepting a request.</p>
         <div class="hero-actions">
           <% if (currentUser.role === 'donor') { %>
-            <a class="button-primary" href="/donate">List equipment <span aria-hidden="true">→</span></a>
+            <a class="button-primary" href="/donate">List equipment</a>
             <a class="button-secondary" href="/donor/dashboard">View my donations</a>
           <% } else if (currentUser.role === 'ngo') { %>
-            <a class="button-primary" href="/ngo/dashboard">Open NGO dashboard <span aria-hidden="true">→</span></a>
+            <a class="button-primary" href="/ngo/dashboard">Open NGO dashboard</a>
           <% } else { %>
-            <a class="button-primary" href="/admin/dashboard">Open admin dashboard <span aria-hidden="true">→</span></a>
+            <a class="button-primary" href="/admin/dashboard">Open admin dashboard</a>
           <% } %>
         </div>
-        <div class="trust-row">
-          <div class="trust-avatars" aria-hidden="true"><span>CC</span><span>+</span><span>♥</span></div>
-          <p><strong>Built for responsible giving</strong><br>Simple listings. Clear ownership. Lasting history.</p>
-        </div>
+        <p class="process-note">Organization verification reviews NGO evidence. It does not certify equipment condition or medical fitness.</p>
       </div>
 
-      <div class="hero-visual" aria-label="Medical equipment donation collection">
-        <div class="visual-card main-equipment-card">
-          <span class="card-label">Ready to help again</span>
-          <img src="/images/wheelchair.jpg" alt="Wheelchair ready for donation">
-          <div class="equipment-caption"><div><strong>Mobility support</strong><span>Equipment in good condition</span></div><span class="condition-dot">Available</span></div>
-        </div>
-        <div class="floating-card float-impact"><span class="float-icon">↻</span><div><strong>A better cycle</strong><span>Reuse before replacement</span></div></div>
-        <div class="floating-card float-step"><span>01</span><div><strong>Create a listing</strong><small>Add condition and location</small></div></div>
-      </div>
+      <aside class="listing-guide" aria-labelledby="listing-guide-title">
+        <span class="page-eyebrow">Listing information</span>
+        <h2 id="listing-guide-title">Describe equipment before arranging a transfer.</h2>
+        <dl>
+          <div><dt>Equipment and condition</dt><dd>Select a category and describe wear, defects, or missing parts.</dd></div>
+          <div><dt>Quantity and location</dt><dd>State how many units you offer and the collection area.</dd></div>
+          <div><dt>Your photos</dt><dd>Add up to three equipment images to help NGOs review your listing.</dd></div>
+        </dl>
+        <p>This is guidance, not an available equipment listing.</p>
+      </aside>
     </section>
 
     <section class="process-section" aria-labelledby="process-title">
-      <div class="section-heading"><span>How CareCycle works</span><h2 id="process-title">From unused to invaluable.</h2><p>A clear path for giving equipment responsibly.</p></div>
+      <div class="section-heading"><span>How CareCycle works</span><h2 id="process-title">List, request, and review.</h2><p>Pickup scheduling and receipt acknowledgement are planned features.</p></div>
       <div class="process-grid">
-        <article><span class="step-number">01</span><div class="step-icon">＋</div><h3>List your equipment</h3><p>Add the condition, quantity, location, and helpful photos.</p></article>
-        <article><span class="step-number">02</span><div class="step-icon">⌕</div><h3>Keep it visible</h3><p>Manage availability and maintain a reliable donation record.</p></article>
-        <article><span class="step-number">03</span><div class="step-icon">✓</div><h3>Complete the cycle</h3><p>Track the listing as it moves toward its next useful chapter.</p></article>
+        <article><span class="step-number">01</span><h3>List your equipment</h3><p>Add the condition, quantity, location, and helpful photos.</p></article>
+        <article><span class="step-number">02</span><h3>NGOs request equipment</h3><p>Verified NGOs browse listings and explain the quantity they need.</p></article>
+        <article><span class="step-number">03</span><h3>Review the request</h3><p>The donor accepts or rejects. Accepted requests show each party's contact details in their request pages.</p></article>
       </div>
     </section>
 
     <section class="equipment-strip">
-      <div><span class="strip-label">Commonly donated</span><h2>Useful equipment deserves more useful years.</h2></div>
-      <div class="equipment-pills"><span>Wheelchairs</span><span>Walkers</span><span>Canes</span><span>Stethoscopes</span></div>
+      <div><span class="strip-label">Supported categories</span><h2>Equipment you can list.</h2></div>
+      <div class="equipment-labels"><span>Wheelchairs</span><span>Walkers</span><span>Canes</span><span>Stethoscopes</span></div>
     </section>
   </main>
 
-  <footer><a class="home-brand footer-brand" href="/home"><span class="home-brand-mark">C</span><span>CareCycle</span></a><p>Keep care in motion.</p></footer>
+  <footer><a class="home-brand footer-brand" href="/home"><span class="home-brand-mark">C</span><span>CareCycle</span></a><p>Medical equipment donation for donors and NGOs.</p></footer>
 </body>
 </html>

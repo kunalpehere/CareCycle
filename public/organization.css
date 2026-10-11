@@ -1,7 +1,7 @@
 .organization-page { max-width:none; }
 .organization-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:2rem; }
 .organization-heading .page-title { font-size:clamp(2.5rem,5vw,4.8rem); }
-.secure-note { flex:none; padding:.65rem .9rem; border:1px solid #b9d9c8; border-radius:999px; color:var(--green); background:#f4fbf7; font-size:.8rem; font-weight:700; }
+.secure-note { flex:none; padding:.65rem .9rem; border:1px solid #b9d9c8; border-radius:6px; color:var(--green); background:#f4fbf7; font-size:.8rem; font-weight:700; }
 .form-message { max-width:1180px; margin:1.5rem 0; padding:1rem 1.2rem; border:1px solid #d7c89e; border-radius:12px; color:#654e1f; background:#fff9e8; }
 .organization-form { max-width:1020px; margin:2.5rem 0 0; overflow:hidden; }
 .organization-form section { display:grid; grid-template-columns:240px 1fr; gap:2.3rem; padding:2rem; border-bottom:1px solid var(--line); }
@@ -27,7 +27,7 @@
 .application-card p { max-width:680px; color:var(--muted); line-height:1.6; }
 .application-meta,.application-actions { display:flex; gap:1.2rem; color:var(--muted); font-size:.85rem; }
 .application-actions { align-items:center; flex:none; }.application-actions>a:first-child { color:var(--green); font-weight:700; }
-.status-badge { display:inline-flex; padding:.4rem .7rem; border-radius:999px; font-size:.72rem; font-weight:800; text-transform:capitalize; }
+.status-badge { display:inline-flex; padding:.4rem .7rem; border-radius:6px; font-size:.72rem; font-weight:800; text-transform:capitalize; }
 .status-badge.pending { color:#76591c; background:#fff0c9; }.status-badge.verified { color:#12613f; background:#dff4e8; }.status-badge.rejected { color:#8a2929; background:#f8dddd; }
 .profile-card,.queue-card { max-width:1020px; margin-top:2.2rem; padding:2rem; }
 .profile-card dl { display:grid; grid-template-columns:repeat(2,1fr); gap:1.6rem; margin:1.8rem 0; }

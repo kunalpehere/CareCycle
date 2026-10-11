@@ -7,7 +7,7 @@
 .next-release-card { display:flex; align-items:center; justify-content:space-between; gap:2rem; margin-top:1.2rem; padding:clamp(1.5rem,4vw,3rem); }
 .next-release-card h2 { margin:.5rem 0; font:700 clamp(1.6rem,3vw,2.5rem) "Manrope"; }
 .next-release-card p { max-width:720px; margin:.5rem 0 0; color:var(--muted); line-height:1.7; }
-.locked-label { flex:none; padding:.55rem .8rem; border-radius:999px; color:#6e5731; background:#f3ead8; font-size:.78rem; font-weight:700; }
+.locked-label { flex:none; padding:.55rem .8rem; border-radius:6px; color:#6e5731; background:#f3ead8; font-size:.78rem; font-weight:700; }
 @media(max-width:800px){.role-summary-grid{grid-template-columns:1fr}.next-release-card{align-items:flex-start;flex-direction:column}}
 .access-denied-card { max-width:720px; margin:4rem auto 0; padding:clamp(2rem,5vw,4rem); text-align:center; }
 .access-denied-card .summary-icon { margin:0 auto 1.2rem; color:#8a2929; background:#f7e5e5; }

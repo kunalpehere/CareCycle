@@ -6,7 +6,6 @@
   <title>My donations | CareCycle</title>
   <link rel="stylesheet" href="/app.css">
   <link rel="stylesheet" href="/donor.css">
-  <script src="/transitions.js" defer></script>
   <script src="/app-nav.js" defer></script>
 </head>
 <body>
@@ -51,7 +50,7 @@
 
     <% if (legacyDonations.length) { %>
       <section class="donor-panel legacy-panel"><h2>Legacy donation history</h2><p>Run the documented Release 0.2 migration before these records can be managed.</p>
-        <ul><% legacyDonations.forEach((item) => { %><li><%= item.equipment %> — <%= item.condition %></li><% }) %></ul>
+        <ul><% legacyDonations.forEach((item) => { %><li><%= item.equipment %>, <%= item.condition %></li><% }) %></ul>
       </section>
     <% } %>
   </main>
