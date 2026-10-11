@@ -122,6 +122,13 @@ Suggested commit: `docs: define CareCycle product scope and architecture`
 
 ### Day 2 - Design cleanup and user needs
 
+Status: implemented and locally verified; participant research and image-permission evidence pending.
+Date: October 12, 2026 (work began October 11).
+Commits: `fix(ui): remove decorative and misleading interface elements` and `docs(product): record user needs and design decisions`, on `codex/day-2-design-cleanup`.
+Checks and results: 33 tests and syntax checks for 50 JavaScript files passed; final template rendering checks passed. Forty desktop/mobile template observations found no horizontal overflow, computed gradients, or active CSS animations. Navigation, keyboard menus, focus/error recovery, image/document previews and confirmation cancellation checked with synthetic fixtures.
+Evidence: [research and provisional decisions](user-needs-and-design.md), [screen sketches](day-2-screen-sketches.md), [asset inventory](promotional-assets.md), and [verification record](day-2-verification.md).
+Known limitations and external checks: no donor/NGO interviews or asset licence evidence available, as confirmed by the project owner. Uncertain promotional images are omitted. Real authenticated database workflows, staging, delivery and a complete accessibility review remain later checks.
+
 Outcome:
 
 - Prepare short donor and NGO interview questions about equipment details, collection, trust, and receipt evidence.

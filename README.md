@@ -4,7 +4,7 @@ CareCycle is a full-stack medical-equipment donation platform that connects indi
 
 ![CareCycle interface showcase](docs/screenshots/carecycle-showcase.gif)
 
-> The animated showcase cycles through the current participant login, home, about, and donation-listing interfaces. Individual full-resolution screenshots are available in [`docs/screenshots`](docs/screenshots).
+> This historical showcase predates the Day 2 interface cleanup. It does not depict the current interface. Individual historical screenshots are available in [`docs/screenshots`](docs/screenshots); refreshed release media is planned for Day 28.
 
 ## Current release
 
@@ -71,6 +71,9 @@ CareCycle Administration is an internal platform role. It is not a government or
 - [Product scope and current role permissions](docs/product-foundation.md)
 - [Current architecture, routes, models, and planned changes](docs/architecture.md)
 - [Day 1 baseline checks and known limitations](docs/day-1-baseline.md)
+- [Day 2 research questions and provisional design decisions](docs/user-needs-and-design.md)
+- [Day 2 screen sketches](docs/day-2-screen-sketches.md) and [promotional asset inventory](docs/promotional-assets.md)
+- [Day 2 implementation checks and browser evidence](docs/day-2-verification.md)
 
 The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup, acknowledgement, and receipts remain planned features. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
 
