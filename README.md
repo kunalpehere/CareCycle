@@ -66,6 +66,14 @@ CareCycle Administration is an internal platform role. It is not a government or
 - Nodemailer-ready notification service
 - Node.js built-in test runner
 
+## Product foundation and architecture
+
+- [Product scope and current role permissions](docs/product-foundation.md)
+- [Current architecture, routes, models, and planned changes](docs/architecture.md)
+- [Day 1 baseline checks and known limitations](docs/day-1-baseline.md)
+
+The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup, acknowledgement, and receipts remain planned features. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
+
 ## Security controls
 
 - Separate participant and CareCycle Administration login realms
@@ -173,6 +181,8 @@ The test suite covers input validation, role separation, ownership, verified-org
 | ![How CareCycle works](docs/screenshots/03-how-it-works.png) | ![About CareCycle](docs/screenshots/05-about-hero.png) | ![CareCycle mission](docs/screenshots/06-about-mission.png) |
 
 ## Planned work
+
+See the [daily development roadmap](docs/development-roadmap.md) for 28 ordered development stages, acceptance checks, and suggested commits. It builds on the current prototype, prioritizing matching correctness, a complete pickup and handover journey, usable interfaces, and a verified portfolio demo. Stages are planned work, not completed features or fixed calendar deadlines.
 
 - Release `0.6B`: notifications and NGO acknowledgement
 - Release `0.7`: pickup, handover, expenses, inventory, and outcome reporting
