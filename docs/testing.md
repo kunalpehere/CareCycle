@@ -25,7 +25,7 @@ npm test
 | `npm run test:browser` | Actual Express auth shell, validation focus, guest recovery and role-selection smoke in desktop/mobile Chromium. | Playwright Chromium plus MongoDB test binary; reports, failure screenshot/trace and output under `artifacts/`. |
 | `npm run test:failure-probe` | Temporarily add a deliberately failing test to the same unit runner, verify nonzero exit and a useful diagnostic, remove the probe. | `npm ci`; expected child failure saved to `artifacts/logs/failure-probe.log`. The probe command itself succeeds only when failure propagation is correct. |
 
-The unit runner lists only top-level `tests/*.test.js` explicitly, avoiding shell-glob differences and accidental discovery of database/browser suites. Integration and browser tests must be requested separately. Test dependencies are `devDependencies` and are not imported by `index.js`, `src/app.js`, or production startup.
+The unit runner lists only top-level `tests/*.test.js` explicitly, avoiding shell-glob differences and accidental discovery of database/browser suites. Integration and browser tests must be requested separately. Integration files run sequentially because each owns a MongoDB process/replica set; this avoids startup resource contention as the suite grows. Test dependencies are `devDependencies` and are not imported by `index.js`, `src/app.js`, or production startup.
 
 ## Disposable database and browser setup
 

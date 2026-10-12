@@ -4,6 +4,7 @@ import { EQUIPMENT_TYPES, EQUIPMENT_CONDITIONS } from "./Donation.js";
 import { pickupSchema } from "./pickupSchema.js";
 import { fulfillmentSchema } from "./fulfillmentSchema.js";
 import { requestAccounting } from "../services/fulfillmentAccounting.js";
+import { receiptSchema } from "./receiptSchema.js";
 
 const listingSnapshotSchema = new mongoose.Schema({
     equipment: { type: String, enum: EQUIPMENT_TYPES, required: true },
@@ -25,6 +26,7 @@ const donationRequestSchema = new mongoose.Schema({
     acknowledgedQuantity: { type: Number, min: 0, max: 100, default: 0 },
     releasedQuantity: { type: Number, min: 0, max: 100, default: 0 },
     fulfillment: { type: fulfillmentSchema, default: null },
+    receipt: { type: receiptSchema, default: null },
     cancellation: { type: new mongoose.Schema({
         actor: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
         actorRole: { type: String, enum: ["donor", "ngo"], required: true },

@@ -14,6 +14,7 @@ import { dashboardRoutes } from "./routes/dashboardRoutes.js";
 import { organizationRoutes } from "./routes/organizationRoutes.js";
 import { discoveryRoutes } from "./routes/discoveryRoutes.js";
 import { requestRoutes } from "./routes/requestRoutes.js";
+import { receiptRoutes } from "./routes/receiptRoutes.js";
 
 export const createApp = () => {
     const app = express();
@@ -39,6 +40,7 @@ export const createApp = () => {
     app.use(dashboardRoutes);
     app.use(organizationRoutes);
     app.use(discoveryRoutes);
+    app.use(receiptRoutes);
     app.use(requestRoutes);
     app.use(donationRoutes);
     app.use(contactRoutes);

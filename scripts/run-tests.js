@@ -16,7 +16,9 @@ export const runSuite = async (suite, { additionalFiles = [], logName = suite } 
         const files = (await readdir(path.join(root, directory))).filter(name => name.endsWith(".test.js"))
             .sort().map(name => path.join(root, directory, name));
         if (!files.length) throw new Error(`No ${suite} tests found.`);
-        args = ["--test", "--test-reporter=tap", ...files, ...additionalFiles];
+        // Each integration file owns a MongoDB process/replica set. Run them
+        // sequentially to avoid startup timeouts and memory pressure as coverage grows.
+        args = ["--test", ...(suite === "integration" ? ["--test-concurrency=1"] : []), "--test-reporter=tap", ...files, ...additionalFiles];
     }
     const logs = path.join(root, "artifacts/logs");
     await mkdir(logs, { recursive: true });

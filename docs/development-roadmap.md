@@ -364,6 +364,13 @@ Suggested commit: `feat(handover): add two-party receipt acknowledgement`
 
 ### Day 12 - Donation receipt and outcome record
 
+Status: implemented and locally verified.
+Date: October 12, 2026.
+Commit: the commit containing this update, `feat(receipts): add traceable donation handover records`, on `codex/day-12-receipts-outcomes`.
+Checks and results: 73 unit/model/template tests, syntax checks for 117 JavaScript files, 93 isolated database tests and 16 desktop/mobile browser checks passed. Archived HTML downloads are byte-identical; generated synthetic desktop/mobile PDFs each contain two A4 pages, all rendered and visually inspected. Receipt scope, access, revision races/failure recovery, outcome updates and agreed name corrections verified.
+Evidence: [Day 12 receipt policies and verification](day-12-verification.md).
+Known limitations and external checks: downloads are self-contained HTML with browser Print/Save as PDF, not direct server-generated PDFs. Quantities/dates cannot be amended through receipt forms; name corrections need counterparty confirmation. Outcome privacy relies on participant declarations, not automatic PII detection. Durable notifications remain Day 13. Hosted CI/production remain unverified; original application data, uploads and `.env` were preserved.
+
 Outcome:
 
 - Generate a printable/downloadable receipt from confirmed handover data with a stable reference.

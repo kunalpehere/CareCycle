@@ -34,6 +34,7 @@ Implemented release stages:
 - Propose, confirm and reschedule private pickup arrangements with an activity history
 - Cancel accepted commitments before handover, report missed collections and resolve disagreements
 - Record actual equipment handovers with a checklist, resolve NGO receipt discrepancies and agree remaining-unit releases
+- Issue private, versioned receipts for completed acknowledged handovers and agree receipt name corrections
 
 ### NGO members
 
@@ -48,6 +49,7 @@ Implemented release stages:
 - Arrange pickup with the matched donor using explicit time zones and counterparty confirmation
 - Report missed collections, retain private activity history and cancel accepted requests before handover
 - Acknowledge physical receipt or report quantity/condition discrepancies before a request completes
+- Download/print recorded receipts and add optional aggregate equipment-use notes without identifying beneficiaries
 
 ### CareCycle Administration
 
@@ -56,6 +58,7 @@ Implemented release stages:
 - Approve or reject NGO applications
 - Suspend or reactivate donor and NGO accounts
 - Review operational metrics and administrative audit records
+- Review issued donation receipts and archived revisions through read-only administration access
 - Review administration-access requests before securely provisioning accounts
 
 CareCycle Administration is an internal platform role. It is not a government or ministry portal, and administrator accounts cannot be created through public registration.
@@ -90,8 +93,9 @@ CareCycle Administration is an internal platform role. It is not a government or
 - [Day 9 pickup arrangements and verification](docs/day-9-verification.md)
 - [Day 10 cancellation and missed-pickup policies and verification](docs/day-10-verification.md)
 - [Day 11 handover, acknowledgement and partial-fulfillment verification](docs/day-11-verification.md)
+- [Day 12 receipt revisions, outcome policies and verification](docs/day-12-verification.md)
 
-The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup, cancellation, missed reports, physical handover, NGO acknowledgement, discrepancy resolution and agreed remaining-unit release are implemented. Printable/downloadable receipts and durable lifecycle notifications remain planned features. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
+The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup, cancellation, missed reports, physical handover, NGO acknowledgement, discrepancy resolution, agreed remaining-unit release, versioned printable/downloadable HTML receipts and optional aggregate outcome notes are implemented. Browser printing supports Save as PDF. Durable lifecycle notifications remain Day 13. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
 
 ## Security controls
 

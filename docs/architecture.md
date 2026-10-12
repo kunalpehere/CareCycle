@@ -8,6 +8,8 @@ Matching evolved in Day 6: [transactional matching and current verification](day
 
 ## Runtime and request path
 
+Day 12 adds [private versioned receipt snapshots](day-12-verification.md) embedded in completed requests. Stored self-contained HTML reproduces each recorded revision; initial issue, NGO outcome updates and jointly confirmed name corrections use guarded transactions. Read-only active administration access includes a paginated index. Downloads exclude raw beneficiary/contact/coordination fields, and print CSS supports native browser PDF printing. Historical receipt gaps below are superseded; durable notifications remain Day 13.
+
 Day 11 adds [transactional handover and two-party receipt acknowledgement](day-11-verification.md). Requests store individual transfer records, original donor declarations, NGO receipt claims and documented resolutions. Listing/request quantities and event history commit together. Partial requests continue with another confirmed pickup or a two-party release of their unfulfilled remainder. Reconciled sibling transfers permit cancellation of untouched commitments; ambiguous legacy evidence fails closed. Historical handover/acknowledgement gaps below are superseded; printable receipts remain Day 12.
 
 Day 10 adds [transactional cancellation and missed-pickup policies](day-10-verification.md). Request cancellation/history and reservation release commit together, guarded by accepted status, pickup version and absence of handover evidence. Missed reports and participant disagreements retain reservations; rescheduling needs fresh confirmation. Matched participants can read cancelled collection history. Historical accepted-cancellation gaps below are superseded; application handover/acknowledgement routes remain planned.

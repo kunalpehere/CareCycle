@@ -7,6 +7,7 @@
 .pickup-page>section { margin-top:1.5rem; padding:1.5rem; }
 .pickup-page h2 { font-size:1.35rem; margin-top:0; }
 .pickup-page p { line-height:1.6; }
+.pickup-page p,.pickup-page h2,.pickup-page li,.receipt-admin .request-main { overflow-wrap:anywhere; }
 .pickup-page a,.pickup-link { color:var(--green); font-weight:700; }
 .pickup-private { white-space:pre-wrap; overflow-wrap:anywhere; }
 .pickup-button { padding:.8rem 1rem; border:0; border-radius:8px; cursor:pointer; font-weight:700; }
