@@ -111,6 +111,8 @@ Withdrawal and editing do not resolve pending requests. A request submitted befo
 
 ## Files, mail, and privacy
 
+Day 8 now provides [real database/HTTP regression evidence](day-8-verification.md) for ownership, role/verification/suspension gates, contacts and private files. Protected responses use `private, no-store` and `Vary: Cookie`; this supersedes historical source-only privacy observations below. See the [coverage/isolation guide](database-regression-suite.md) for precise tested boundaries and external limits.
+
 - `public/` is static. Runtime uploads are not statically mounted. Donation images live in `uploads/donations`; verification files live in `uploads/verification-documents`. Services create these relative directories when saving files.
 - Upload parsing uses memory buffers, count/size limits, allowed MIME types, and basic signature checks. Donation limits are three JPEG/PNG/WebP images at 5 MiB each; verification uses one PDF/JPEG/PNG at 8 MiB. Signature checking is not malware scanning or medical-content validation.
 - Donors retrieve only their images. Verified NGOs can retrieve images on available listings. Organization evidence is accessible only to the NGO owner or an administrator. These controls are described from source and existing tests, not a fresh adversarial database/browser audit.

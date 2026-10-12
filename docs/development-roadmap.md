@@ -271,6 +271,13 @@ Suggested commit: `fix(requests): support explicit retry and withdrawal policies
 
 ### Day 8 - Database workflow regression suite
 
+Status: implemented and locally verified.
+Date: October 12, 2026.
+Commit: the commit containing this update, `test(matching): cover database races and privacy boundaries`, on `codex/day-8-database-regressions`.
+Checks and results: 59 unit/model/template tests, syntax checks for 95 JavaScript files, 39 isolated database tests and eight desktop/mobile browser checks passed. Fourteen new HTTP/database scenarios cover authorization, verification/suspension, contact/file privacy, conditional access, CSRF/forged identity, concurrent decisions, replay and deliberate write-failure recovery. Owned runtime cleanup verified.
+Evidence: [database coverage/isolation guide](database-regression-suite.md) and [Day 8 verification](day-8-verification.md).
+Known limitations and external checks: hosted CI and production infrastructure remain unverified; existing application records, indexes and `.env` were preserved. Replica-set and Day 7 index preparation are required before restarting against existing data. Concurrent administrative-state resolution and pickup/handover remain later work.
+
 Outcome:
 
 - Add integration tests for matching, ownership, verification, contact privacy, withdrawal, and concurrent decisions.

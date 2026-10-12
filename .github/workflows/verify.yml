@@ -42,7 +42,7 @@ jobs:
           retention-days: 7
 
   integration:
-    name: Isolated database smoke
+    name: Isolated database workflow regressions
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

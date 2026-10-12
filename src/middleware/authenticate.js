@@ -4,6 +4,10 @@ import { clearAuthCookie } from "../services/authCookieService.js";
 import { respondUnauthorized } from "./accessResponses.js";
 
 export const authenticate = async (req, res, next) => {
+    // Protected pages/media may contain contacts or verification evidence.
+    // Set this before auth checks, including failures and conditional file reads.
+    res.setHeader("Cache-Control", "private, no-store");
+    res.vary("Cookie");
     try {
         const token = req.cookies.token;
         if (!token) return respondUnauthorized(req, res);

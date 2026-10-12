@@ -79,6 +79,8 @@ CareCycle Administration is an internal platform role. It is not a government or
 - [Day 6 transactional matching and verification](docs/day-6-verification.md)
 - [Day 7 request policies and required index migration](docs/day-7-request-policies.md)
 - [Day 7 implementation and verification](docs/day-7-verification.md)
+- [Database workflow regression coverage and isolation](docs/database-regression-suite.md)
+- [Day 8 implementation and verification](docs/day-8-verification.md)
 
 The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup, acknowledgement, and receipts remain planned features. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
 
