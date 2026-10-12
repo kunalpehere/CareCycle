@@ -5,10 +5,15 @@ import { authorizeRoles } from "../middleware/authorize.js";
 import { requireVerifiedOrganization } from "../middleware/verifiedOrganization.js";
 import { actionRateLimit } from "../middleware/rateLimit.js";
 import { verifyCsrfToken } from "../middleware/csrf.js";
+import { showPickup, changePickup } from "../controllers/pickupController.js";
 
 export const requestRoutes = Router();
 const verifiedNgoOnly = [authenticate, authorizeRoles("ngo"), requireVerifiedOrganization];
 const donorOnly = [authenticate, authorizeRoles("donor")];
+for (const [role, gates] of [["donor", donorOnly], ["ngo", verifiedNgoOnly]]) {
+    requestRoutes.get(`/${role}/requests/:requestId/pickup`, gates, showPickup);
+    requestRoutes.post(`/${role}/requests/:requestId/pickup/:action`, gates, actionRateLimit, verifyCsrfToken, changePickup);
+}
 requestRoutes.get("/ngo/requests", verifiedNgoOnly, showOrganizationRequests);
 requestRoutes.post("/ngo/equipment/:id/requests", verifiedNgoOnly, actionRateLimit, verifyCsrfToken, createEquipmentRequest);
 requestRoutes.post("/ngo/requests/:requestId/cancel", verifiedNgoOnly, actionRateLimit, verifyCsrfToken, cancelEquipmentRequest);

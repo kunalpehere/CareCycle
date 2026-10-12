@@ -2,3 +2,16 @@
 @media(max-width:760px){.requests-heading,.request-card{align-items:flex-start;flex-direction:column}.browse-button{width:100%;text-align:center}.request-actions{width:100%;justify-content:space-between}}
 .donor-request-card { align-items:stretch; }.donor-request-card .request-main { flex:1; }.organization-summary,.contact-exchange { margin-top:1rem; padding:1rem; border-radius:11px; background:#f2f6f3; }.organization-summary p,.contact-exchange p { margin:.35rem 0; color:var(--muted); line-height:1.5; }.organization-summary span { color:var(--green); font-size:.82rem; font-weight:700; }.contact-exchange { color:#245c43; background:#e7f6ed; }.contact-exchange a { color:var(--green); font-weight:700; }.decision-note { margin-top:1rem!important; padding:.8rem 0 0; border-top:1px solid var(--line); }.decision-panel { display:grid; width:310px; gap:.8rem; flex:none; }.decision-panel form { display:grid; gap:.55rem; padding:1rem; border:1px solid var(--line); border-radius:11px; background:#fbfcfa; }.decision-panel label { display:grid; gap:.4rem; color:#344b42; font-size:.78rem; font-weight:700; }.decision-panel textarea { width:100%; padding:.65rem; border:1px solid #cbd8d1; border-radius:8px; resize:vertical; }.decision-panel button { padding:.72rem; border:0; border-radius:8px; font-weight:800; cursor:pointer; }.accept-button { color:white; background:var(--green); }.reject-button { color:#8a2929; background:#f7e5e5; }
 @media(max-width:900px){.donor-request-card{flex-direction:column}.decision-panel{width:100%;grid-template-columns:1fr 1fr}}@media(max-width:600px){.decision-panel{grid-template-columns:1fr}}
+.pickup-page { padding-left:max(1.2rem,calc((100vw - 850px)/2)); padding-right:max(1.2rem,calc((100vw - 850px)/2)); }
+.pickup-page .page-title { font-size:clamp(2rem,6vw,3.5rem); margin-top:1rem; }
+.pickup-page>section { margin-top:1.5rem; padding:1.5rem; }
+.pickup-page h2 { font-size:1.35rem; margin-top:0; }
+.pickup-page p { line-height:1.6; }
+.pickup-page a,.pickup-link { color:var(--green); font-weight:700; }
+.pickup-private { white-space:pre-wrap; overflow-wrap:anywhere; }
+.pickup-button { padding:.8rem 1rem; border:0; border-radius:8px; cursor:pointer; font-weight:700; }
+.pickup-history li { padding:.75rem 0; border-bottom:1px solid var(--line); overflow-wrap:anywhere; }
+.pickup-history time { display:block; margin-top:.4rem; color:var(--muted); }
+.pickup-page input { min-width:0; max-width:100%; }
+.pickup-field { display:grid; gap:.4rem; }
+@media(max-width:600px) { .pickup-page>section { padding:1rem; } .pickup-history ol { padding-left:1.25rem; } }

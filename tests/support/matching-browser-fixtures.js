@@ -24,5 +24,11 @@ export const seedMatchingBrowserFixtures = async () => {
             beneficiary: "Synthetic community beneficiary summary", message: "Synthetic equipment need for browser verification" });
         await Donation.create({ donor: donor._id, equipment: "walker", condition: "good", quantity: 5,
             description: "Synthetic Day 7 retry and withdrawal fixture", location: { city: `Day7 ${project}`, state: "Maharashtra" } });
+        const pickupDonor = await User.create({ name: "Synthetic Pickup Donor", email: `donor-day9-${project}@example.invalid`, password, role: "donor" });
+        const pickupNgo = await User.create({ name: "Synthetic Pickup NGO", email: `ngo-day9-${project}@example.invalid`, password, role: "ngo" });
+        const pickupOrg = new mongoose.Types.ObjectId();
+        await Organization.collection.insertOne({ _id: pickupOrg, owner: pickupNgo._id, name: "Synthetic Pickup Organization", verificationStatus: "verified", contactEmail: pickupNgo.email, address: { city: "Pune" } });
+        const pickupListing = await Donation.create({ donor: pickupDonor._id, equipment: "wheelchair", condition: "good", quantity: 5, allocatedQuantity: 2, description: "Synthetic Day 9 pickup fixture", location: { city: `Day9 ${project}`, state: "Maharashtra" } });
+        await DonationRequest.create({ donation: pickupListing._id, organization: pickupOrg, requestedBy: pickupNgo._id, quantity: 2, status: "accepted", beneficiary: "Synthetic pickup beneficiaries", message: "Synthetic equipment pickup for browser verification" });
     }
 };

@@ -295,6 +295,13 @@ Suggested commit: `test(matching): cover database races and privacy boundaries`
 
 ### Day 9 - Pickup arrangement
 
+Status: implemented and locally verified.
+Date: October 12, 2026.
+Commit: the commit containing this update, `feat(pickup): add confirmed collection arrangements`, on `codex/day-9-pickup-arrangements`.
+Checks and results: 64 unit/model/template tests, syntax checks for 101 JavaScript files, 50 isolated database tests and 10 desktop/mobile browser checks passed. Pickup coverage includes counterparty confirmation, rescheduling snapshots, named time zones and clock changes, private access, separate NGO plans, duplicate/concurrent writes and stale-form recovery.
+Evidence: [Day 9 implementation and verification](day-9-verification.md).
+Known limitations and external checks: hosted CI and production remain unverified. Day 10 cancellation/missed pickups and Days 11–13 handover, acknowledgement, receipts and durable notifications remain planned. Existing application databases, uploads and `.env` were preserved.
+
 Outcome:
 
 - Attach pickup arrangements to each accepted request, including proposed window, confirmation, time zone, and private coordination details.

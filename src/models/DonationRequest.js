@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { REQUEST_INDEX_NAME, REQUEST_INDEX_FILTER } from "../services/requestPolicy.js";
 import { EQUIPMENT_TYPES, EQUIPMENT_CONDITIONS } from "./Donation.js";
+import { pickupSchema } from "./pickupSchema.js";
 
 const listingSnapshotSchema = new mongoose.Schema({
     equipment: { type: String, enum: EQUIPMENT_TYPES, required: true },
@@ -17,6 +18,7 @@ const donationRequestSchema = new mongoose.Schema({
     beneficiary: { type: String, required: true, trim: true, minlength: 10, maxlength: 500 },
     message: { type: String, required: true, trim: true, minlength: 20, maxlength: 1000 },
     listingSnapshot: { type: listingSnapshotSchema, default: null },
+    pickup: { type: pickupSchema, default: null },
     status: { type: String, enum: ["pending", "accepted", "rejected", "cancelled", "completed"], default: "pending", index: true },
     responseNote: { type: String, trim: true, maxlength: 500, default: "" },
     respondedAt: { type: Date, default: null },
