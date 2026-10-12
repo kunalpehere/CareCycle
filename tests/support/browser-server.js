@@ -25,6 +25,8 @@ try {
     process.env.MONGO_URI = database.getUri();
     process.env.PORT = "4183";
     process.env.APP_URL = "http://127.0.0.1:4183";
+    // Distinct synthetic client addresses isolate each viewport's real rate limits.
+    process.env.TRUST_PROXY = "127.0.0.1";
     await cp(path.join(root, "views"), path.join(runtime, "views"), { recursive: true });
     await cp(path.join(root, "public"), path.join(runtime, "public"), { recursive: true });
     // dotenv sees no .env, and all upload paths are within disposable runtime.

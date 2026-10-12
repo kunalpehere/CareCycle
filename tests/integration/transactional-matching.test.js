@@ -91,16 +91,16 @@ test("transactional matching and remaining stock on an isolated replica set", { 
             const edit = await form(`/donations/${item.id}/edit`, donor);
             assert.equal((await post(`/donations/${item.id}/edit`, edit, {
                 equipment: "walker", condition: "good", quantity: "5", description: "Synthetic normal edit",
-                city: "Pune", state: "Maharashtra", postalCode: "411001"
+                city: "Pune", state: "Maharashtra", postalCode: "411001", _version: "0"
             })).status, 302, "Normal edits without commitments remain usable.");
             assert.equal((await Donation.findById(item.id)).description, "Synthetic normal edit");
             const stale = await Donation.findById(item.id);
             await accept(await pending(item, 2));
             let status;
-            const response = { status(code) { status = code; return this; }, send() {} };
+            const response = { status(code) { status = code; return this; }, send() {}, render() {} };
             await updateDonation({ ownedDonation: stale, auth: { userId: donor.id }, files: [], body: {
                 equipment: "walker", condition: "good", quantity: "1", description: "Synthetic stale edit",
-                city: "Pune", state: "Maharashtra", postalCode: "411001"
+                city: "Pune", state: "Maharashtra", postalCode: "411001", _version: String(stale.__v)
             } }, response, error => { throw error; });
             assert.equal(status, 409);
             const final = await Donation.findById(item.id);
@@ -141,7 +141,11 @@ test("transactional matching and remaining stock on an isolated replica set", { 
             // Creation can precede acceptance, but it cannot reserve extra units.
             assert.ok(created === null || created.status === "pending");
             assert.equal((await Donation.findById(item.id)).allocatedQuantity, 1);
-            if (created) assert.equal((await accept(created)).reason, "capacity");
+            if (created) {
+                assert.equal((await DonationRequest.findById(created.id)).status, "cancelled");
+                assert.equal((await DonationRequest.findById(created.id)).resolutionReason, "availability_changed");
+                assert.equal((await accept(created)).reason, "already_decided");
+            }
         });
 
         await t.test("HTTP catalogue/detail/form use remaining stock and protect contacts", async () => {
@@ -155,7 +159,7 @@ test("transactional matching and remaining stock on an isolated replica set", { 
             assert.doesNotMatch(detail.html, /private-donor@example/);
             const invalid = await post(`/ngo/equipment/${item.id}/requests`, detail, { quantity: 4,
                 beneficiary: "Synthetic beneficiary summary", message: "Synthetic equipment need statement" });
-            assert.equal(invalid.status, 302);
+            assert.equal(invalid.status, 409);
             assert.equal(await DonationRequest.countDocuments({ donation: item._id, organization: organizationId }), 0);
             const valid = await post(`/ngo/equipment/${item.id}/requests`, detail, { quantity: 3,
                 beneficiary: "Synthetic beneficiary summary", message: "Synthetic equipment need statement" });

@@ -6,6 +6,8 @@ Day 6 update: accounting is now integrated into transactional acceptance, reques
 
 ## Implementation boundary
 
+Day 7 update: [request/listing policies](day-7-request-policies.md) now enforce pending-request resolution, retries, versioned quantity/edit/withdrawal changes and preserved attempt history. The original Day 5 boundary below remains historical; pickup/handover transitions are still future contracts.
+
 Day 5 adds tested pure accounting/policy helpers, document validation and a guarded backfill tool. These helpers define the behavior that later routes must enforce with transactional predicates and resource authorization. They do not authorize a caller by role alone. Existing matching, discovery, edit and withdrawal controllers retain their earlier behavior. The Day 6 atomicity/discovery defect and Day 7 retry/withdrawal defects remain open. Pickup records, handover and acknowledgement routes do not yet exist.
 
 ## Quantity contract

@@ -5,14 +5,15 @@ import { validateDonationRequest, validateRequestDecision } from "../validators/
 import { acceptPendingRequest, createPendingRequest } from "../services/matchingService.js";
 import { availableListingQuery } from "../services/availabilityService.js";
 import { quantityAccounting } from "../services/quantityContract.js";
+import { workflowConflict } from "../services/workflowConflict.js";
 
 export const createEquipmentRequest = async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send("Equipment listing not found");
         const donation = await Donation.findOne({ _id: req.params.id, ...availableListingQuery() }).select("quantity allocatedQuantity handedOverQuantity");
-        if (!donation) return res.status(409).send("This equipment is no longer available.");
+        if (!donation) return await workflowConflict(req, res, { donationId: req.params.id, message: "This equipment is no longer requestable. Review current availability and your request history." });
         const { valid, value } = validateDonationRequest(req.body, quantityAccounting(donation).available);
-        if (!valid) return res.redirect(`/ngo/equipment/${donation.id}?message=${encodeURIComponent("Enter a valid quantity, beneficiary summary, and need statement.")}`);
+        if (!valid) return await workflowConflict(req, res, { donationId: donation._id, message: "Enter a quantity within current availability, a beneficiary summary and a valid need statement." });
 
         const created = await createPendingRequest({
             donation: donation._id,
@@ -20,10 +21,10 @@ export const createEquipmentRequest = async (req, res, next) => {
             requestedBy: req.auth.userId,
             ...value
         });
-        if (!created) return res.status(409).send("Availability changed. Return to equipment discovery to see remaining units.");
+        if (!created) return await workflowConflict(req, res, { donationId: donation._id, message: "Availability changed while you submitted the form. Review current stock before trying again." });
         res.redirect("/ngo/requests?message=Equipment%20request%20submitted.");
     } catch (error) {
-        if (error?.code === 11000) return res.redirect(`/ngo/equipment/${req.params.id}?message=${encodeURIComponent("Your organization has already requested this listing.")}`);
+        if (error?.code === 11000) return workflowConflict(req, res, { donationId: req.params.id, message: "Your organization already has a pending, accepted or completed request for this listing. Review its history." }).catch(next);
         next(error);
     }
 };
@@ -83,10 +84,11 @@ export const decideEquipmentRequest = async (req, res, next) => {
         const decision = String(req.params.decision || "").toLowerCase();
         const { valid, value } = validateRequestDecision(req.body, decision);
         if (!valid) return res.redirect(`/donor/requests?message=${encodeURIComponent("Rejections require a reason of at least 10 characters; notes cannot exceed 500 characters.")}`);
-        const request = await DonationRequest.findOne({ _id: req.params.requestId, status: "pending" }).select("donation quantity status");
-        if (!request) return res.status(409).send("This request has already been decided or is unavailable.");
+        const request = await DonationRequest.findById(req.params.requestId).select("donation quantity status");
+        if (!request) return res.status(404).send("Request not found");
         const ownsDonation = await Donation.exists({ _id: request.donation, donor: req.auth.userId });
         if (!ownsDonation) return res.status(403).send("This request belongs to another donor's listing.");
+        if (request.status !== "pending") return await workflowConflict(req, res, { donor: true, donationId: request.donation, message: "This request has already been decided. Its recorded decision was preserved." });
 
         if (decision === "reject") {
             const rejected = await DonationRequest.findOneAndUpdate(
@@ -94,7 +96,7 @@ export const decideEquipmentRequest = async (req, res, next) => {
                 { $set: { status: "rejected", responseNote: value.responseNote, respondedAt: new Date(), respondedBy: req.auth.userId } },
                 { new: true }
             );
-            if (!rejected) return res.status(409).send("This request has already been decided.");
+            if (!rejected) return await workflowConflict(req, res, { donor: true, donationId: request.donation, message: "Another action already resolved this request. Review its history." });
             return res.redirect("/donor/requests?message=Request%20rejected.");
         }
 
@@ -102,7 +104,7 @@ export const decideEquipmentRequest = async (req, res, next) => {
         if (!result.accepted) {
             if (result.reason === "ownership") return res.status(403).send("This request belongs to another donor's listing.");
             const message = result.reason === "capacity" ? "The listing no longer has enough unallocated quantity for this request." : "This request has already been decided.";
-            return res.status(409).send(message);
+            return await workflowConflict(req, res, { donor: true, donationId: request.donation, message });
         }
         res.redirect("/donor/requests?message=Request%20accepted.%20Contact%20details%20are%20now%20available.");
     } catch (error) {
@@ -113,12 +115,14 @@ export const decideEquipmentRequest = async (req, res, next) => {
 export const cancelEquipmentRequest = async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.requestId)) return res.status(404).send("Request not found");
+        const owned = await DonationRequest.findOne({ _id: req.params.requestId, organization: req.verifiedOrganization._id }).select("donation");
+        if (!owned) return res.status(404).send("Request not found");
         const request = await DonationRequest.findOneAndUpdate(
             { _id: req.params.requestId, organization: req.verifiedOrganization._id, status: "pending" },
-            { $set: { status: "cancelled" } },
+            { $set: { status: "cancelled", resolutionReason: "organization_cancelled", responseNote: "Your organization cancelled this pending request.", respondedAt: new Date(), respondedBy: req.auth.userId } },
             { new: true }
         );
-        if (!request) return res.status(409).send("Only a pending request owned by your organization can be cancelled.");
+        if (!request) return await workflowConflict(req, res, { donationId: owned.donation, message: "Only a pending request can be cancelled here. Review the recorded decision before continuing." });
         res.redirect("/ngo/requests?message=Request%20cancelled.");
     } catch (error) {
         next(error);

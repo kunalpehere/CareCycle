@@ -2,9 +2,10 @@ import { test, expect } from "@playwright/test";
 
 test("partial acceptance remains discoverable with an accurate request limit", async ({ page, browser }, testInfo) => {
     const project = testInfo.project.name;
-    const ngoContext = await browser.newContext({ viewport: page.viewportSize(), baseURL: "http://127.0.0.1:4183" });
+    const ngoContext = await browser.newContext({ viewport: page.viewportSize(), baseURL: "http://127.0.0.1:4183", extraHTTPHeaders: testInfo.project.use.extraHTTPHeaders });
     const ngoPage = await ngoContext.newPage();
     const login = async (target, role) => {
+        await target.context().setExtraHTTPHeaders({ "X-Forwarded-For": project === "desktop" ? "192.0.2.11" : "192.0.2.12" });
         await target.route("**/*", route => new URL(route.request().url()).origin === "http://127.0.0.1:4183" ? route.continue() : route.abort());
         await target.goto("http://127.0.0.1:4183/login");
         await target.getByLabel("Email address", { exact: true }).fill(`${role}-day6-${project}@example.invalid`);

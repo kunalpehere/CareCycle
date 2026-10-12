@@ -25,8 +25,10 @@ test("organizations support verification evidence and review states", () => {
     assert.ok(Organization.schema.indexes().some(([fields]) => fields.verificationStatus === 1 && fields.submittedAt === 1));
 });
 
-test("an organization can request a donation only once", () => {
+test("only a current attempt blocks another organization request", () => {
     assert.ok(DonationRequest.schema.indexes().some(([fields, options]) => fields.donation === 1 && fields.organization === 1 && options.unique));
+    assert.deepEqual(DonationRequest.schema.indexes().find(([, options]) => options.name === "request_current_attempt_v1")[1].partialFilterExpression,
+        { status: { $in: ["pending", "accepted", "completed"] } });
     assert.deepEqual(DonationRequest.schema.path("status").enumValues, ["pending", "accepted", "rejected", "cancelled", "completed"]);
     assert.equal(DonationRequest.schema.path("beneficiary").options.required, true);
 });

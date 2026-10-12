@@ -18,8 +18,8 @@ export default defineConfig({
         video: "off"
     },
     projects: [
-        { name: "desktop", use: { viewport: { width: 1366, height: 900 } } },
-        { name: "mobile", use: { viewport: { width: 390, height: 844 } } }
+        { name: "desktop", use: { viewport: { width: 1366, height: 900 }, extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.1" } } },
+        { name: "mobile", use: { viewport: { width: 390, height: 844 }, extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.2" } } }
     ],
     webServer: {
         command: "node tests/support/browser-server.js",

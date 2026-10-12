@@ -2,6 +2,9 @@ import { Donation } from "../models/Donation.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { availableListingQuery } from "./availabilityService.js";
 import { quantityAccounting } from "./quantityContract.js";
+import { runTransaction } from "./transactionService.js";
+import { resolvePendingRequests } from "./listingPolicyService.js";
+import { BLOCKING_REQUEST_STATUSES } from "./requestPolicy.js";
 
 export const buildCapacityReservationQuery = (request, donorId) => ({
     _id: request.donation,
@@ -12,17 +15,7 @@ export const buildCapacityReservationQuery = (request, donorId) => ({
 class DecisionConflict extends Error {}
 
 export const createMatchingService = ({ DonationModel = Donation, RequestModel = DonationRequest } = {}) => {
-    const transact = async operation => {
-        const session = await DonationModel.db.startSession();
-        let result;
-        try {
-            await session.withTransaction(async () => {
-                // Driver retries rerun reads and recompute the decision.
-                result = await operation(session);
-            }, { readConcern: { level: "snapshot" }, writeConcern: { w: "majority" } });
-            return result;
-        } finally { await session.endSession(); }
-    };
+    const transact = operation => runTransaction(DonationModel.db, operation);
     const acceptPendingRequest = async ({ request, donorId, responseNote = "", respondedBy }) => {
         try {
             return await transact(async session => {
@@ -41,6 +34,8 @@ export const createMatchingService = ({ DonationModel = Donation, RequestModel =
                     $set: { status: "accepted", responseNote, respondedAt: new Date(), respondedBy }
                 }, { new: true, session, runValidators: true });
                 if (!acceptedRequest) throw new DecisionConflict();
+                await resolvePendingRequests({ donationId: donation._id, available: quantityAccounting(donation).available,
+                    actor: donorId, session, RequestModel });
                 return { accepted: true, donation, request: acceptedRequest };
             });
         } catch (error) {
@@ -49,12 +44,15 @@ export const createMatchingService = ({ DonationModel = Donation, RequestModel =
         }
     };
     const createPendingRequest = async data => transact(async session => {
+        const blocking = await RequestModel.exists({ donation: data.donation, organization: data.organization, status: { $in: BLOCKING_REQUEST_STATUSES } }).session(session);
+        if (blocking) { const error = new Error("Your organization already has a current request for this listing."); error.code = 11000; throw error; }
         // A version touch serializes creation with allocation without reserving stock.
         const listing = await DonationModel.findOneAndUpdate({ _id: data.donation, ...availableListingQuery(data.quantity) },
             { $inc: { __v: 1 } }, { new: true, session });
         if (!listing) return null;
         quantityAccounting(listing);
-        const [request] = await RequestModel.create([data], { session });
+        const [request] = await RequestModel.create([{ ...data, listingSnapshot: { equipment: listing.equipment, condition: listing.condition,
+            totalQuantity: listing.quantity, location: listing.location } }], { session });
         return request;
     });
     return { acceptPendingRequest, createPendingRequest };

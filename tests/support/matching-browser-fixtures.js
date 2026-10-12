@@ -22,5 +22,7 @@ export const seedMatchingBrowserFixtures = async () => {
             description: "Synthetic Day 6 browser fixture", location: { city: `Day6 ${project}`, state: "Maharashtra" } });
         await DonationRequest.create({ donation: donation._id, organization: first, requestedBy: firstOwner._id, quantity: 2,
             beneficiary: "Synthetic community beneficiary summary", message: "Synthetic equipment need for browser verification" });
+        await Donation.create({ donor: donor._id, equipment: "walker", condition: "good", quantity: 5,
+            description: "Synthetic Day 7 retry and withdrawal fixture", location: { city: `Day7 ${project}`, state: "Maharashtra" } });
     }
 };

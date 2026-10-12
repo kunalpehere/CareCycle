@@ -33,11 +33,13 @@
             <p><strong>Location:</strong> <%= donation.location.city %>, <%= donation.location.state %> <%= donation.location.postalCode %></p>
             <p><%= donation.description %></p>
             <p class="field-note">Created <%= new Date(donation.createdAt).toLocaleDateString() %></p>
+            <% if (["available", "requested", "matched", "pickup_scheduled"].includes(donation.status)) { %><p><a href="/donations/<%= donation._id %>/quantity">Update total quantity</a></p><% } %>
             <% if (donation.status === "available" && !donation.allocatedQuantity) { %>
               <div class="card-actions">
                 <a href="/donations/<%= donation._id %>/edit" class="secondary-button">Edit</a>
                 <form method="post" action="/donations/<%= donation._id %>/withdraw" data-confirm="Withdraw this listing? It will remain in your history.">
                   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="hidden" name="_version" value="<%= donation.__v || 0 %>">
                   <button type="submit" class="danger-button">Withdraw</button>
                 </form>
               </div>

@@ -4,6 +4,7 @@ import { Donation, EQUIPMENT_CONDITIONS, EQUIPMENT_TYPES } from "../models/Donat
 import { donationImageDirectory } from "../services/imageService.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { availableListingQuery, withRemainingAvailability } from "../services/availabilityService.js";
+import { BLOCKING_REQUEST_STATUSES } from "../services/requestPolicy.js";
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const normalizedFilter = (value, allowed) => allowed.includes(String(value || "").toLowerCase()) ? String(value).toLowerCase() : "";
@@ -45,8 +46,10 @@ export const showEquipmentDetail = async (req, res, next) => {
         const donation = await Donation.findOne({ _id: req.params.id, ...availableListingQuery() })
             .select("equipment condition quantity allocatedQuantity handedOverQuantity description location images createdAt").lean();
         if (!donation) return res.status(404).send("Equipment listing not found");
-        const existingRequest = await DonationRequest.findOne({ donation: donation._id, organization: req.verifiedOrganization._id })
-            .select("status quantity createdAt").lean();
+        const pair = { donation: donation._id, organization: req.verifiedOrganization._id };
+        const existingRequest = await DonationRequest.findOne({ ...pair, status: { $in: BLOCKING_REQUEST_STATUSES } })
+            .sort({ createdAt: -1, _id: -1 }).select("status quantity createdAt").lean() ||
+            await DonationRequest.findOne(pair).sort({ createdAt: -1, _id: -1 }).select("status quantity createdAt").lean();
         res.render("equipment-detail.ejs", { donation: withRemainingAvailability(donation), organization: req.verifiedOrganization, existingRequest, message: String(req.query.message || "") });
     } catch (error) {
         next(error);

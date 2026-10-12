@@ -8,6 +8,8 @@ Matching evolved in Day 6: [transactional matching and current verification](day
 
 ## Runtime and request path
 
+Day 7 adds [request retry/history, transactional quantity/withdrawal policies and an index-readiness preflight](day-7-request-policies.md), verified in [Day 7 checks](day-7-verification.md). This supersedes the historical one-request-per-pair and unresolved-pending descriptions below. Pickup and handover are still planned.
+
 ```mermaid
 flowchart TD
     Browser[Browser: forms, cookies, rendered HTML] --> App[Express application]

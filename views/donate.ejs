@@ -18,6 +18,7 @@
 
       <form action="<%= formAction %>" method="post" enctype="multipart/form-data" class="listing-form">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <% if (donation) { %><input type="hidden" name="_version" value="<%= donation.__v || 0 %>"><% } %>
 
         <label for="equipment">Equipment type</label>
         <select name="equipment" id="equipment" required>

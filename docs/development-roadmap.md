@@ -247,6 +247,13 @@ Suggested commit: `fix(matching): make acceptance atomic and retain remaining av
 
 ### Day 7 - Request retry, withdrawal, and stale actions
 
+Status: implemented and locally verified.
+Date: October 12, 2026.
+Commit: the commit containing this update, `fix(requests): support explicit retry and withdrawal policies`, on `codex/day-7-request-policies`.
+Checks and results: 59 unit/model/template tests, syntax checks for 93 JavaScript files, 24 isolated database tests and eight desktop/mobile browser checks passed. Retry/history, duplicates, migration dry-run/resume/refusal, quantity/withdrawal resolution, stale forms and concurrent acceptance boundaries verified.
+Evidence: [request/listing policies and migration procedure](day-7-request-policies.md) and [Day 7 verification](day-7-verification.md).
+Known limitations and external checks: existing application database/indexes and `.env` were preserved. Replica-set and request-index preparation must be completed before restarting against existing data. Day 8 expands regression coverage; pickup/handover remain later stages. Hosted CI and deployment remain unverified.
+
 Outcome:
 
 - Implement the chosen re-request policy after cancellation/rejection, preserving previous decisions and limiting active duplicates.
