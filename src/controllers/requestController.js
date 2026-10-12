@@ -53,11 +53,17 @@ export const showOrganizationRequests = async (req, res, next) => {
 export const showDonorRequests = async (req, res, next) => {
     try {
         const donationIds = await Donation.find({ donor: req.auth.userId }).distinct("_id");
-        const requests = await DonationRequest.find({ donation: { $in: donationIds } })
+        const query = { donation: { $in: donationIds } };
+        if (req.query.request !== undefined) {
+            if (!mongoose.Types.ObjectId.isValid(req.query.request)) return res.status(404).send("Request not found");
+            query._id = req.query.request;
+        }
+        const requests = await DonationRequest.find(query)
             .sort({ createdAt: -1 })
             .populate({ path: "donation", select: "equipment condition quantity allocatedQuantity location status" })
             .populate({ path: "organization", select: "name description address contactPerson contactEmail phone" })
             .lean();
+        if (req.query.request !== undefined && !requests.length) return res.status(404).send("Request not found");
         for (const request of requests) {
             if (!request.organization) continue;
             request.organizationPublic = {

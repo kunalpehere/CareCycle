@@ -1,0 +1,94 @@
+import { test, expect } from "@playwright/test";
+
+const login = async (page, project, kind = "donor") => {
+    await page.context().setExtraHTTPHeaders({ "X-Forwarded-For": project === "desktop" ? "192.0.2.151" : "192.0.2.152" });
+    await page.route("**/*", route => new URL(route.request().url()).origin === "http://127.0.0.1:4183" ? route.continue() : route.abort());
+    await page.goto('/login');
+    await page.getByLabel('Email address', { exact: true }).fill(`${kind}-day15-${project}@example.invalid`);
+    await page.getByLabel('Password', { exact: true }).fill('Workspace-fixture-42!');
+    await page.getByRole('button', { name: 'Sign in as participant' }).click();
+    await expect(page).toHaveURL(/\/donor\/dashboard/);
+};
+
+test("donor identifies the next task, reviews only that request and retains quantity accounting", async ({ page }, testInfo) => {
+    const project = testInfo.project.name;
+    await login(page, project);
+    await expect(page.locator('.summary-link').filter({ hasText: 'Requests to decide' })).toContainText('9');
+    await expect(page.locator('.task-card')).toHaveCount(8);
+    await page.keyboard.press('Tab');
+    await page.getByRole('link', { name: 'Skip to main content' }).focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#main-content')).toBeFocused();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.evaluate(() => { document.activeElement?.blur(); scrollTo(0, 0); });
+    await page.screenshot({ path: `artifacts/day-15-workspace-${project}.png`, fullPage: true });
+    await page.screenshot({ path: `artifacts/day-15-workspace-top-${project}.png` });
+    await page.getByRole('link', { name: 'Review request', exact: true }).first().click();
+    await expect(page).toHaveURL(/\/donor\/requests\?request=/);
+    await expect(page.locator('.request-card')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Accept request', exact: true }).click();
+    await page.goto('/donor/dashboard?filter=pickups');
+    await expect(page.locator('.task-card')).toContainText('Arrange pickup');
+    const listing = page.locator('.donation-card');
+    await expect(listing).toHaveCount(1);
+    const value = label => listing.locator('.quantity-breakdown > div').filter({ has: page.locator('dt', { hasText: label }) }).locator('dd');
+    await expect(value('Available to request')).toHaveText('3');
+    await expect(value('Reserved, not handed over')).toHaveText('2');
+    await listing.locator('summary').focus(); await page.keyboard.press('Enter');
+    await expect(listing.locator('.progress-timeline')).toContainText('Request accepted');
+    await page.getByRole('link', { name: 'Review collection', exact: true }).click();
+    await expect(page).toHaveURL(/\/pickup$/);
+    await expect(page.getByRole('heading', { name: 'Arrange pickup', exact: true })).toBeVisible();
+});
+
+test("donor filters and pagination preserve recovery, receipt history and NGO waits", async ({ page }, testInfo) => {
+    const project = testInfo.project.name;
+    await login(page, project);
+    await page.getByLabel('Show', { exact: true }).selectOption('waiting');
+    await page.getByRole('button', { name: 'Apply filters' }).click();
+    await expect(page.locator('.task-card')).toContainText('Waiting for NGO acknowledgement');
+    await expect(page.locator('.quantity-breakdown > div').filter({ hasText: 'NGO acknowledged' }).locator('dd')).toHaveText('0');
+    await page.evaluate(() => { document.activeElement?.blur(); scrollTo(0, 0); });
+    await page.screenshot({ path: `artifacts/day-15-waiting-${project}.png`, fullPage: true });
+    await page.getByLabel('Equipment', { exact: true }).selectOption('cane');
+    await page.getByRole('button', { name: 'Apply filters' }).click();
+    await expect(page.getByRole('heading', { name: 'No listings match' })).toBeVisible();
+    await page.getByRole('link', { name: 'Show all listings and steps' }).click();
+    await page.getByRole('link', { name: 'Next listings', exact: true }).click();
+    await expect(page.locator('.donation-card')).toHaveCount(2);
+    await expect(page.getByLabel('Show', { exact: true })).toHaveValue('all');
+    await page.getByRole('link', { name: 'Previous listings', exact: true }).click();
+    await page.getByRole('link', { name: 'Next steps', exact: true }).click();
+    await expect(page.locator('.task-card')).toHaveCount(3);
+    await expect(page.locator('.task-list')).toContainText('Review missed pickup');
+    await page.getByLabel('Show', { exact: true }).selectOption('history');
+    await page.getByRole('button', { name: 'Apply filters' }).click();
+    await expect(page.locator('.donation-card')).toHaveCount(2);
+    const complete = page.locator('.donation-card').filter({ has: page.locator('.status-completed') });
+    await complete.locator('summary').click();
+    await expect(complete.getByRole('link', { name: 'Donation receipt', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Withdraw', exact: true })).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.evaluate(() => { document.activeElement?.blur(); scrollTo(0, 0); });
+    await page.screenshot({ path: `artifacts/day-15-history-${project}.png`, fullPage: true });
+    await page.goto('/donor/dashboard?filter=history&equipment=wheelchair&page=2');
+    await expect(page.getByLabel('Equipment', { exact: true })).toHaveValue('wheelchair');
+    await expect(page.locator('.donation-card')).toHaveCount(1);
+});
+
+test("new donors get an actionable empty workspace and truthful listing feedback", async ({ page }, testInfo) => {
+    await login(page, testInfo.project.name, 'empty');
+    await expect(page.getByRole('heading', { name: 'No listings yet' })).toBeVisible();
+    await page.getByRole('link', { name: 'Create a listing', exact: true }).click();
+    await page.getByLabel('Equipment type').selectOption('cane');
+    await page.getByLabel('Condition', { exact: true }).selectOption('good');
+    await page.getByLabel('Quantity', { exact: true }).fill('2');
+    await page.getByLabel('City', { exact: true }).fill('Pune');
+    await page.getByLabel('State', { exact: true }).fill('Maharashtra');
+    await page.getByLabel('Postal code', { exact: true }).fill('411001');
+    await page.getByLabel('Description', { exact: true }).fill('Synthetic Day 15 new equipment');
+    await page.getByRole('button', { name: 'Create listing', exact: true }).click();
+    await expect(page.locator('.form-message')).toContainText('Listing created. Verified NGOs can review it.');
+    await expect(page.locator('.form-message')).not.toContainText('configured');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});

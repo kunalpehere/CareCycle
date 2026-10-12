@@ -2,11 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
 import ejs from "ejs";
+import { buildDonorWorkspace } from "../src/services/donorWorkspaceService.js";
 
 const render = (name, data) => ejs.renderFile(path.resolve("views", name), {
     csrfToken: "test-token",
     currentUser: { id: "user-id", name: "Test Donor", email: "donor@example.com", role: "donor" },
-    ...data
+    ...data,
+    ...(name === "donor-dashboard.ejs" ? buildDonorWorkspace({ donations: data.donations, requests: [], donorId: "user-id" }) : {})
 });
 
 test("donor matching reveals contact only after acceptance", async () => {

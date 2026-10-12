@@ -431,6 +431,9 @@ Suggested commit: `feat(frontend): introduce a clear public CareCycle experience
 
 ### Day 15 - Donor workspace
 
+Status: implemented and locally verified on October 12, 2026. See [Day 15 evidence](day-15-verification.md). The donor workspace groups pending decisions, pickup commitments, NGO waits and review items; shows distinct listing quantities and per-request progress; and supports equipment/status filters with separate listing/task pages. Owner-scoped snapshot reads preserve consistency during concurrent decisions. Hosted CI and production remain unverified.
+Commit: the commit containing this update, `feat(donor): organize the workspace around pending actions`, on `codex/day-15-donor-workspace`.
+
 Outcome:
 
 - Surface requests awaiting decisions, pickup commitments, and handovers awaiting acknowledgement.

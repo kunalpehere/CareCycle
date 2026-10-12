@@ -38,6 +38,8 @@ try {
     await connectDatabase();
     const { seedMatchingBrowserFixtures } = await import("./matching-browser-fixtures.js");
     await seedMatchingBrowserFixtures();
+    const { seedDonorWorkspaceBrowserFixtures } = await import("./donor-workspace-browser-fixtures.js");
+    await seedDonorWorkspaceBrowserFixtures();
     const { startNotificationWorker } = await import("../../src/services/notificationWorker.js");
     notificationWorker = startNotificationWorker({ intervalMs: 250, send: null });
     server = createApp().listen(4183, "127.0.0.1");

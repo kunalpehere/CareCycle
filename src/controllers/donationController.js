@@ -10,6 +10,8 @@ import { workflowConflict } from "../services/workflowConflict.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { OPEN_LISTING_STATUSES } from "../services/availabilityService.js";
 import { quantityAccounting } from "../services/quantityContract.js";
+import { buildDonorWorkspace } from "../services/donorWorkspaceService.js";
+import { runTransaction } from "../services/transactionService.js";
 
 const formData = (overrides = {}) => ({
     equipmentTypes: EQUIPMENT_TYPES,
@@ -26,12 +28,20 @@ export const showCreateDonation = (req, res) => res.render("donate.ejs", formDat
 
 export const showDonorDashboard = async (req, res, next) => {
     try {
-        const donations = await Donation.find({ donor: req.auth.userId }).sort({ createdAt: -1 }).lean();
-        const legacyUser = await User.collection.findOne({ _id: req.auth.user._id }, { projection: { products: 1 } });
+        // One read snapshot keeps listing totals and request progress consistent during concurrent decisions.
+        const { donations, requests, legacyUser } = await runTransaction(Donation.db, async session => {
+            const donations = await Donation.find({ donor: req.auth.userId }).sort({ createdAt: -1, _id: -1 }).session(session).lean();
+            const requests = await DonationRequest.find({ donation: { $in: donations.map(item => item._id) } })
+                .select("donation organization quantity status createdAt updatedAt respondedAt cancellation.at pickup.status pickup.proposal.start pickup.proposal.end pickup.proposal.timeZone pickup.proposal.proposedBy pickup.missedReport.disputed pickup.history.action pickup.history.at handedOverQuantity acknowledgedQuantity releasedQuantity fulfillment.transfers.quantity fulfillment.transfers.status fulfillment.transfers.at fulfillment.transfers.receivedQuantity fulfillment.transfers.acknowledgedBy fulfillment.transfers.donor fulfillment.transfers.acknowledgedAt fulfillment.transfers.resolution.quantity fulfillment.remainderProposal.actor fulfillment.completedAt")
+                .populate({ path: "organization", select: "name", options: { session } }).sort({ createdAt: -1, _id: -1 }).session(session).lean();
+            const legacyUser = await User.collection.findOne({ _id: req.auth.user._id }, { projection: { products: 1 }, session });
+            return { donations, requests, legacyUser };
+        });
         const legacyDonations = Array.isArray(legacyUser?.products) ? legacyUser.products.map((item) => ({
             equipment: String(item.equipment || "Unknown"), condition: String(item.quality || "Unknown"), status: "legacy", legacy: true
         })) : [];
-        res.render("donor-dashboard.ejs", { donations, legacyDonations, message: String(req.query.message || "") });
+        const workspace = buildDonorWorkspace({ donations, requests, donorId: req.auth.userId, query: req.query });
+        res.render("donor-dashboard.ejs", { ...workspace, legacyDonations, message: String(req.query.message || "") });
     } catch (error) {
         next(error);
     }
@@ -54,15 +64,12 @@ export const createDonation = async (req, res, next) => {
 
         images = await saveDonationImages(req.files);
         const donation = await Donation.create({ donor: req.auth.userId, ...value, images });
-        let notification = "Email notification is not configured.";
         try {
-            const result = await sendDonationMail({ email: req.auth.user.email, equipment: value.equipment, condition: value.condition });
-            if (result.sent) notification = "Notification email sent.";
+            await sendDonationMail({ email: req.auth.user.email, equipment: value.equipment, condition: value.condition });
         } catch (mailError) {
             console.error("Donation email failed", { message: mailError.message });
-            notification = "The notification email failed.";
         }
-        res.redirect(`/donor/dashboard?message=${encodeURIComponent(`Listing created. ${notification}`)}`);
+        res.redirect(`/donor/dashboard?message=${encodeURIComponent("Listing created. Verified NGOs can review it. Check your requests for the next step.")}`);
     } catch (error) {
         await removeDonationImages(images);
         next(error);

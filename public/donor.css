@@ -1,7 +1,7 @@
 .donor-page { width:100%; }
 .donor-panel { border:1px solid rgba(23,107,75,.1); border-radius:18px; background:rgba(255,255,255,.92); box-shadow:0 18px 50px rgba(16,67,48,.08); }
 .form-panel { max-width:820px; margin:0 auto; padding:clamp(1.5rem,4vw,3rem); }
-.form-panel h1,.dashboard-heading h1 { margin:0; font:800 clamp(2rem,4vw,3.4rem)/1.08 "Manrope"; letter-spacing:-.045em; }
+.form-panel h1,.dashboard-heading h1 { margin:0; font:800 clamp(2rem,4vw,3.4rem)/1.08 "Manrope",sans-serif; letter-spacing:-.045em; }
 .listing-form { display:grid; gap:.7rem; margin-top:1.8rem; }
 .listing-form label { margin-top:.4rem; font-size:.88rem; font-weight:700; }
 .listing-form input,.listing-form select,.listing-form textarea { width:100%; padding:.88rem 1rem; border:1px solid var(--line); border-radius:10px; outline:none; color:var(--ink); background:#fbfcfa; }
@@ -23,7 +23,7 @@
 .card-image { width:100%; height:220px; object-fit:cover; }
 .card-content { display:grid; gap:.55rem; padding:1.35rem; }
 .card-content p { margin:0; color:#4e625a; line-height:1.5; }
-.card-title h2 { margin:0; font:700 1.35rem "Manrope"; text-transform:capitalize; }
+.card-title h2 { margin:0; font:700 1.35rem "Manrope",sans-serif; text-transform:capitalize; }
 .card-actions { justify-content:flex-start; margin-top:.7rem; }
 .status { padding:.35rem .65rem; border-radius:6px; background:#dde3e8; font-size:.75rem; font-weight:700; text-transform:capitalize; }
 .status-available { color:#155d37; background:#d9f4e4; }
@@ -37,3 +37,29 @@
 .existing-image input { width:auto; }
 .empty-state,.legacy-panel { margin-top:1rem; padding:2rem; }
 @media(max-width:700px){.form-grid{grid-template-columns:1fr}.dashboard-heading{align-items:flex-start;flex-direction:column}.dashboard-heading .primary-button{width:100%}}
+
+.workspace-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:1rem; }
+.summary-link { display:grid; gap:.5rem; padding:1.3rem; text-decoration:none; color:var(--ink); }
+.summary-link strong { font-size:2rem; color:var(--green); }
+.summary-link:hover { border-color:var(--green); }
+.workspace-filters { display:flex; align-items:end; flex-wrap:wrap; gap:1rem; padding:1.2rem; margin:1.5rem 0 2rem; }
+.workspace-filters label { display:block; font-weight:700; margin-bottom:.4rem; }
+.workspace-filters select { max-width:100%; min-height:44px; padding:.6rem; border:1px solid var(--line); border-radius:6px; background:white; }
+.workspace-tasks { margin:2rem 0 3rem; }
+.workspace-tasks .dashboard-heading { margin-bottom:1rem; }
+.task-list { display:grid; gap:.8rem; }
+.task-card { display:flex; align-items:center; justify-content:space-between; gap:1.2rem; padding:1.3rem; }
+.task-card h3 { margin:.5rem 0; }.task-card p { margin:.4rem 0; color:#4e625a; line-height:1.5; }
+.task-card>a { flex-shrink:0; }
+.workspace-pagination { display:flex; flex-wrap:wrap; justify-content:space-between; gap:1rem; margin:1.5rem 0; }
+.quantity-breakdown { margin:.5rem 0; padding:.8rem; border:1px solid var(--line); border-radius:6px; }
+.quantity-breakdown>div { display:flex; justify-content:space-between; gap:1rem; padding:.35rem 0; }
+.quantity-breakdown dt { color:#4e625a; }.quantity-breakdown dd { margin:0; font-weight:700; white-space:nowrap; }
+.card-title h3 { margin:0; font:700 1.35rem "Manrope",sans-serif; text-transform:capitalize; }
+.listing-progress { padding-top:1rem; border-top:1px solid var(--line); }.listing-progress summary { cursor:pointer; padding:.6rem 0; font-weight:700; }
+.request-progress { padding:1rem 0; border-bottom:1px solid var(--line); }.request-progress h4 { margin:0 0 .5rem; }
+.progress-timeline { padding-left:1.2rem; font-size:.86rem; line-height:1.6; }.progress-timeline time { display:block; color:#4e625a; }
+.donor-page .donation-grid { grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); }
+.donor-page .card-content { overflow-wrap:anywhere; }
+@media(max-width:900px){.workspace-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.task-card{align-items:flex-start;flex-direction:column}}
+@media(max-width:520px){.workspace-filters>div{width:100%}.workspace-filters select{width:100%}.card-actions{flex-wrap:wrap}.card-title{align-items:flex-start;flex-wrap:wrap}}
