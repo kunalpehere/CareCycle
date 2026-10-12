@@ -4,6 +4,8 @@ Current implementation reviewed October 11, 2026, version `0.6.0-alpha.2`. Diagr
 
 Configuration evolved in Day 4: see [runtime loading, validated proxy settings and live replica-set gate](runtime-configuration.md) and [current verification evidence](day-4-verification.md). The October 11 baseline below remains a historical architectural review.
 
+Matching evolved in Day 6: [transactional matching and current verification](day-6-verification.md) supersedes the historical matching description below. Acceptance now reserves units and changes the request in one transaction; discovery/detail/images/request limits use remaining quantity, including legacy open listing statuses. New acceptance keeps the listing lifecycle `available`, independently of request fulfillment. Edit/withdraw guards protect commitments; retry and pending-request reconciliation remain Day 7.
+
 ## Runtime and request path
 
 ```mermaid

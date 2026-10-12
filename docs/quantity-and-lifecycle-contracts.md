@@ -2,6 +2,8 @@
 
 Date: October 12, 2026. Contract version: 1.
 
+Day 6 update: accounting is now integrated into transactional acceptance, request creation and remaining-stock discovery. See [Day 6 implementation and verification](day-6-verification.md). The Day 5 boundary below records the state when these contracts were introduced. Pending-request edit/withdraw reconciliation and retry still await Day 7.
+
 ## Implementation boundary
 
 Day 5 adds tested pure accounting/policy helpers, document validation and a guarded backfill tool. These helpers define the behavior that later routes must enforce with transactional predicates and resource authorization. They do not authorize a caller by role alone. Existing matching, discovery, edit and withdrawal controllers retain their earlier behavior. The Day 6 atomicity/discovery defect and Day 7 retry/withdrawal defects remain open. Pickup records, handover and acknowledgement routes do not yet exist.

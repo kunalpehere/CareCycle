@@ -76,6 +76,7 @@ CareCycle Administration is an internal platform role. It is not a government or
 - [Day 2 implementation checks and browser evidence](docs/day-2-verification.md)
 - [Day 5 quantity/lifecycle contracts and migration procedure](docs/quantity-and-lifecycle-contracts.md)
 - [Day 5 implementation and verification](docs/day-5-verification.md)
+- [Day 6 transactional matching and verification](docs/day-6-verification.md)
 
 The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup, acknowledgement, and receipts remain planned features. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
 
@@ -91,7 +92,7 @@ The portfolio release targets one reliable equipment journey from listing throug
 - Suspended-account enforcement
 - Private verification documents and donation images
 - File size, count, MIME-type, and binary-signature validation
-- Conditional quantity reservation to prevent over-allocation
+- Transactional request acceptance and quantity reservation to prevent over-allocation
 - Administrative audit records
 - No public administrator registration
 

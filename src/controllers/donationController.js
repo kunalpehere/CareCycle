@@ -66,7 +66,7 @@ export const createDonation = async (req, res, next) => {
 export const showEditDonation = async (req, res, next) => {
     try {
         const donation = req.ownedDonation.toObject();
-        if (donation.status !== "available") return res.status(409).send("Only available listings can be edited.");
+        if (donation.status !== "available" || donation.allocatedQuantity > 0) return res.status(409).send("Only available listings without commitments can be edited.");
         res.render("donate.ejs", formData({
             donation,
             formTitle: "Edit donation listing",
@@ -82,7 +82,7 @@ export const updateDonation = async (req, res, next) => {
     let newImages = [];
     try {
         const donation = req.ownedDonation;
-        if (donation.status !== "available") return res.status(409).send("Only available listings can be edited.");
+        if (donation.status !== "available" || donation.allocatedQuantity > 0) return res.status(409).send("Only available listings without commitments can be edited.");
 
         const { valid, value } = validateDonation(req.body);
         if (!valid) return res.status(400).render("donate.ejs", formData({
@@ -100,9 +100,14 @@ export const updateDonation = async (req, res, next) => {
         }
 
         newImages = await saveDonationImages(req.files);
-        Object.assign(donation, value);
-        donation.images = [...retainedImages, ...newImages];
-        await donation.save();
+        const updated = await Donation.findOneAndUpdate({ _id: donation._id, donor: req.auth.userId,
+            status: "available", allocatedQuantity: { $in: [0, null] }, __v: donation.__v }, {
+            $set: { ...value, images: [...retainedImages, ...newImages] }, $inc: { __v: 1 }
+        }, { new: true, runValidators: true });
+        if (!updated) {
+            await removeDonationImages(newImages);
+            return res.status(409).send("This listing changed. Reload it before editing.");
+        }
         await removeDonationImages(removedImages);
         res.redirect("/donor/dashboard?message=Listing%20updated.");
     } catch (error) {
@@ -114,11 +119,11 @@ export const updateDonation = async (req, res, next) => {
 export const withdrawDonation = async (req, res, next) => {
     try {
         const donation = await Donation.findOneAndUpdate(
-            { _id: req.params.id, donor: req.auth.userId, status: "available" },
+            { _id: req.params.id, donor: req.auth.userId, status: "available", allocatedQuantity: { $in: [0, null] } },
             { $set: { status: "withdrawn" } },
             { new: true }
         );
-        if (!donation) return res.status(409).send("Only an available listing owned by you can be withdrawn.");
+        if (!donation) return res.status(409).send("Only an available listing without commitments owned by you can be withdrawn.");
         res.redirect("/donor/dashboard?message=Listing%20withdrawn.");
     } catch (error) {
         next(error);

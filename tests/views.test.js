@@ -20,7 +20,7 @@ test("donor matching reveals contact only after acceptance", async () => {
 });
 
 test("equipment detail renders request form and request history renders cancellation only for pending", async () => {
-    const donation = { _id: "507f1f77bcf86cd799439012", equipment: "wheelchair", condition: "good", quantity: 2,
+    const donation = { _id: "507f1f77bcf86cd799439012", equipment: "wheelchair", condition: "good", quantity: 5, allocatedQuantity: 3, availableQuantity: 2,
         description: "A maintained folding wheelchair.", location: { city: "Pune", state: "Maharashtra", postalCode: "411001" }, images: [], createdAt: new Date("2026-08-01"), status: "available" };
     const detail = await render("equipment-detail.ejs", { currentUser: { role: "ngo" }, donation, organization: { name: "Mobility Trust" }, existingRequest: null, message: "" });
     assert.match(detail, /Request this equipment/);
@@ -34,7 +34,7 @@ test("equipment detail renders request form and request history renders cancella
 });
 
 test("verified NGO discovery renders safe listing data without donor identity", async () => {
-    const donation = { _id: "507f1f77bcf86cd799439012", equipment: "wheelchair", condition: "good", quantity: 1,
+    const donation = { _id: "507f1f77bcf86cd799439012", equipment: "wheelchair", condition: "good", quantity: 5, allocatedQuantity: 2, availableQuantity: 3,
         description: "A maintained folding wheelchair.", location: { city: "Pune", state: "Maharashtra", postalCode: "411001" },
         images: [], createdAt: new Date("2026-08-01"), donor: { name: "Private Donor", email: "private@example.com" } };
     const html = await render("equipment-discovery.ejs", {
@@ -44,6 +44,7 @@ test("verified NGO discovery renders safe listing data without donor identity", 
     });
     assert.match(html, /Verified NGO catalogue/);
     assert.match(html, /wheelchair/);
+    assert.match(html, /<strong>3<\/strong> available/);
     assert.doesNotMatch(html, /Private Donor|private@example\.com/);
 });
 

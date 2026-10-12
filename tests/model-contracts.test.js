@@ -14,8 +14,8 @@ test("donations expose the planned lifecycle and donor index", () => {
 test("matching reserves quantity only when capacity remains", () => {
     const query = buildCapacityReservationQuery({ donation: "donation-id", quantity: 3 }, "donor-id");
     assert.equal(query.donor, "donor-id");
-    assert.deepEqual(query.status.$in, ["available", "requested", "matched"]);
-    assert.deepEqual(query.$expr.$lte[1], "$quantity");
+    assert.deepEqual(query.status.$in, ["available", "requested", "matched", "pickup_scheduled"]);
+    assert.equal(query.$expr.$gte[1], 3);
     assert.equal(Donation.schema.path("allocatedQuantity").options.default, 0);
 });
 

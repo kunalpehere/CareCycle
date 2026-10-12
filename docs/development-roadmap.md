@@ -223,6 +223,13 @@ Suggested commit: `refactor(donations): define quantity and lifecycle invariants
 
 ### Day 6 - Transactional acceptance and remaining availability
 
+Status: implemented and locally verified.
+Date: October 12, 2026.
+Commit: the commit containing this update, `fix(matching): make acceptance atomic and retain remaining availability`, on `codex/day-6-transactional-matching`.
+Checks and results: 55 unit/model/template tests, syntax checks for 83 JavaScript files, 14 isolated database tests and six desktop/mobile browser tests passed. Concurrent/repeated acceptance, cancellation races, stale edits, deliberate transaction abort, remaining-stock requests and authenticated privacy checks verified.
+Evidence: [Day 6 implementation, setup and verification](day-6-verification.md).
+Known limitations and external checks: existing application database and `.env` were preserved; replica-set configuration/backfill of that dataset remains an operator step. Retry/index migration and pending-request reconciliation remain Day 7; pickup/handover remain later work. Hosted CI, deployment and production infrastructure remain unverified.
+
 Outcome:
 
 - Apply quantity reservation and request acceptance atomically using the supported MongoDB replica-set topology.

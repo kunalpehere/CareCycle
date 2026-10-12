@@ -3,6 +3,7 @@ import path from "path";
 import { Donation, EQUIPMENT_CONDITIONS, EQUIPMENT_TYPES } from "../models/Donation.js";
 import { donationImageDirectory } from "../services/imageService.js";
 import { DonationRequest } from "../models/DonationRequest.js";
+import { availableListingQuery, withRemainingAvailability } from "../services/availabilityService.js";
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const normalizedFilter = (value, allowed) => allowed.includes(String(value || "").toLowerCase()) ? String(value).toLowerCase() : "";
@@ -15,7 +16,7 @@ export const showEquipmentDiscovery = async (req, res, next) => {
             condition: normalizedFilter(req.query.condition, EQUIPMENT_CONDITIONS),
             location: String(req.query.location || "").trim().slice(0, 100)
         };
-        const query = { status: "available" };
+        const query = availableListingQuery();
         if (filters.equipment) query.equipment = filters.equipment;
         if (filters.condition) query.condition = filters.condition;
         if (filters.location) {
@@ -27,12 +28,12 @@ export const showEquipmentDiscovery = async (req, res, next) => {
         const pageSize = 12;
         const [donations, total] = await Promise.all([
             Donation.find(query).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
-                .select("equipment condition quantity description location images createdAt").lean(),
+                .select("equipment condition quantity allocatedQuantity handedOverQuantity description location images createdAt").lean(),
             Donation.countDocuments(query)
         ]);
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
         const filterQuery = new URLSearchParams(Object.entries(filters).filter(([, value]) => value)).toString();
-        res.render("equipment-discovery.ejs", discoveryData({ donations, filters, organization: req.verifiedOrganization, total, page, totalPages, filterQuery }));
+        res.render("equipment-discovery.ejs", discoveryData({ donations: donations.map(withRemainingAvailability), filters, organization: req.verifiedOrganization, total, page, totalPages, filterQuery }));
     } catch (error) {
         next(error);
     }
@@ -41,12 +42,12 @@ export const showEquipmentDiscovery = async (req, res, next) => {
 export const showEquipmentDetail = async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send("Equipment listing not found");
-        const donation = await Donation.findOne({ _id: req.params.id, status: "available" })
-            .select("equipment condition quantity description location images createdAt").lean();
+        const donation = await Donation.findOne({ _id: req.params.id, ...availableListingQuery() })
+            .select("equipment condition quantity allocatedQuantity handedOverQuantity description location images createdAt").lean();
         if (!donation) return res.status(404).send("Equipment listing not found");
         const existingRequest = await DonationRequest.findOne({ donation: donation._id, organization: req.verifiedOrganization._id })
             .select("status quantity createdAt").lean();
-        res.render("equipment-detail.ejs", { donation, organization: req.verifiedOrganization, existingRequest, message: String(req.query.message || "") });
+        res.render("equipment-detail.ejs", { donation: withRemainingAvailability(donation), organization: req.verifiedOrganization, existingRequest, message: String(req.query.message || "") });
     } catch (error) {
         next(error);
     }
@@ -57,7 +58,7 @@ export const serveDiscoveryImage = async (req, res, next) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send("Image not found");
         const filename = path.basename(req.params.filename);
         if (filename !== req.params.filename || !/^[a-f0-9-]+\.(jpg|png|webp)$/.test(filename)) return res.status(404).send("Image not found");
-        const listed = await Donation.exists({ _id: req.params.id, status: "available", "images.filename": filename });
+        const listed = await Donation.exists({ _id: req.params.id, ...availableListingQuery(), "images.filename": filename });
         if (!listed) return res.status(404).send("Image not found");
         res.sendFile(filename, { root: donationImageDirectory });
     } catch (error) {

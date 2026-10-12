@@ -2,22 +2,25 @@ import mongoose from "mongoose";
 import { Donation } from "../models/Donation.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { validateDonationRequest, validateRequestDecision } from "../validators/input.js";
-import { acceptPendingRequest } from "../services/matchingService.js";
+import { acceptPendingRequest, createPendingRequest } from "../services/matchingService.js";
+import { availableListingQuery } from "../services/availabilityService.js";
+import { quantityAccounting } from "../services/quantityContract.js";
 
 export const createEquipmentRequest = async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send("Equipment listing not found");
-        const donation = await Donation.findOne({ _id: req.params.id, status: "available" }).select("quantity");
+        const donation = await Donation.findOne({ _id: req.params.id, ...availableListingQuery() }).select("quantity allocatedQuantity handedOverQuantity");
         if (!donation) return res.status(409).send("This equipment is no longer available.");
-        const { valid, value } = validateDonationRequest(req.body, donation.quantity);
+        const { valid, value } = validateDonationRequest(req.body, quantityAccounting(donation).available);
         if (!valid) return res.redirect(`/ngo/equipment/${donation.id}?message=${encodeURIComponent("Enter a valid quantity, beneficiary summary, and need statement.")}`);
 
-        await DonationRequest.create({
+        const created = await createPendingRequest({
             donation: donation._id,
             organization: req.verifiedOrganization._id,
             requestedBy: req.auth.userId,
             ...value
         });
+        if (!created) return res.status(409).send("Availability changed. Return to equipment discovery to see remaining units.");
         res.redirect("/ngo/requests?message=Equipment%20request%20submitted.");
     } catch (error) {
         if (error?.code === 11000) return res.redirect(`/ngo/equipment/${req.params.id}?message=${encodeURIComponent("Your organization has already requested this listing.")}`);
@@ -97,6 +100,7 @@ export const decideEquipmentRequest = async (req, res, next) => {
 
         const result = await acceptPendingRequest({ request, donorId: req.auth.userId, responseNote: value.responseNote, respondedBy: req.auth.userId });
         if (!result.accepted) {
+            if (result.reason === "ownership") return res.status(403).send("This request belongs to another donor's listing.");
             const message = result.reason === "capacity" ? "The listing no longer has enough unallocated quantity for this request." : "This request has already been decided.";
             return res.status(409).send(message);
         }

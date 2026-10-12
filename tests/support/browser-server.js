@@ -33,6 +33,8 @@ try {
     const { connectDatabase, disconnectDatabase } = await import("../../src/config/database.js");
     disconnect = disconnectDatabase;
     await connectDatabase();
+    const { seedMatchingBrowserFixtures } = await import("./matching-browser-fixtures.js");
+    await seedMatchingBrowserFixtures();
     server = createApp().listen(4183, "127.0.0.1");
     await new Promise((resolve, reject) => { server.once("listening", resolve); server.once("error", reject); });
     console.log("Isolated browser test app listening on 127.0.0.1:4183");
