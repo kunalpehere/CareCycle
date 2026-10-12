@@ -1,3 +1,4 @@
+import { respondError } from "./errors.js";
 export const createRateLimiter = ({ windowMs, max }) => {
     const attempts = new Map();
     return (req, res, next) => {
@@ -11,7 +12,7 @@ export const createRateLimiter = ({ windowMs, max }) => {
         }
         if (entry.count >= max) {
             res.setHeader("Retry-After", Math.ceil((entry.resetAt - now) / 1000));
-            return res.status(429).send("Too many requests. Please try again later.");
+            return respondError(req, res, 429, "Too many requests. Please try again later.");
         }
         entry.count += 1;
         next();

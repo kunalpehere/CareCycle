@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Donation receipt | CareCycle</title><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/requests.css"><script src="/app-nav.js" defer></script></head><body>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Donation receipt | CareCycle</title><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/requests.css"><script src="/app-nav.js" defer></script><link rel="stylesheet" href="/ui-consistency.css"></head><body>
 <%- include('partials/app-nav', { activePage: role === 'admin' ? 'admin-dashboard' : role + '-requests' }) %>
 <main class="app-main pickup-page"><a href="/<%= role %>/<%= role === 'admin' ? 'dashboard' : 'requests' %>">Back to <%= role === 'admin' ? 'administration' : 'requests' %></a><h1 class="page-title">Donation receipt</h1>
 <p>Receipts record actual NGO-acknowledged transfers. Downloads contain the recorded revision, with no pickup instructions or beneficiary summaries.</p>

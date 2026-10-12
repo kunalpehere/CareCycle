@@ -16,10 +16,10 @@
     invalidTimer = setTimeout(() => {
       const form = event.target.form;
       if (!form) return;
-      form.querySelector('.validation-summary')?.remove();
+      form.querySelector('.client-errors')?.remove();
       const fields = [...form.querySelectorAll(':invalid')];
       const summary = document.createElement('div');
-      summary.className = 'validation-summary';
+      summary.className = 'validation-summary client-errors';
       summary.setAttribute('role', 'alert');
       summary.tabIndex = -1;
       const heading = document.createElement('strong');
@@ -30,7 +30,7 @@
         const item = document.createElement('li');
         const link = document.createElement('a');
         link.href = `#${field.id}`;
-        link.textContent = field.labels?.[0]?.textContent?.trim() || field.name || 'Required field';
+        link.textContent = field.labels?.[0] ? [...field.labels[0].childNodes].filter(node => node.nodeType === Node.TEXT_NODE).map(node => node.textContent).join(' ').trim() || field.labels[0].textContent.trim() : field.name || 'Required field';
         item.append(link); list.append(item);
       });
       summary.append(heading, list);
@@ -65,22 +65,36 @@
 
   const dialog = document.createElement('dialog');
   dialog.className = 'confirm-dialog';
-  dialog.innerHTML = '<form method="dialog"><h2>Confirm action</h2><p></p><div><button value="cancel">Cancel</button><button class="confirm-action" value="confirm">Continue</button></div></form>';
+  dialog.setAttribute('aria-labelledby', 'confirm-title');
+  dialog.setAttribute('aria-describedby', 'confirm-message');
+  dialog.innerHTML = '<form method="dialog"><h2 id="confirm-title">Confirm action</h2><p id="confirm-message"></p><div><button value="cancel">Cancel</button><button class="confirm-action" value="confirm">Continue</button></div></form>';
   document.body.append(dialog);
   let pendingForm;
+  let trigger;
   document.querySelectorAll('form[data-confirm]').forEach((form) => form.addEventListener('submit', (event) => {
     if (form.dataset.confirmed === 'true') return;
     event.preventDefault();
     pendingForm = form;
+    trigger = event.submitter || form.querySelector('button[type="submit"]');
     dialog.querySelector('p').textContent = form.dataset.confirm;
+    dialog.returnValue = '';
     dialog.showModal();
     dialog.querySelector('button[value="cancel"]').focus();
   }));
   dialog.addEventListener('close', () => {
     if (dialog.returnValue === 'confirm' && pendingForm) {
       pendingForm.dataset.confirmed = 'true';
-      pendingForm.requestSubmit();
-    } else pendingForm?.querySelector('button[type="submit"]')?.focus();
+      if (trigger?.form === pendingForm) pendingForm.requestSubmit(trigger);
+      else pendingForm.requestSubmit();
+      delete pendingForm.dataset.confirmed;
+    } else trigger?.focus();
     pendingForm = null;
+    trigger = null;
+  });
+  document.addEventListener('click', event => {
+    const link = event.target.closest('.validation-summary a');
+    if (!link) return;
+    const field = document.getElementById(link.getAttribute('href')?.slice(1));
+    if (field) { event.preventDefault(); field.focus(); field.scrollIntoView({ block: 'center' }); }
   });
 })();

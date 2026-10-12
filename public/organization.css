@@ -7,7 +7,7 @@
 .organization-form section { display:grid; grid-template-columns:240px 1fr; gap:2.3rem; padding:2rem; border-bottom:1px solid var(--line); }
 .form-section-title { display:flex; align-items:flex-start; gap:.8rem; }
 .form-section-title>span { display:grid; place-items:center; min-width:36px; height:36px; border-radius:10px; color:var(--green); background:var(--mint); font-weight:800; }
-.form-section-title h2 { margin:0; font:700 1.12rem "Manrope"; }
+.form-section-title h2 { margin:0; font:700 1.12rem "Manrope",sans-serif; }
 .form-section-title p { margin:.4rem 0 0; color:var(--muted); font-size:.82rem; line-height:1.55; }
 .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.1rem; }
 .form-grid label,.file-field { display:grid; gap:.45rem; color:#253b33; font-size:.86rem; font-weight:700; }
@@ -23,7 +23,7 @@
 .form-actions a { color:var(--muted); text-decoration:none; }
 .form-actions button,.dashboard-action { border:0; border-radius:9px; padding:.85rem 1.1rem; color:white; background:var(--deep); font-weight:700; text-decoration:none; cursor:pointer; }
 .application-card { display:flex; align-items:center; justify-content:space-between; gap:2rem; margin-top:1.2rem; padding:2rem; }
-.application-card h2 { margin:.7rem 0 .4rem; font:700 1.7rem "Manrope"; }
+.application-card h2 { margin:.7rem 0 .4rem; font:700 1.7rem "Manrope",sans-serif; }
 .application-card p { max-width:680px; color:var(--muted); line-height:1.6; }
 .application-meta,.application-actions { display:flex; gap:1.2rem; color:var(--muted); font-size:.85rem; }
 .application-actions { align-items:center; flex:none; }.application-actions>a:first-child { color:var(--green); font-weight:700; }
@@ -33,7 +33,7 @@
 .profile-card dl { display:grid; grid-template-columns:repeat(2,1fr); gap:1.6rem; margin:1.8rem 0; }
 .profile-card dl div:last-child { grid-column:1/-1; }.profile-card dt { color:var(--muted); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; }.profile-card dd { margin:.35rem 0 0; line-height:1.65; }
 .review-note { margin:2rem 0 0; padding:1rem; border-radius:10px; color:var(--muted); background:#f2f5f2; font-size:.88rem; }
-.back-link { display:block; margin-bottom:1.5rem; }.queue-heading { display:flex; justify-content:space-between; align-items:center; }.queue-heading h2 { font:700 1.5rem "Manrope"; }.queue-heading span,.empty-state { color:var(--muted); }
+.back-link { display:block; margin-bottom:1.5rem; }.queue-heading { display:flex; justify-content:space-between; align-items:center; }.queue-heading h2 { font:700 1.5rem "Manrope",sans-serif; }.queue-heading span,.empty-state { color:var(--muted); }
 .queue-list { display:grid; margin-top:1rem; }.queue-list a { display:flex; justify-content:space-between; gap:1rem; padding:1.1rem 0; border-top:1px solid var(--line); color:var(--ink); text-decoration:none; }.queue-list a:hover strong { color:var(--green); }.queue-list span { display:block; margin-top:.3rem; color:var(--muted); font-size:.85rem; }.queue-list time { color:var(--muted); font-size:.82rem; }
 @media(max-width:800px){.organization-heading,.application-card{align-items:flex-start;flex-direction:column}.organization-form section{grid-template-columns:1fr;gap:1.2rem}.application-actions{align-items:flex-start;flex-wrap:wrap}.profile-card dl{grid-template-columns:1fr}.profile-card dl div:last-child{grid-column:auto}}
 @media(max-width:560px){.form-grid{grid-template-columns:1fr}.form-grid label.wide{grid-column:auto}.organization-form section,.profile-card,.queue-card{padding:1.25rem}.form-actions{padding:1rem 1.25rem}.application-meta{flex-direction:column}.queue-heading{align-items:flex-start;flex-direction:column}}

@@ -13,6 +13,7 @@
         <a href="/register?role=donor">Register as donor</a>
         <a href="/register?role=ngo">Register as NGO</a>
       <% } else if (navRole === 'donor') { %>
+        <a class="mobile-create" href="/donate">Create listing</a>
         <a href="/about" class="<%= activePage === 'about' ? 'active' : '' %>">About</a>
         <a href="/contact" class="<%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
         <a href="/donor/dashboard" class="<%= activePage === 'donations' ? 'active' : '' %>">My donations</a>

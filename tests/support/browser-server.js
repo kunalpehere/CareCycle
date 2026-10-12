@@ -40,6 +40,8 @@ try {
     await seedMatchingBrowserFixtures();
     const { seedDonorWorkspaceBrowserFixtures } = await import("./donor-workspace-browser-fixtures.js");
     await seedDonorWorkspaceBrowserFixtures();
+    const { seedAccessibilityFixtures } = await import("./accessibility-browser-fixtures.js");
+    await seedAccessibilityFixtures(root);
     const { startNotificationWorker } = await import("../../src/services/notificationWorker.js");
     notificationWorker = startNotificationWorker({ intervalMs: 250, send: null });
     server = createApp().listen(4183, "127.0.0.1");

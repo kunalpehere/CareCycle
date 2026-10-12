@@ -486,6 +486,9 @@ Suggested commit: `feat(listings): add practical equipment details and guided va
 
 ### Day 18 - Mobile, accessibility, and visual consistency
 
+Status: implemented and locally verified on October 12, 2026. See [Day 18 evidence](day-18-verification.md). Shared UI tokens, mobile and no-JavaScript navigation, named confirmation dialogs, focus/error recovery, contrast and heading fixes are implemented. All 28 full-page templates were exercised across 132 synthetic page-state/viewport audits with no detected axe violations, overflow, decorative effects or tested control-border contrast failures. Physical-device/screen-reader and production checks remain unverified. Day 16 is still planned, so Phase 4 remains incomplete.
+Commit: the commit containing this update, `fix(ui): improve mobile actions and accessible workflow consistency`, on `codex/day-18-accessible-consistency`.
+
 Outcome:
 
 - Restore visible mobile logout and ensure every important action has a mobile route.
