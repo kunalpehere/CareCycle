@@ -8,6 +8,7 @@ import { quantityAccounting } from "../services/quantityContract.js";
 import { workflowConflict } from "../services/workflowConflict.js";
 import { runTransaction } from "../services/transactionService.js";
 import { recordRequestEvent } from "../services/notificationService.js";
+import { loadNgoRequests } from '../services/ngoWorkspaceService.js';
 
 export const createEquipmentRequest = async (req, res, next) => {
     try {
@@ -33,18 +34,8 @@ export const createEquipmentRequest = async (req, res, next) => {
 
 export const showOrganizationRequests = async (req, res, next) => {
     try {
-        const requests = await DonationRequest.find({ organization: req.verifiedOrganization._id })
-            .sort({ createdAt: -1 })
-            .populate({ path: "donation", select: "equipment condition quantity allocatedQuantity location status createdAt donor", populate: { path: "donor", select: "name email" } })
-            .lean();
-        for (const request of requests) {
-            if (!request.donation) continue;
-            if (["accepted", "completed"].includes(request.status)) {
-                request.donorContact = request.donation.donor ? { name: request.donation.donor.name, email: request.donation.donor.email } : null;
-            }
-            delete request.donation.donor;
-        }
-        res.render("ngo-requests.ejs", { requests, organization: req.verifiedOrganization, message: String(req.query.message || "") });
+        const workspace = await loadNgoRequests({ organizationId: req.verifiedOrganization._id, userId: req.auth.userId, query: req.query });
+        res.render("ngo-requests.ejs", { ...workspace, organization: req.verifiedOrganization, message: String(req.query.message || "") });
     } catch (error) {
         next(error);
     }

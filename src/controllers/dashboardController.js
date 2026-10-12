@@ -1,13 +1,15 @@
 import { getDashboardPath } from "../services/roleService.js";
 import { Organization } from "../models/Organization.js";
 import { loadAdminDashboardData } from "./adminController.js";
+import { loadNgoRequests } from '../services/ngoWorkspaceService.js';
 
 export const redirectToRoleDashboard = (req, res) => res.redirect(getDashboardPath(req.auth.user.role));
 
 export const showNgoDashboard = async (req, res, next) => {
     try {
         const organization = await Organization.findOne({ owner: req.auth.userId }).lean();
-        res.render("ngo-dashboard.ejs", { user: req.auth.user, organization, message: String(req.query.message || "") });
+        const workspace = organization?.verificationStatus === 'verified' ? await loadNgoRequests({ organizationId: organization._id, userId: req.auth.userId, dashboard: true }) : null;
+        res.render("ngo-dashboard.ejs", { user: req.auth.user, organization, workspace, message: String(req.query.message || "") });
     } catch (error) {
         next(error);
     }

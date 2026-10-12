@@ -450,6 +450,9 @@ Suggested commit: `feat(donor): organize the workspace around pending actions`
 
 ### Day 16 - NGO workspace and discovery
 
+Status: implemented and locally verified on October 12, 2026. See [Day 16 evidence](day-16-verification.md). Verified NGOs see bounded operational next steps; onboarding and rejection remediation remain explicit. Request history has status filters, pagination, quantities and timelines. Discovery filters/page context survive all detail entry links and return navigation. Contact and collection privacy boundaries remain enforced. All 90 unit tests, 147 syntax checks, 128 integration checks and 42 browser checks passed. This completes Phase 4 locally; hosted CI and production remain unverified.
+Commit: the commit containing this update, `feat(ngo): improve equipment discovery and request tracking`, on `codex/day-16-ngo-workspace`.
+
 Outcome:
 
 - Show onboarding tasks before verification and requests/pickups after verification.
@@ -466,7 +469,7 @@ Suggested commit: `feat(ngo): improve equipment discovery and request tracking`
 
 ### Day 17 - Equipment-specific listing UX
 
-Status: implemented and locally verified on October 12, 2026, at the project owner's request before Day 16. See [Day 17 evidence](day-17-verification.md). Optional reported equipment details, category-specific specifications, field-level validation, escaped draft recovery and clearer image handling are implemented. Older listings remain readable without backfill. Field choices remain provisional because participant research is pending. Day 16 remains planned.
+Status: implemented and locally verified on October 12, 2026, at the project owner's request before Day 16. See [Day 17 evidence](day-17-verification.md). Optional reported equipment details, category-specific specifications, field-level validation, escaped draft recovery and clearer image handling are implemented. Older listings remain readable without backfill. Field choices remain provisional because participant research is pending. Day 16 was subsequently implemented; see its verification record.
 Commit: the commit containing this update, `feat(listings): add practical equipment details and guided validation`, on `codex/day-17-equipment-details`.
 
 Outcome:
@@ -486,7 +489,7 @@ Suggested commit: `feat(listings): add practical equipment details and guided va
 
 ### Day 18 - Mobile, accessibility, and visual consistency
 
-Status: implemented and locally verified on October 12, 2026. See [Day 18 evidence](day-18-verification.md). Shared UI tokens, mobile and no-JavaScript navigation, named confirmation dialogs, focus/error recovery, contrast and heading fixes are implemented. All 28 full-page templates were exercised across 132 synthetic page-state/viewport audits with no detected axe violations, overflow, decorative effects or tested control-border contrast failures. Physical-device/screen-reader and production checks remain unverified. Day 16 is still planned, so Phase 4 remains incomplete.
+Status: implemented and locally verified on October 12, 2026. See [Day 18 evidence](day-18-verification.md). Shared UI tokens, mobile and no-JavaScript navigation, named confirmation dialogs, focus/error recovery, contrast and heading fixes are implemented. All 28 full-page templates were exercised across 132 synthetic page-state/viewport audits with no detected axe violations, overflow, decorative effects or tested control-border contrast failures. Physical-device/screen-reader and production checks remain unverified. Day 16 was subsequently implemented; see its verification record.
 Commit: the commit containing this update, `fix(ui): improve mobile actions and accessible workflow consistency`, on `codex/day-18-accessible-consistency`.
 
 Outcome:
