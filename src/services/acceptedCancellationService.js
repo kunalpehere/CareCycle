@@ -4,6 +4,7 @@ import { runTransaction } from "./transactionService.js";
 import { quantityAccounting } from "./quantityContract.js";
 import { noRecordedHandover, pickupVersionFilter, validatePickupReason } from "./pickupService.js";
 import { reconciledListing } from "./fulfillmentAccounting.js";
+import { recordRequestEvent } from "./notificationService.js";
 
 class CancellationConflict extends Error {}
 
@@ -30,6 +31,7 @@ export const cancelAcceptedRequest = async ({ requestId, version, actorId, actor
             }, { new: true, session });
             if (!released) throw new CancellationConflict();
             quantityAccounting(released);
+            await recordRequestEvent({ request: cancelled, kind: "pickup_cancelled", key: `pickup:${version + 1}`, session });
             return true;
         });
     } catch (error) { if (error instanceof CancellationConflict) return false; throw error; }

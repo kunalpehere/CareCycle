@@ -92,6 +92,8 @@ Stop the development `mongod` with Ctrl+C in terminal A. Restart using the same 
 
 ## Isolated tests
 
+Day 13 starts a bounded lifecycle notification worker with the application. Notification email defaults off per account. Provider credentials enable sending only for opted-in recipients; absent credentials preserve queued jobs without attempts. `npm run notifications:process` runs one bounded pass against the configured database, so verify the intended runtime before using it. Lifecycle email uses account addresses rather than `MAIL_RECIPIENTS`. See [Day 13 operational limits](day-13-verification.md).
+
 `npm test` needs no MongoDB service. Its cookie/configuration check briefly starts localhost HTTP on an ephemeral port without database access, then closes it. Integration tests create owned synthetic replica/standalone processes; browser tests create their own replica and disposable app/runtime directory.
 
 Test mode rejects remote/SRV MongoDB targets, non-loopback application origins, and names outside `carecycle_test_...`. The harness overrides inherited settings, generates secrets, blanks mail and skips `.env`. This does not approve arbitrary existing local databases as test targets; use owned harness instances.

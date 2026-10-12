@@ -9,11 +9,12 @@ const runtimeRoot = path.join(root, "artifacts/runtime");
 await mkdir(runtimeRoot, { recursive: true });
 const runtime = await mkdtemp(path.join(runtimeRoot, "browser-"));
 Object.assign(process.env, isolatedTestEnvironment());
-let database, server, disconnect;
+let database, server, disconnect, notificationWorker;
 let stopping = false;
 const stop = async () => {
     if (stopping) return;
     stopping = true;
+    if (notificationWorker) await notificationWorker.stop();
     if (server) { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
     if (disconnect) await disconnect();
     if (database) await database.stop();
@@ -37,6 +38,8 @@ try {
     await connectDatabase();
     const { seedMatchingBrowserFixtures } = await import("./matching-browser-fixtures.js");
     await seedMatchingBrowserFixtures();
+    const { startNotificationWorker } = await import("../../src/services/notificationWorker.js");
+    notificationWorker = startNotificationWorker({ intervalMs: 250, send: null });
     server = createApp().listen(4183, "127.0.0.1");
     await new Promise((resolve, reject) => { server.once("listening", resolve); server.once("error", reject); });
     console.log("Isolated browser test app listening on 127.0.0.1:4183");

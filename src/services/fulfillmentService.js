@@ -4,6 +4,7 @@ import { DonationRequest } from "../models/DonationRequest.js";
 import { runTransaction } from "./transactionService.js";
 import { requestAccounting, reconciledListing } from "./fulfillmentAccounting.js";
 import { validatePickupReason } from "./pickupService.js";
+import { recordRequestEvent } from "./notificationService.js";
 
 export const fulfillmentActions = ["handover", "acknowledge", "receipt-dispute", "resolution-propose", "resolution-confirm", "remainder-propose", "remainder-confirm", "remainder-withdraw"];
 export const wholeQuantity = value => typeof value === "string" && /^(0|[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value)) && Number(value) <= 100 ? Number(value) : null;
@@ -90,6 +91,7 @@ export const changeFulfillment = async ({ requestId, version, actorId, actorRole
                 $inc: { handedOverQuantity: handedDelta, allocatedQuantity: allocatedDelta, __v: 1 }, $set: { status: completed ? "completed" : "available" }
             }, { new: true, session });
             if (!changedListing || !await reconciledListing(changedListing, session, DonationRequest)) throw new FulfillmentConflict();
+            await recordRequestEvent({ request, kind: eventAction, key: `fulfillment:${request.pickup.version}`, session });
             return true;
         });
     } catch (error) { if (error instanceof FulfillmentConflict) return false; throw error; }

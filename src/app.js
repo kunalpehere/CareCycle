@@ -15,6 +15,7 @@ import { organizationRoutes } from "./routes/organizationRoutes.js";
 import { discoveryRoutes } from "./routes/discoveryRoutes.js";
 import { requestRoutes } from "./routes/requestRoutes.js";
 import { receiptRoutes } from "./routes/receiptRoutes.js";
+import { notificationRoutes } from "./routes/notificationRoutes.js";
 
 export const createApp = () => {
     const app = express();
@@ -36,6 +37,7 @@ export const createApp = () => {
     }));
     app.use(issueCsrfToken);
     app.use(authRoutes);
+    app.use(notificationRoutes);
     app.use(pageRoutes);
     app.use(dashboardRoutes);
     app.use(organizationRoutes);

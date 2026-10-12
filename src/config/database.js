@@ -3,6 +3,8 @@ import { env } from "./env.js";
 import { DatabaseTopologyError, verifyReplicaSet } from "./topology.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { RequestIndexError, verifyRequestIndexes } from "../services/requestPolicy.js";
+import { LifecycleEvent } from "../models/LifecycleEvent.js";
+import { Notification } from "../models/Notification.js";
 
 mongoose.set("strictQuery", true);
 
@@ -25,6 +27,8 @@ export const connectDatabase = async () => {
         });
         await verifyReplicaSet(mongoose.connection, env.mongoRequireReplicaSet);
         await DonationRequest.init();
+        await LifecycleEvent.init();
+        await Notification.init();
         await verifyRequestIndexes(mongoose.connection);
         return mongoose;
     } catch (error) {

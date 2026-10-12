@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ["donor", "ngo", "admin"], default: "donor", index: true },
     status: { type: String, enum: ["active", "suspended", "deleted"], default: "active", index: true },
     emailVerifiedAt: { type: Date, default: null },
+    notificationEmailEnabled: { type: Boolean, default: false },
     lastLoginAt: { type: Date, default: null }
 }, { timestamps: true });
 

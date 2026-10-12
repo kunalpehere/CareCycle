@@ -22,6 +22,7 @@
     "test": "npm run check && node scripts/run-tests.js unit",
     "test:integration": "node scripts/run-tests.js integration",
     "test:browser": "node scripts/run-tests.js browser",
+    "notifications:process": "node scripts/process-notifications.js --once",
     "test:failure-probe": "node scripts/check-test-failure.js"
   },
   "author": "",

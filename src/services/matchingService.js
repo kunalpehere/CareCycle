@@ -5,6 +5,7 @@ import { quantityAccounting } from "./quantityContract.js";
 import { runTransaction } from "./transactionService.js";
 import { resolvePendingRequests } from "./listingPolicyService.js";
 import { BLOCKING_REQUEST_STATUSES } from "./requestPolicy.js";
+import { recordRequestEvent } from "./notificationService.js";
 
 export const buildCapacityReservationQuery = (request, donorId) => ({
     _id: request.donation,
@@ -36,6 +37,7 @@ export const createMatchingService = ({ DonationModel = Donation, RequestModel =
                 if (!acceptedRequest) throw new DecisionConflict();
                 await resolvePendingRequests({ donationId: donation._id, available: quantityAccounting(donation).available,
                     actor: donorId, session, RequestModel });
+                await recordRequestEvent({ request: acceptedRequest, kind: "request_accepted", key: "accepted", session });
                 return { accepted: true, donation, request: acceptedRequest };
             });
         } catch (error) {
@@ -53,6 +55,7 @@ export const createMatchingService = ({ DonationModel = Donation, RequestModel =
         quantityAccounting(listing);
         const [request] = await RequestModel.create([{ ...data, listingSnapshot: { equipment: listing.equipment, condition: listing.condition,
             totalQuantity: listing.quantity, location: listing.location } }], { session });
+        await recordRequestEvent({ request, kind: "request_submitted", key: "submitted", session });
         return request;
     });
     return { acceptPendingRequest, createPendingRequest };

@@ -7,6 +7,8 @@ import {
 } from "../services/verificationDocumentService.js";
 import { sameOwner } from "../services/authorizationService.js";
 import { respondForbidden } from "../middleware/accessResponses.js";
+import { runTransaction } from "../services/transactionService.js";
+import { recordOrganizationEvent } from "../services/notificationService.js";
 
 const organizationFormData = (overrides = {}) => ({
     organization: null,
@@ -32,6 +34,7 @@ export const showCreateOrganization = async (req, res, next) => {
 
 export const createOrganization = async (req, res, next) => {
     let savedDocument;
+    let committed = false;
     try {
         const existing = await Organization.exists({ owner: req.auth.userId });
         if (existing) return res.status(409).send("This NGO member already owns an organization profile.");
@@ -39,16 +42,21 @@ export const createOrganization = async (req, res, next) => {
         if (!valid) return res.status(400).render("organization-form.ejs", organizationFormData({ organization: req.body, message: "Complete every required organization field with valid information." }));
 
         savedDocument = await saveVerificationDocument(req.file);
-        const organization = await Organization.create({
-            owner: req.auth.userId,
-            ...value,
-            verificationDocument: savedDocument,
-            verificationStatus: "pending",
-            submittedAt: new Date()
+        const organization = await runTransaction(Organization.db, async session => {
+            const [created] = await Organization.create([{
+                owner: req.auth.userId,
+                ...value,
+                verificationDocument: savedDocument,
+                verificationStatus: "pending",
+                submittedAt: new Date()
+            }], { session });
+            await recordOrganizationEvent({ organization: created, kind: "organization_submitted", session });
+            return created;
         });
+        committed = true;
         res.redirect(`/ngo/dashboard?message=${encodeURIComponent(`${organization.name} was submitted for verification.`)}`);
     } catch (error) {
-        await removeVerificationDocument(savedDocument);
+        if (!committed) await removeVerificationDocument(savedDocument);
         if (error?.code === 11000) return res.status(409).send("That organization or registration number is already registered.");
         next(error);
     }
@@ -72,6 +80,7 @@ export const showEditOrganization = (req, res) => {
 
 export const updateOrganization = async (req, res, next) => {
     let newDocument;
+    let committed = false;
     try {
         const organization = req.ownedOrganization;
         if (organization.verificationStatus === "verified") return res.status(409).send("Verified organization details cannot be changed here.");
@@ -92,18 +101,18 @@ export const updateOrganization = async (req, res, next) => {
 
         if (req.file) newDocument = await saveVerificationDocument(req.file);
         const previousDocument = organization.verificationDocument?.toObject?.() || organization.verificationDocument;
-        Object.assign(organization, value);
-        if (newDocument) organization.verificationDocument = newDocument;
-        organization.verificationStatus = "pending";
-        organization.rejectionReason = "";
-        organization.submittedAt = new Date();
-        organization.verifiedAt = null;
-        organization.verifiedBy = null;
-        await organization.save();
-        if (newDocument) await removeVerificationDocument(previousDocument);
+        const changed = await runTransaction(Organization.db, async session => {
+            const current = await Organization.findOneAndUpdate({ _id: organization._id, owner: req.auth.userId, __v: organization.__v, verificationStatus: organization.verificationStatus },
+                { $set: { ...value, ...(newDocument ? { verificationDocument: newDocument } : {}), verificationStatus: "pending", rejectionReason: "", submittedAt: new Date(), verifiedAt: null, verifiedBy: null }, $inc: { __v: 1 } }, { new: true, runValidators: true, session });
+            if (!current) return false;
+            await recordOrganizationEvent({ organization: current, kind: "organization_submitted", session }); return true;
+        });
+        if (!changed) { await removeVerificationDocument(newDocument); return res.status(409).send("This application changed during review. Reload it before submitting again."); }
+        committed = true;
+        if (newDocument) await removeVerificationDocument(previousDocument).catch(() => console.error("Previous verification document cleanup failed."));
         res.redirect("/ngo/dashboard?message=Organization%20application%20updated.");
     } catch (error) {
-        await removeVerificationDocument(newDocument);
+        if (!committed) await removeVerificationDocument(newDocument);
         if (error?.code === 11000) return res.status(409).send("That registration number is already registered.");
         next(error);
     }

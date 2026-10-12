@@ -35,6 +35,7 @@ Implemented release stages:
 - Cancel accepted commitments before handover, report missed collections and resolve disagreements
 - Record actual equipment handovers with a checklist, resolve NGO receipt discrepancies and agree remaining-unit releases
 - Issue private, versioned receipts for completed acknowledged handovers and agree receipt name corrections
+- Receive private lifecycle notifications, mark updates read and opt into generic notification emails
 
 ### NGO members
 
@@ -50,6 +51,7 @@ Implemented release stages:
 - Report missed collections, retain private activity history and cancel accepted requests before handover
 - Acknowledge physical receipt or report quantity/condition discrepancies before a request completes
 - Download/print recorded receipts and add optional aggregate equipment-use notes without identifying beneficiaries
+- Receive verification and donation updates in a private inbox, with optional notification email
 
 ### CareCycle Administration
 

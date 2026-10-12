@@ -1,5 +1,7 @@
 import { DonationRequest } from "../models/DonationRequest.js";
 import { canArrangePickup } from "./fulfillmentAccounting.js";
+import { recordRequestEvent } from "./notificationService.js";
+import { runTransaction } from "./transactionService.js";
 
 export const pickupVersion = value => typeof value === "string" && /^(0|[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value)) ? Number(value) : null;
 export const pickupVersionFilter = version => version ? { "pickup.version": version } : { pickup: null };
@@ -56,7 +58,11 @@ export const updatePickup = async ({ request, version, actorId, actorRole, actio
         "pickup.missedReport": action === "propose" ? null : current?.missedReport || null };
     // MongoDB cannot set children of null. The initial write creates the whole plan.
     const update = version ? { $set: fields, $push: { "pickup.history": event } } : { $set: { pickup: { status: "proposed", version: 1, proposal: nextProposal, confirmedBy: null, confirmedAt: null, history: [event] } } };
-    return Boolean(await DonationRequest.findOneAndUpdate(filter, update, { runValidators: true, new: true }));
+    return runTransaction(DonationRequest.db, async session => {
+        const changed = await DonationRequest.findOneAndUpdate(filter, update, { runValidators: true, new: true, session });
+        if (changed) await recordRequestEvent({ request: changed, kind: `pickup_${event.action}`, key: `pickup:${version + 1}`, session });
+        return Boolean(changed);
+    });
 };
 
 export const reportPickupIssue = async ({ request, version, actorId, actorRole, action, reason, noHandover, now = new Date() }) => {
@@ -73,9 +79,13 @@ export const reportPickupIssue = async ({ request, version, actorId, actorRole, 
         if (plan.status !== "missed" || !plan.missedReport?.disputed || String(plan.missedReport.disputedBy) !== String(actorId) || !noHandover) return false;
         fields = { "pickup.missedReport.disputed": false, "pickup.missedReport.disputedBy": null };
     } else return false;
-    return Boolean(await DonationRequest.findOneAndUpdate({ _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...((request.handedOverQuantity ?? 0) === 0 ? noRecordedHandover() : { handedOverQuantity: request.handedOverQuantity }) }, {
-        $set: fields, $inc: { "pickup.version": 1 }, $push: { "pickup.history": { action: action === "dispute" ? "disputed" : action === "resolve" ? "resolved" : "missed", actor: actorId, actorRole, at: now, version: version + 1, proposal: plan.proposal, reason: reason.trim() } }
-    }, { new: true, runValidators: true }));
+    return runTransaction(DonationRequest.db, async session => {
+        const changed = await DonationRequest.findOneAndUpdate({ _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...((request.handedOverQuantity ?? 0) === 0 ? noRecordedHandover() : { handedOverQuantity: request.handedOverQuantity }) }, {
+            $set: fields, $inc: { "pickup.version": 1 }, $push: { "pickup.history": { action: action === "dispute" ? "disputed" : action === "resolve" ? "resolved" : "missed", actor: actorId, actorRole, at: now, version: version + 1, proposal: plan.proposal, reason: reason.trim() } }
+        }, { new: true, runValidators: true, session });
+        if (changed) await recordRequestEvent({ request: changed, kind: action === "dispute" ? "pickup_disputed" : action === "resolve" ? "pickup_resolved" : "pickup_missed", key: `pickup:${version + 1}`, session });
+        return Boolean(changed);
+    });
 };
 
 export const formatPickupTime = (value, timeZone) => new Intl.DateTimeFormat("en-GB", { timeZone, dateStyle: "medium", timeStyle: "short" }).format(new Date(value));

@@ -388,6 +388,8 @@ Suggested commit: `feat(receipts): add traceable donation handover records`
 
 ### Day 13 - Durable lifecycle notifications
 
+Status: implemented and verified locally on October 12, 2026. See [Day 13 evidence](day-13-verification.md). Private participant/admin inboxes, atomic lifecycle events, idempotent processing and optional email with bounded retries are implemented. Real mailbox/provider delivery, hosted CI and production remain unverified. Provider duplicates are possible after a send succeeds but the worker loses its acknowledgement. Existing application data, uploads and `.env` were preserved.
+
 Outcome:
 
 - Add in-app notifications for verification, requests, decisions, pickup changes, and acknowledgements.

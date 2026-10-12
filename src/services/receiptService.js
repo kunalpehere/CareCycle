@@ -6,6 +6,7 @@ import { User } from "../models/User.js";
 import { Organization } from "../models/Organization.js";
 import { runTransaction } from "./transactionService.js";
 import { requestAccounting } from "./fulfillmentAccounting.js";
+import { recordRequestEvent } from "./notificationService.js";
 
 const iso = value => new Date(value).toISOString();
 export const receiptReference = requestId => `CC-${String(requestId).toUpperCase()}`;
@@ -94,6 +95,7 @@ export const changeReceipt = async ({ requestId, version, actorId, actorRole, or
             request.receipt.revisions.push({ number, at: now, actor: actorId, actorRole, reason, amendmentEvidence, snapshot, html });
         }
         await request.save({ session });
+        await recordRequestEvent({ request, kind: `receipt_${eventAction}`, key: `receipt:${request.receipt.version}`, session });
         return true;
     });
 };

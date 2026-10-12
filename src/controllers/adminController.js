@@ -5,6 +5,8 @@ import { DonationRequest } from "../models/DonationRequest.js";
 import { Organization } from "../models/Organization.js";
 import { User } from "../models/User.js";
 import { AdminAccessRequest } from "../models/AdminAccessRequest.js";
+import { runTransaction } from "../services/transactionService.js";
+import { recordOrganizationEvent } from "../services/notificationService.js";
 
 export const decideOrganization = async (req, res, next) => {
     try {
@@ -16,9 +18,14 @@ export const decideOrganization = async (req, res, next) => {
         const update = decision === 'approve'
             ? { verificationStatus: 'verified', verifiedAt: new Date(), verifiedBy: req.auth.userId, rejectionReason: '' }
             : { verificationStatus: 'rejected', verifiedAt: null, verifiedBy: null, rejectionReason: reason };
-        const organization = await Organization.findOneAndUpdate({ _id: req.params.organizationId, verificationStatus: 'pending' }, { $set: update }, { new: true });
+        const organization = await runTransaction(Organization.db, async session => {
+            const changed = await Organization.findOneAndUpdate({ _id: req.params.organizationId, verificationStatus: 'pending' }, { $set: update, $inc: { __v: 1 } }, { new: true, session });
+            if (!changed) return null;
+            await AuditLog.create([{ actor: req.auth.userId, action: `organization.${decision === 'approve' ? 'verified' : 'rejected'}`, targetType: 'organization', targetId: changed._id, details: decision === 'reject' ? { reason } : {} }], { session });
+            await recordOrganizationEvent({ organization: changed, kind: decision === 'approve' ? 'organization_verified' : 'organization_rejected', session });
+            return changed;
+        });
         if (!organization) return res.status(409).send("This application has already been reviewed or is unavailable.");
-        await AuditLog.create({ actor: req.auth.userId, action: `organization.${decision === 'approve' ? 'verified' : 'rejected'}`, targetType: 'organization', targetId: organization._id, details: decision === 'reject' ? { reason } : {} });
         res.redirect(`/admin/dashboard?message=${encodeURIComponent(`${organization.name} was ${decision === 'approve' ? 'verified' : 'rejected'}.`)}`);
     } catch (error) { next(error); }
 };

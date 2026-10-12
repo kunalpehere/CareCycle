@@ -10,6 +10,12 @@ export const seedMatchingBrowserFixtures = async () => {
     await Promise.all([User.init(), Organization.init(), Donation.init(), DonationRequest.init()]);
     const password = await bcrypt.hash("Matching-fixture-42!", 10);
     for (const project of ["desktop", "mobile"]) {
+        const noticeDonor = await User.create({ name: "Synthetic Notification Donor", email: `donor-day13-${project}@example.invalid`, password, role: "donor" });
+        const noticeNgo = await User.create({ name: "Synthetic Notification NGO", email: `ngo-day13-${project}@example.invalid`, password, role: "ngo" });
+        const noticeOrg = new mongoose.Types.ObjectId();
+        await Organization.collection.insertOne({ _id: noticeOrg, owner: noticeNgo._id, name: "Synthetic Notification Organization", verificationStatus: "verified", contactEmail: noticeNgo.email, address: { city: "Pune" } });
+        const noticeListing = await Donation.create({ donor: noticeDonor._id, equipment: "wheelchair", condition: "good", quantity: 5, description: "Synthetic Day 13 notification fixture", location: { city: `Day13 ${project}`, state: "Maharashtra" } });
+        await DonationRequest.create({ donation: noticeListing._id, organization: noticeOrg, requestedBy: noticeNgo._id, quantity: 2, status: "pending", beneficiary: "PRIVATE_DAY13_BENEFICIARY", message: "PRIVATE_DAY13_REQUEST_NEED" });
         const donor = await User.create({ name: "Synthetic Matching Donor", email: `donor-day6-${project}@example.invalid`, password, role: "donor" });
         const ngo = await User.create({ name: "Synthetic Matching NGO", email: `ngo-day6-${project}@example.invalid`, password, role: "ngo" });
         const firstOwner = await User.create({ name: "Synthetic First NGO", email: `first-day6-${project}@example.invalid`, password, role: "ngo" });

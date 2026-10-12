@@ -6,6 +6,8 @@ import { acceptPendingRequest, createPendingRequest } from "../services/matching
 import { availableListingQuery } from "../services/availabilityService.js";
 import { quantityAccounting } from "../services/quantityContract.js";
 import { workflowConflict } from "../services/workflowConflict.js";
+import { runTransaction } from "../services/transactionService.js";
+import { recordRequestEvent } from "../services/notificationService.js";
 
 export const createEquipmentRequest = async (req, res, next) => {
     try {
@@ -91,11 +93,15 @@ export const decideEquipmentRequest = async (req, res, next) => {
         if (request.status !== "pending") return await workflowConflict(req, res, { donor: true, donationId: request.donation, message: "This request has already been decided. Its recorded decision was preserved." });
 
         if (decision === "reject") {
-            const rejected = await DonationRequest.findOneAndUpdate(
-                { _id: request._id, status: "pending" },
-                { $set: { status: "rejected", responseNote: value.responseNote, respondedAt: new Date(), respondedBy: req.auth.userId } },
-                { new: true }
-            );
+            const rejected = await runTransaction(DonationRequest.db, async session => {
+                const changed = await DonationRequest.findOneAndUpdate(
+                    { _id: request._id, status: "pending" },
+                    { $set: { status: "rejected", responseNote: value.responseNote, respondedAt: new Date(), respondedBy: req.auth.userId } },
+                    { new: true, session }
+                );
+                if (changed) await recordRequestEvent({ request: changed, kind: "request_rejected", key: "rejected", session });
+                return changed;
+            });
             if (!rejected) return await workflowConflict(req, res, { donor: true, donationId: request.donation, message: "Another action already resolved this request. Review its history." });
             return res.redirect("/donor/requests?message=Request%20rejected.");
         }
@@ -117,11 +123,15 @@ export const cancelEquipmentRequest = async (req, res, next) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.requestId)) return res.status(404).send("Request not found");
         const owned = await DonationRequest.findOne({ _id: req.params.requestId, organization: req.verifiedOrganization._id }).select("donation");
         if (!owned) return res.status(404).send("Request not found");
-        const request = await DonationRequest.findOneAndUpdate(
-            { _id: req.params.requestId, organization: req.verifiedOrganization._id, status: "pending" },
-            { $set: { status: "cancelled", resolutionReason: "organization_cancelled", responseNote: "Your organization cancelled this pending request.", respondedAt: new Date(), respondedBy: req.auth.userId } },
-            { new: true }
-        );
+        const request = await runTransaction(DonationRequest.db, async session => {
+            const changed = await DonationRequest.findOneAndUpdate(
+                { _id: req.params.requestId, organization: req.verifiedOrganization._id, status: "pending" },
+                { $set: { status: "cancelled", resolutionReason: "organization_cancelled", responseNote: "Your organization cancelled this pending request.", respondedAt: new Date(), respondedBy: req.auth.userId } },
+                { new: true, session }
+            );
+            if (changed) await recordRequestEvent({ request: changed, kind: "request_cancelled", key: "cancelled", session });
+            return changed;
+        });
         if (!request) return await workflowConflict(req, res, { donationId: owned.donation, message: "Only a pending request can be cancelled here. Review the recorded decision before continuing." });
         res.redirect("/ngo/requests?message=Request%20cancelled.");
     } catch (error) {

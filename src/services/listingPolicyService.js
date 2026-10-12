@@ -3,13 +3,17 @@ import { DonationRequest } from "../models/DonationRequest.js";
 import { OPEN_LISTING_STATUSES } from "./availabilityService.js";
 import { quantityAccounting } from "./quantityContract.js";
 import { runTransaction } from "./transactionService.js";
+import { recordRequestEvent } from "./notificationService.js";
 
 export const resolvePendingRequests = async ({ donationId, available, withdrawn = false, actor, session, RequestModel = DonationRequest }) => {
     const filter = { donation: donationId, status: "pending" };
     if (!withdrawn) filter.quantity = { $gt: available };
-    return RequestModel.updateMany(filter, { $set: { status: "cancelled", respondedAt: new Date(), respondedBy: actor,
+    const affected = await RequestModel.find(filter).session(session).lean();
+    const result = await RequestModel.updateMany(filter, { $set: { status: "cancelled", respondedAt: new Date(), respondedBy: actor,
         resolutionReason: withdrawn ? "listing_withdrawn" : "availability_changed",
         responseNote: withdrawn ? "The donor withdrew this listing." : "The remaining quantity is lower than this request. You may submit a smaller new request if stock remains." } }, { session });
+    for (const request of affected) await recordRequestEvent({ request, kind: "request_cancelled", key: "cancelled", session });
+    return result;
 };
 
 export const changeListing = async ({ donationId, donorId, expectedVersion, action, value = {}, images }) => runTransaction(Donation.db, async session => {

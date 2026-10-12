@@ -16,14 +16,14 @@ const getConfiguration = () => {
     };
 };
 
-export const sendDonationMail = async ({ email, equipment, condition }) => {
+export const sendDonationMail = async () => {
     const configuration = getConfiguration();
     if (!configuration) return { sent: false, reason: "not-configured" };
     await configuration.transporter.sendMail({
         from: env.mailFrom,
         to: configuration.recipients,
         subject: "Donation of medical equipment",
-        html: `<main><h3>New CareCycle donation</h3><p>A donor is offering <strong>${escapeHtml(condition)}</strong> <strong>${escapeHtml(equipment)}</strong>.</p><p>Donor contact: ${escapeHtml(email)}</p><p><a href="${escapeHtml(env.appUrl)}">Visit CareCycle</a></p></main>`
+        html: `<main><h3>New CareCycle donation</h3><p>A new equipment listing was created. Sign in to review it.</p><p><a href="${escapeHtml(env.appUrl)}">Visit CareCycle</a></p></main>`
     });
     return { sent: true };
 };

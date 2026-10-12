@@ -142,3 +142,7 @@ These are release intentions, not components shown as implemented above:
 | Days 25 to 28 | Isolated staging demo, complete browser release gate, measurements and honest portfolio evidence. |
 
 Production topology, providers, performance and recovery guarantees remain unverified. Keep the existing stack and choose infrastructure against those later acceptance checks rather than presenting a future architecture as deployed.
+
+## Day 13 implemented lifecycle outbox
+
+The Day 1 mail/inbox observations above are historical. Lifecycle mutations now atomically persist events to `lifecycle_events`; a bounded worker materializes owner-scoped `notifications` rows and sends optional generic account notices. Email is opt-in, durable, leased and limited to five attempts. Requests retain their existing inventory/fulfillment transactions. SMTP calls occur outside business transactions. Duplicate inbox processing is idempotent; provider-level exactly-once delivery is not guaranteed. New-listing mail no longer includes donor contacts. Contact-form delivery remains separate and immediate. See [Day 13 behavior, evidence and limitations](day-13-verification.md).
