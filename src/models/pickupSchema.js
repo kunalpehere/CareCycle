@@ -13,20 +13,33 @@ const proposalSchema = new mongoose.Schema({
 }, { _id: false });
 
 const eventSchema = new mongoose.Schema({
-    action: { type: String, enum: ["proposed", "rescheduled", "confirmed"], required: true },
+    action: { type: String, enum: ["proposed", "rescheduled", "confirmed", "missed", "disputed", "resolved", "cancelled"], required: true },
     actor: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
     actorRole: { type: String, enum: ["donor", "ngo"], required: true },
     at: { type: Date, required: true },
     version: { type: Number, required: true, min: 1 },
-    proposal: { type: proposalSchema, required: true }
+    proposal: { type: proposalSchema, default: null, required: function () { return this.action !== "cancelled"; } },
+    reason: { type: String, trim: true, maxlength: 500, default: "" },
+    releasedQuantity: { type: Number, min: 0, max: 100, default: 0 }
 }, { _id: false });
 
 // Embedded in the accepted request: plan, version and history change atomically.
 export const pickupSchema = new mongoose.Schema({
-    status: { type: String, enum: ["proposed", "confirmed"], required: true },
+    status: { type: String, enum: ["proposed", "confirmed", "missed", "cancelled"], required: true },
     version: { type: Number, min: 1, required: true },
-    proposal: { type: proposalSchema, required: true },
+    proposal: { type: proposalSchema, default: null, required: function () {
+        const status = this.status ?? this.get?.("pickup.status") ?? this.get?.("pickup")?.status;
+        return status !== "cancelled";
+    } },
     confirmedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users", default: null },
     confirmedAt: { type: Date, default: null },
+    missedReport: { type: new mongoose.Schema({
+        actor: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
+        actorRole: { type: String, enum: ["donor", "ngo"], required: true },
+        at: { type: Date, required: true },
+        reason: { type: String, required: true, maxlength: 500 },
+        disputed: { type: Boolean, default: false },
+        disputedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users", default: null }
+    }, { _id: false }), default: null },
     history: { type: [eventSchema], default: [] }
 }, { _id: false });

@@ -8,21 +8,33 @@
     <h1 class="page-title">Arrange pickup</h1>
     <p class="page-intro">Collection for <%= request.quantity %> units<% if (request.listingSnapshot) { %> of <%= request.listingSnapshot.equipment %><% } %>. Coordination details are private to this matched donor and NGO.</p>
     <% if (message) { %><div class="request-message" role="status"><%= message %></div><% } %>
-    <% const plan = request.pickup; const proposal = plan?.proposal; const form = values || proposal || {}; %>
+    <% const plan = request.pickup; const proposal = plan?.proposal; const form = values || proposal || {}; const active = request.status === 'accepted' && !(request.handedOverQuantity > 0); const disputed = plan?.missedReport?.disputed; %>
     <section class="surface pickup-current" aria-labelledby="current-plan">
         <h2 id="current-plan">Current pickup plan</h2>
+        <% if (request.cancellation) { %>
+            <p><strong>Request cancelled by the <%= request.cancellation.actorRole === 'ngo' ? 'NGO' : 'donor' %>.</strong> <%= request.cancellation.releasedQuantity %> reserved units were released.</p>
+            <p class="pickup-private"><strong>Cancellation reason:</strong> <%= request.cancellation.reason %></p>
+            <p>This request is closed. Review the listing from your request history if you want to request equipment again.</p>
+        <% } %>
         <% if (!plan) { %><p>No pickup has been arranged. Either participant can propose a window.</p><% } else { %>
-            <p><strong>Status: <%= plan.status %></strong>. Proposed by the <%= proposal.proposerRole === 'ngo' ? 'NGO' : 'donor' %>.</p>
+            <p><strong>Status: <%= plan.status %></strong><% if (proposal) { %>. Proposed by the <%= proposal.proposerRole === 'ngo' ? 'NGO' : 'donor' %>.<% } %></p>
+            <% if (proposal) { %>
             <p><%= formatPickupTime(proposal.start, proposal.timeZone) %> to <%= formatPickupTime(proposal.end, proposal.timeZone) %> (<%= proposal.timeZone %>)</p>
             <p class="pickup-private"><strong>Pickup address:</strong> <%= proposal.address %></p>
             <% if (proposal.instructions) { %><p class="pickup-private"><strong>Coordination instructions:</strong> <%= proposal.instructions %></p><% } %>
-            <% if (plan.status === 'proposed' && proposal.proposerRole !== role && new Date(proposal.start) > new Date()) { %>
+            <% if (active && !disputed && plan.status === 'proposed' && proposal.proposerRole !== role && new Date(proposal.start) > new Date()) { %>
                 <form method="post" action="<%= base %>/confirm"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan.version %>"><button class="accept-button pickup-button" type="submit">Confirm pickup</button></form>
             <% } else if (plan.status === 'proposed' && new Date(proposal.start) > new Date()) { %><p>Waiting for the other participant to confirm. They may propose a different window.</p><% } %>
-            <% if (new Date(proposal.start) <= new Date()) { %><p>This window has started or passed. Propose a new future window to arrange another pickup. A schedule does not record equipment handover.</p><% } %>
+            <% if (active && !disputed && new Date(proposal.start) <= new Date()) { %><p>This window has started or passed. Propose a new future window to arrange another pickup. A schedule does not record equipment handover.</p><% } %>
+            <% } %>
+            <% if (plan.status === 'missed') { %>
+                <p><strong>Missed pickup reported by the <%= plan.missedReport?.actorRole === 'ngo' ? 'NGO' : 'donor' %>.</strong> Units remain reserved.</p>
+                <p class="pickup-private"><%= plan.missedReport?.reason %></p>
+                <% if (disputed) { %><p><strong>The participants disagree about this collection.</strong> Rescheduling and cancellation are blocked while the disagreement remains. Coordinate using your matched contact details. If you cannot agree, use <a href="/contact">Contact</a> and quote request <%= request._id %>. Do not include beneficiary details. This report does not prove whether equipment was handed over.</p><% } %>
+            <% } %>
         <% } %>
     </section>
-    <section class="surface pickup-editor">
+    <% if (active && !disputed) { %><section class="surface pickup-editor">
         <h2><%= plan ? 'Propose a revised pickup' : 'Propose pickup' %></h2>
         <p>Enter local times in the named time zone. A revised proposal replaces confirmation and needs the other participant to confirm again.</p>
         <form class="request-form" method="post" action="<%= base %>/propose">
@@ -35,15 +47,42 @@
             <div class="pickup-field"><label for="pickup-instructions">Private coordination instructions (optional)</label><textarea id="pickup-instructions" name="instructions" maxlength="1000" rows="3"><%= form.instructions || '' %></textarea></div>
             <button type="submit"><%= plan ? 'Submit revised proposal' : 'Submit pickup proposal' %></button>
         </form>
-    </section>
+    </section><% } %>
+    <% if (active) { %><section class="surface pickup-issues" aria-labelledby="issues-title">
+        <h2 id="issues-title">Collection changes</h2>
+        <% const canMiss = plan?.status === 'confirmed' && proposal && new Date(proposal.end) <= new Date(); const canDispute = plan?.status === 'missed' && !disputed && plan.missedReport && String(plan.missedReport.actor) !== currentUser.id; const canResolve = disputed && String(plan.missedReport.disputedBy) === currentUser.id; %>
+        <% if (disputed && !canResolve) { %><p>The participant who recorded the disagreement must withdraw it before you can reschedule or cancel. Use your matched contact details or Contact to seek help.</p><% } %>
+        <% if (canMiss || canDispute || canResolve) { const issueAction = canMiss ? 'missed' : canDispute ? 'dispute' : 'resolve'; %>
+            <form class="request-form" method="post" action="<%= base %>/<%= issueAction %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan.version %>">
+                <div class="pickup-field"><label for="issue-reason"><%= canMiss ? 'Reason for missed pickup' : canDispute ? 'Reason for disagreement' : 'Reason for withdrawing disagreement' %></label><textarea id="issue-reason" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div>
+                <% if (!canDispute) { %><label class="pickup-check"><input type="checkbox" name="noHandover" value="yes" required> No equipment has been handed over for this request.</label><% } %>
+                <button type="submit"><%= canMiss ? 'Report missed pickup' : canDispute ? 'Dispute missed report' : 'Withdraw disagreement' %></button>
+            </form>
+        <% } %>
+        <% if (!disputed) { %>
+            <p>Cancellation closes this accepted request and releases its reserved units. Use it only before any equipment has been handed over. Recorded handover evidence prevents release.</p>
+            <form class="request-form" method="post" action="<%= base %>/cancel" data-confirm="Cancel this accepted request and release its reserved units?">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan?.version || 0 %>">
+                <div class="pickup-field"><label for="cancellation-reason">Reason for cancellation</label><textarea id="cancellation-reason" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div>
+                <label class="pickup-check"><input type="checkbox" name="noHandover" value="yes" required> No equipment has been handed over for this request.</label>
+                <button type="submit">Cancel accepted request</button>
+            </form>
+        <% } %>
+        <% if (plan?.status === 'confirmed' && !canMiss) { %><p>A missed pickup can be reported after the confirmed window ends.</p><% } %>
+    </section><% } %>
     <section class="surface pickup-history" aria-labelledby="history-title">
         <h2 id="history-title">Pickup activity</h2>
         <% if (!plan) { %><p>No pickup activity yet.</p><% } else { %><ol><% plan.history.forEach(event => { %>
             <li><strong><%= event.action %> by the <%= event.actorRole === 'ngo' ? 'NGO' : 'donor' %></strong>
-                <time datetime="<%= new Date(event.at).toISOString() %>"><%= formatPickupTime(event.at, event.proposal.timeZone) %> (<%= event.proposal.timeZone %>)</time>
+                <time datetime="<%= new Date(event.at).toISOString() %>"><%= formatPickupTime(event.at, event.proposal?.timeZone || 'UTC') %> (<%= event.proposal?.timeZone || 'UTC' %>)</time>
+                <% if (event.reason) { %><p class="pickup-private"><strong>Reason:</strong> <%= event.reason %></p><% } %>
+                <% if (event.releasedQuantity) { %><p>Released <%= event.releasedQuantity %> reserved units.</p><% } %>
+                <% if (event.proposal) { %>
                 <p><%= formatPickupTime(event.proposal.start, event.proposal.timeZone) %> to <%= formatPickupTime(event.proposal.end, event.proposal.timeZone) %> (<%= event.proposal.timeZone %>)</p>
                 <p class="pickup-private"><%= event.proposal.address %></p>
                 <% if (event.proposal.instructions) { %><p class="pickup-private"><%= event.proposal.instructions %></p><% } %>
+                <% } %>
             </li>
         <% }) %></ol><% } %>
     </section>

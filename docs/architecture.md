@@ -8,6 +8,8 @@ Matching evolved in Day 6: [transactional matching and current verification](day
 
 ## Runtime and request path
 
+Day 10 adds [transactional cancellation and missed-pickup policies](day-10-verification.md). Request cancellation/history and reservation release commit together, guarded by accepted status, pickup version and absence of handover evidence. Missed reports and participant disagreements retain reservations; rescheduling needs fresh confirmation. Matched participants can read cancelled collection history. Historical accepted-cancellation gaps below are superseded; application handover/acknowledgement routes remain planned.
+
 Day 9 adds private pickup plans embedded in accepted requests. Proposal, confirmation, rescheduling, version and event history persist in one guarded document update. Only matched participants can access pickup routes, with existing account and NGO verification gates. No listing accounting changes occur. See [Day 9 verification and storage contract](day-9-verification.md). Historical pickup scheduling gaps described below are superseded; handover and acknowledgement still await later stages.
 
 Day 7 adds [request retry/history, transactional quantity/withdrawal policies and an index-readiness preflight](day-7-request-policies.md), verified in [Day 7 checks](day-7-verification.md). This supersedes the historical one-request-per-pair and unresolved-pending descriptions below. Pickup and handover are still planned.

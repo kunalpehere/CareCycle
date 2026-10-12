@@ -1,0 +1,64 @@
+import { test, expect } from "@playwright/test";
+
+test("missed collection, disagreement, rescheduling and cancellation preserve history", async ({ page, browser }, testInfo) => {
+    test.setTimeout(60000);
+    const project = testInfo.project.name;
+    const donorContext = await browser.newContext({ viewport: page.viewportSize(), baseURL: "http://127.0.0.1:4183" });
+    const donorPage = await donorContext.newPage();
+    const login = async (target, role) => {
+        await target.context().setExtraHTTPHeaders({ "X-Forwarded-For": project === "desktop" ? "192.0.2.41" : "192.0.2.42" });
+        await target.route("**/*", route => new URL(route.request().url()).origin === "http://127.0.0.1:4183" ? route.continue() : route.abort());
+        await target.goto("/login");
+        await target.getByLabel("Email address", { exact: true }).fill(`${role}-day10-${project}@example.invalid`);
+        await target.getByLabel("Password", { exact: true }).fill("Matching-fixture-42!");
+        await target.getByRole("button", { name: "Sign in as participant" }).click();
+        await target.goto(`/${role}/requests`);
+        await target.getByRole("link", { name: "Arrange pickup (confirmed)", exact: true }).click();
+    };
+    const declaration = target => target.locator('form[action$="/missed"] input[name="noHandover"]').check();
+    try {
+        await login(page, "ngo"); await login(donorPage, "donor");
+        await page.getByLabel("Reason for missed pickup", { exact: true }).fill("Synthetic report: collection did not take place.");
+        await declaration(page);
+        await page.getByRole("button", { name: "Report missed pickup", exact: true }).click();
+        await expect(page.locator(".pickup-current")).toContainText("Units remain reserved");
+        await donorPage.reload();
+        await donorPage.getByLabel("Reason for disagreement", { exact: true }).fill("Synthetic disagreement about the collection record.");
+        await donorPage.getByRole("button", { name: "Dispute missed report", exact: true }).click();
+        await page.reload();
+        await expect(page.locator(".pickup-current")).toContainText("participants disagree");
+        await expect(page.getByRole("button", { name: "Cancel accepted request", exact: true })).toHaveCount(0);
+        await expect(page.getByRole("button", { name: "Submit revised proposal", exact: true })).toHaveCount(0);
+        await page.screenshot({ path: `artifacts/day-10-${project}-disagreement.png`, fullPage: true });
+        await donorPage.getByLabel("Reason for withdrawing disagreement", { exact: true }).fill("Synthetic resolution: both agree no equipment was handed over.");
+        await donorPage.locator('form[action$="/resolve"] input[name="noHandover"]').check();
+        await donorPage.getByRole("button", { name: "Withdraw disagreement", exact: true }).click();
+        await page.reload();
+        await page.getByLabel("Window start", { exact: true }).fill("2090-01-02T10:00");
+        await page.getByLabel("Window end", { exact: true }).fill("2090-01-02T12:00");
+        await page.getByRole("button", { name: "Submit revised proposal", exact: true }).click();
+        await donorPage.reload();
+        await donorPage.getByRole("button", { name: "Confirm pickup", exact: true }).click();
+        const stale = await donorContext.newPage(); await stale.goto(donorPage.url());
+        await page.reload();
+        await page.getByLabel("Reason for cancellation", { exact: true }).fill("Synthetic cancellation: transport is no longer available.");
+        await page.locator('form[action$="/cancel"] input[name="noHandover"]').check();
+        await page.getByRole("button", { name: "Cancel accepted request", exact: true }).click();
+        await page.getByRole("button", { name: "Continue", exact: true }).click();
+        await expect(page.locator(".pickup-current")).toContainText("2 reserved units were released");
+        await expect(page.locator(".pickup-history li")).toHaveCount(8);
+        await expect(page.getByRole("button", { name: "Cancel accepted request", exact: true })).toHaveCount(0);
+        await stale.getByLabel("Reason for cancellation", { exact: true }).fill("Synthetic repeated cancellation must preserve the recorded release.");
+        await stale.locator('form[action$="/cancel"] input[name="noHandover"]').check();
+        await stale.getByRole("button", { name: "Cancel accepted request", exact: true }).click();
+        await stale.getByRole("button", { name: "Continue", exact: true }).click();
+        await expect(stale.getByRole("status")).toContainText("already cancelled");
+        for (const target of [page, stale]) expect(await target.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+        await page.screenshot({ path: `artifacts/day-10-${project}-cancelled.png`, fullPage: true });
+        await page.goto("/ngo/requests");
+        await expect(page.getByRole("link", { name: "View collection history (cancelled)", exact: true })).toBeVisible();
+        await page.goto(`/ngo/equipment?location=${encodeURIComponent(`Day10 ${project}`)}`);
+        await page.getByRole("link", { name: "View listing", exact: true }).click();
+        await expect(page.locator(".detail-copy")).toContainText("Available quantity5");
+    } finally { await donorContext.close(); }
+});

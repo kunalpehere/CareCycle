@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { pickupVersion, zonedPickupTime, validatePickupProposal } from "../src/services/pickupService.js";
+import { pickupVersion, zonedPickupTime, validatePickupProposal, validatePickupReason } from "../src/services/pickupService.js";
 import ejs from "ejs";
 import path from "node:path";
 
@@ -31,10 +31,15 @@ test("pickup versions reject missing, fractional, negative and unsafe input", ()
     for (const value of [undefined, -1, "-1", "1.5", "01", "9007199254740992", ["1"]]) assert.equal(pickupVersion(value), null);
 });
 
+test("collection issue reasons require bounded, nonempty text", () => {
+    assert.equal(validatePickupReason({ reason: "  A clear collection reason  " }), true);
+    for (const reason of [undefined, ["not trusted"], "short", " ".repeat(50), "x".repeat(501)]) assert.equal(validatePickupReason({ reason }), false);
+});
+
 test("pickup page escapes private content and only offers counterparty confirmation", async () => {
     const { formatPickupTime } = await import("../src/services/pickupService.js");
     const proposal = { start: new Date("2090-01-10T10:00Z"), end: new Date("2090-01-10T12:00Z"), timeZone: "UTC", localStart: "2090-01-10T10:00", localEnd: "2090-01-10T12:00", address: "<script>private</script>", instructions: "<img src=x onerror=alert(1)>", proposerRole: "donor" };
-    const render = role => ejs.renderFile(path.resolve("views/pickup.ejs"), { request: { _id: "test", quantity: 2, pickup: { status: "proposed", version: 1, proposal, history: [{ action: "proposed", actorRole: "donor", at: new Date(), proposal }] } }, role, base: "/pickup", message: "", values: null, formatPickupTime, csrfToken: "test", currentUser: { role, name: "Synthetic" } });
+    const render = role => ejs.renderFile(path.resolve("views/pickup.ejs"), { request: { _id: "test", status: "accepted", quantity: 2, pickup: { status: "proposed", version: 1, proposal, history: [{ action: "proposed", actorRole: "donor", at: new Date(), proposal }] } }, role, base: "/pickup", message: "", values: null, formatPickupTime, csrfToken: "test", currentUser: { role, name: "Synthetic" } });
     const donor = await render("donor"), ngo = await render("ngo");
     assert.doesNotMatch(donor, /Confirm pickup/); assert.match(ngo, /Confirm pickup/);
     assert.doesNotMatch(ngo, /<script>private|<img src=x/); assert.match(ngo, /&lt;script&gt;private/);

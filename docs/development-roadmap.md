@@ -317,6 +317,13 @@ Suggested commit: `feat(pickup): add confirmed collection arrangements`
 
 ### Day 10 - Cancellation and missed pickup
 
+Status: implemented and locally verified.
+Date: October 12, 2026.
+Commit: the commit containing this update, `feat(pickup): handle cancellations and missed collections`, on `codex/day-10-cancellation-missed-pickups`.
+Checks and results: 65 unit/model/template tests, 104 JavaScript syntax checks, 63 isolated database tests and 12 desktop/mobile browser checks passed. New checks cover exactly-once release, exhausted-listing rediscovery, deliberate transaction failure/retry, cancellation/rescheduling/sibling-acceptance races, a test-only handover race, missed-window validation, disagreement recovery, authorization and private history.
+Evidence: [Day 10 policies and verification](day-10-verification.md).
+Known limitations and external checks: actual handover/acknowledgement remain Day 11. Cancellation conservatively blocks any listing with aggregate handover evidence until per-request fulfillment reconciliation exists. Conflicting missed reports use participant withdrawal and manual Contact escalation; no automatic adjudication or notification is claimed. Hosted CI and production remain unverified. Existing application data, uploads and `.env` were preserved.
+
 Outcome:
 
 - Add cancellation after acceptance, missed-pickup reporting, and explicit rescheduling rules.

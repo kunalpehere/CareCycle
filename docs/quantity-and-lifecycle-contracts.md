@@ -6,6 +6,8 @@ Day 6 update: accounting is now integrated into transactional acceptance, reques
 
 ## Implementation boundary
 
+Day 10 update: [accepted-request cancellation and missed collections](day-10-verification.md) now implement exactly-once reservation release, ended-window reports, disagreement/withdrawal events and rescheduling after a missed collection. Cancellation, missed reporting and rescheduling require no request handover evidence; cancellation conservatively also refuses listings with any aggregate handover evidence until Day 11 provides per-request reconciliation. Cancelled pickup history remains private and readable to matched participants. Physical handover, acknowledgement and receipt transitions remain planned.
+
 Day 9 update: unarranged/proposed/confirmed pickup behavior is implemented as an embedded accepted-request plan with private participant-only routes, counterparty confirmation, rescheduling and versioned history. See [Day 9 evidence](day-9-verification.md). Scheduling leaves quantities unchanged. Missed/cancelled/handed-over/acknowledged/disputed pickup behavior in the lifecycle table remains planned.
 
 Day 7 update: [request/listing policies](day-7-request-policies.md) now enforce pending-request resolution, retries, versioned quantity/edit/withdrawal changes and preserved attempt history. The original Day 5 boundary below remains historical; pickup/handover transitions are still future contracts.

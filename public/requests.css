@@ -14,4 +14,6 @@
 .pickup-history time { display:block; margin-top:.4rem; color:var(--muted); }
 .pickup-page input { min-width:0; max-width:100%; }
 .pickup-field { display:grid; gap:.4rem; }
+.request-form .pickup-check { display:flex; align-items:flex-start; gap:.6rem; line-height:1.5; }
+.request-form .pickup-check input { width:1.2rem; height:1.2rem; padding:0; flex:none; }
 @media(max-width:600px) { .pickup-page>section { padding:1rem; } .pickup-history ol { padding-left:1.25rem; } }

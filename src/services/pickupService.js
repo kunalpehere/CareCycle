@@ -1,6 +1,9 @@
 import { DonationRequest } from "../models/DonationRequest.js";
 
 export const pickupVersion = value => typeof value === "string" && /^(0|[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value)) ? Number(value) : null;
+export const pickupVersionFilter = version => version ? { "pickup.version": version } : { pickup: null };
+export const noRecordedHandover = () => ({ $or: [{ handedOverQuantity: 0 }, { handedOverQuantity: { $exists: false } }] });
+export const validatePickupReason = body => typeof body.reason === "string" && body.reason.trim().length >= 10 && body.reason.trim().length <= 500;
 
 // Resolve wall-clock minutes using the supplied IANA zone, never the server zone.
 // Multiple matches (DST overlap) and zero matches (DST gap) require a new time.
@@ -38,19 +41,40 @@ export const validatePickupProposal = (body, now = new Date()) => {
 };
 
 export const updatePickup = async ({ request, version, actorId, actorRole, action, proposal, now = new Date() }) => {
-    if (request.status !== "accepted" || version === null || version !== (request.pickup?.version || 0)) return false;
+    if (request.status !== "accepted" || (request.handedOverQuantity || 0) !== 0 || version === null || version !== (request.pickup?.version || 0)) return false;
     const current = request.pickup;
+    if (current && (!["proposed", "confirmed", "missed"].includes(current.status) || current.missedReport?.disputed)) return false;
     if (action === "confirm" && (!current || current.status !== "proposed" || current.proposal.proposerRole === actorRole || String(current.proposal.proposedBy) === String(actorId) || current.proposal.start <= now)) return false;
     if (action === "propose" && (!proposal || proposal.start <= now || proposal.end <= proposal.start)) return false;
     if (!["propose", "confirm"].includes(action)) return false;
     const nextProposal = action === "propose" ? { ...proposal, proposedBy: actorId, proposerRole: actorRole } : current.proposal;
     const event = { action: action === "confirm" ? "confirmed" : current ? "rescheduled" : "proposed", actor: actorId, actorRole, at: now, version: version + 1, proposal: nextProposal };
-    const filter = { _id: request._id, status: "accepted", ...(version ? { "pickup.version": version } : { pickup: null }) };
+    const filter = { _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...noRecordedHandover() };
     const fields = { "pickup.status": action === "confirm" ? "confirmed" : "proposed", "pickup.version": version + 1, "pickup.proposal": nextProposal,
-        "pickup.confirmedBy": action === "confirm" ? actorId : null, "pickup.confirmedAt": action === "confirm" ? now : null };
+        "pickup.confirmedBy": action === "confirm" ? actorId : null, "pickup.confirmedAt": action === "confirm" ? now : null,
+        "pickup.missedReport": action === "propose" ? null : current?.missedReport || null };
     // MongoDB cannot set children of null. The initial write creates the whole plan.
     const update = version ? { $set: fields, $push: { "pickup.history": event } } : { $set: { pickup: { status: "proposed", version: 1, proposal: nextProposal, confirmedBy: null, confirmedAt: null, history: [event] } } };
     return Boolean(await DonationRequest.findOneAndUpdate(filter, update, { runValidators: true, new: true }));
+};
+
+export const reportPickupIssue = async ({ request, version, actorId, actorRole, action, reason, noHandover, now = new Date() }) => {
+    const plan = request.pickup;
+    if (request.status !== "accepted" || (request.handedOverQuantity || 0) !== 0 || !plan || version !== plan.version || !validatePickupReason({ reason })) return false;
+    let fields;
+    if (action === "missed") {
+        if (plan.status !== "confirmed" || !plan.proposal || plan.proposal.end > now || !noHandover) return false;
+        fields = { "pickup.status": "missed", "pickup.missedReport": { actor: actorId, actorRole, at: now, reason: reason.trim(), disputed: false, disputedBy: null } };
+    } else if (action === "dispute") {
+        if (plan.status !== "missed" || !plan.missedReport || plan.missedReport.disputed || String(plan.missedReport.actor) === String(actorId)) return false;
+        fields = { "pickup.missedReport.disputed": true, "pickup.missedReport.disputedBy": actorId };
+    } else if (action === "resolve") {
+        if (plan.status !== "missed" || !plan.missedReport?.disputed || String(plan.missedReport.disputedBy) !== String(actorId) || !noHandover) return false;
+        fields = { "pickup.missedReport.disputed": false, "pickup.missedReport.disputedBy": null };
+    } else return false;
+    return Boolean(await DonationRequest.findOneAndUpdate({ _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...noRecordedHandover() }, {
+        $set: fields, $inc: { "pickup.version": 1 }, $push: { "pickup.history": { action: action === "dispute" ? "disputed" : action === "resolve" ? "resolved" : "missed", actor: actorId, actorRole, at: now, version: version + 1, proposal: plan.proposal, reason: reason.trim() } }
+    }, { new: true, runValidators: true }));
 };
 
 export const formatPickupTime = (value, timeZone) => new Intl.DateTimeFormat("en-GB", { timeZone, dateStyle: "medium", timeStyle: "short" }).format(new Date(value));

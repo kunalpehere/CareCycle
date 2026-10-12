@@ -32,6 +32,7 @@ Implemented release stages:
 - Track allocated quantities and matching history
 - Exchange contact information only after accepting a request
 - Propose, confirm and reschedule private pickup arrangements with an activity history
+- Cancel accepted commitments before handover, report missed collections and resolve disagreements
 
 ### NGO members
 
@@ -44,6 +45,7 @@ Implemented release stages:
 - Cancel pending requests and review request history
 - Receive donor contact information only after an accepted match
 - Arrange pickup with the matched donor using explicit time zones and counterparty confirmation
+- Report missed collections, retain private activity history and cancel accepted requests before handover
 
 ### CareCycle Administration
 
@@ -84,8 +86,9 @@ CareCycle Administration is an internal platform role. It is not a government or
 - [Database workflow regression coverage and isolation](docs/database-regression-suite.md)
 - [Day 8 implementation and verification](docs/day-8-verification.md)
 - [Day 9 pickup arrangements and verification](docs/day-9-verification.md)
+- [Day 10 cancellation and missed-pickup policies and verification](docs/day-10-verification.md)
 
-The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup proposals, confirmation and rescheduling are implemented. Accepted-request cancellation, missed pickups, handover, acknowledgement, receipts and durable lifecycle notifications remain planned features. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
+The portfolio release targets one reliable equipment journey from listing through NGO-acknowledged handover and a traceable receipt. Pickup proposals, confirmation, rescheduling, accepted-request cancellation and missed-pickup reporting are implemented. Handover, acknowledgement, receipts and durable lifecycle notifications remain planned features. Government portals, payments, full hospital inventory, and multi-member organizations are outside this release's scope.
 
 ## Security controls
 

@@ -19,15 +19,24 @@ const donationRequestSchema = new mongoose.Schema({
     message: { type: String, required: true, trim: true, minlength: 20, maxlength: 1000 },
     listingSnapshot: { type: listingSnapshotSchema, default: null },
     pickup: { type: pickupSchema, default: null },
+    handedOverQuantity: { type: Number, min: 0, max: 100, default: 0 },
+    cancellation: { type: new mongoose.Schema({
+        actor: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
+        actorRole: { type: String, enum: ["donor", "ngo"], required: true },
+        at: { type: Date, required: true },
+        reason: { type: String, required: true, trim: true, minlength: 10, maxlength: 500 },
+        releasedQuantity: { type: Number, required: true, min: 1, max: 100 }
+    }, { _id: false }), default: null },
     status: { type: String, enum: ["pending", "accepted", "rejected", "cancelled", "completed"], default: "pending", index: true },
     responseNote: { type: String, trim: true, maxlength: 500, default: "" },
     respondedAt: { type: Date, default: null },
     respondedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users", default: null },
-    resolutionReason: { type: String, enum: ["", "organization_cancelled", "listing_withdrawn", "availability_changed"], default: "" }
+    resolutionReason: { type: String, enum: ["", "organization_cancelled", "listing_withdrawn", "availability_changed", "donor_cancelled_after_acceptance", "organization_cancelled_after_acceptance"], default: "" }
 }, { timestamps: true });
 
 donationRequestSchema.index({ donation: 1, organization: 1 }, { unique: true, name: REQUEST_INDEX_NAME, partialFilterExpression: REQUEST_INDEX_FILTER });
 donationRequestSchema.path("quantity").validate(Number.isSafeInteger, "Request quantity must be a whole number.");
+donationRequestSchema.path("handedOverQuantity").validate(function (value) { return Number.isSafeInteger(value) && value <= this.quantity; }, "Request handover quantity must be a whole number within the commitment.");
 donationRequestSchema.index({ organization: 1, status: 1, createdAt: -1 });
 donationRequestSchema.index({ donation: 1, status: 1, createdAt: 1 });
 
