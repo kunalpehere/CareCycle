@@ -409,6 +409,9 @@ Suggested commit: `feat(notifications): add durable donation lifecycle updates`
 
 ### Day 14 - Public homepage and honest content
 
+Status: implemented and locally verified on October 12, 2026. See [Day 14 evidence](day-14-verification.md). Home, About and Contact are accessible before login, with guest-safe navigation, role-specific registration entry points and explanations of the implemented pickup, handover and receipt workflow. Protected records remain authenticated. Contact delivery is optional; real mailbox delivery, hosted CI and production remain unverified.
+Commit: the commit containing this update, `feat(frontend): introduce a clear public CareCycle experience`, on `codex/day-14-public-experience`.
+
 Outcome:
 
 - Make the product explanation accessible before login, with clear donor and NGO entry points.

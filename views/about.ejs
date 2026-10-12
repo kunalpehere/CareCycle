@@ -11,20 +11,23 @@
 </head>
 <body>
   <%- include('partials/app-nav', { activePage: 'about' }) %>
-  <main class="app-main about-page">
+  <main class="app-main about-page" id="main-content" tabindex="-1">
     <section class="about-hero">
       <div><span class="page-eyebrow">About CareCycle</span><h1 class="page-title">Medical equipment donation for donors and NGOs.</h1><p class="page-intro">Donors list equipment and review requests. NGOs submit verification evidence before browsing and requesting equipment.</p></div>
-      <aside class="surface about-summary"><h2>What verification means</h2><p>Administrators review organization evidence. Verification does not certify equipment condition or medical fitness.</p><p>Pickup scheduling, handover acknowledgement, and receipts are planned features.</p></aside>
+      <aside class="surface about-summary"><h2>What verification means</h2><p>Administrators review organization evidence. Verification does not certify equipment condition or medical fitness.</p><p>Participants agree on pickup, record handover and acknowledge receipt. Equipment condition and outcomes remain participant declarations.</p></aside>
     </section>
 
     <section class="mission-grid">
-      <article class="surface mission-main"><span class="page-eyebrow">Current service</span><h2>Describe equipment and review requests.</h2><p>Listings record equipment type, condition, quantity, description, location, and optional images. Donors can accept or reject NGO requests and view matched contact details.</p></article>
+      <article class="surface mission-main"><span class="page-eyebrow">Current service</span><h2>Track equipment from listing to receipt.</h2><p>Listings record equipment type, condition, quantity, description, location, and optional images. Verified NGOs request quantities and donors decide which requests to accept.</p><p>Matched participants confirm pickup arrangements, manage cancellations or missed pickups, and record full or partial handovers. NGO acknowledgement and resolution of discrepancies are required for completion.</p><p>Completed, reconciled donations have private receipts with traceable revisions. Receipts are transfer records, not tax certificates or guarantees of medical fitness.</p></article>
       <article class="value-card"><span>01</span><h3>Donor decisions</h3><p>The listing owner reviews requests and decides which to accept.</p></article>
       <article class="value-card"><span>02</span><h3>Clear information</h3><p>NGOs can review equipment details before submitting a request.</p></article>
-      <article class="value-card"><span>03</span><h3>Contact exchange</h3><p>Matched parties see contact details in their request pages after acceptance.</p></article>
+      <article class="value-card"><span>03</span><h3>Private coordination</h3><p>Matched parties see contact details after acceptance. Pickup addresses, verification documents and receipts are limited to authorized viewers. Private inboxes retain workflow updates; email is optional.</p></article>
     </section>
 
-    <section class="about-cta"><div><span class="page-eyebrow">Ready to contribute?</span><h2>Start with the equipment you already have.</h2></div><a href="<%= currentUser.role === 'donor' ? '/donate' : currentUser.role === 'ngo' ? '/ngo/dashboard' : '/admin/dashboard' %>"><%= currentUser.role === 'donor' ? 'Create a donation listing' : 'Open dashboard' %></a></section>
+    <section class="about-cta"><div><span class="page-eyebrow">Your next step</span><h2>Donate equipment or represent an NGO.</h2></div>
+      <% if (!currentUser) { %><a href="/register?role=donor">Register as donor</a><a href="/register?role=ngo">Register as NGO</a>
+      <% } else { %><a href="<%= currentUser.role === 'donor' ? '/donate' : currentUser.role === 'ngo' ? '/ngo/dashboard' : '/admin/dashboard' %>"><%= currentUser.role === 'donor' ? 'Create a donation listing' : 'Open dashboard' %></a><% } %>
+    </section>
   </main>
 </body>
 </html>

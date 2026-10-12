@@ -12,7 +12,7 @@
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <main class="auth-shell" id="main-content" tabindex="-1">
     <section class="auth-story register-story" aria-labelledby="carecycle-title">
-      <a class="brand brand-light" href="/login" aria-label="CareCycle home">
+      <a class="brand brand-light" href="/home" aria-label="CareCycle home">
         <span class="brand-mark" aria-hidden="true">C</span><span>CareCycle</span>
       </a>
       <div class="story-content">
@@ -20,9 +20,9 @@
         <h1 id="carecycle-title">Create a donor or NGO account.</h1>
         <p>Donors list equipment. NGOs submit an organization profile for verification before discovering equipment.</p>
         <ul class="story-checks">
-          <li>Securely manage your donation listings</li>
-          <li>Add useful equipment and location details</li>
-          <li>Track each listing from one dashboard</li>
+          <li>Donors review requests and decide who receives equipment</li>
+          <li>NGOs need organization verification before discovery</li>
+          <li>Both participants agree on pickup and record receipt</li>
         </ul>
       </div>
       <p class="story-note">Organization verification does not certify equipment condition.</p>
@@ -40,11 +40,11 @@
           <fieldset class="role-picker">
             <legend>I am joining as</legend>
             <label class="role-option">
-              <input type="radio" name="role" value="donor" checked>
+              <input type="radio" name="role" value="donor" <%= typeof selectedRole === 'undefined' || selectedRole !== 'ngo' ? 'checked' : '' %>>
               <span><strong>Equipment donor</strong><small>List and manage equipment you want to give.</small></span>
             </label>
             <label class="role-option">
-              <input type="radio" name="role" value="ngo">
+              <input type="radio" name="role" value="ngo" <%= typeof selectedRole !== 'undefined' && selectedRole === 'ngo' ? 'checked' : '' %>>
               <span><strong>NGO member</strong><small>Represent an organization seeking equipment.</small></span>
             </label>
           </fieldset>
@@ -57,6 +57,7 @@
           <button type="submit" class="auth-primary">Create account</button>
         </form>
         <p class="auth-switch">Already have an account? <a href="/login">Sign in</a></p>
+        <p class="auth-switch"><a href="/home">How CareCycle works</a></p>
       </div>
     </section>
   </main>

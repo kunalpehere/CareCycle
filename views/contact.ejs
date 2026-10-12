@@ -11,22 +11,23 @@
 </head>
 <body>
   <%- include('partials/app-nav', { activePage: 'contact' }) %>
-  <main class="app-main contact-page">
+  <% const contactValues = typeof values === 'undefined' ? {} : values; %>
+  <main class="app-main contact-page" id="main-content" tabindex="-1">
     <header class="contact-heading"><span class="page-eyebrow">Contact CareCycle</span><h1 class="page-title">Contact CareCycle about your account or listing.</h1><p class="page-intro">Have a question about a listing, equipment condition, or how CareCycle works? Send us a message.</p></header>
     <section class="contact-layout surface">
       <aside class="contact-aside">
         <span class="contact-symbol">C</span>
-        <h2>We’re here to help.</h2>
-        <p>Share enough detail for us to understand your question. If email delivery is configured, your message and reply address are sent to the configured support recipients.</p>
+        <h2>Ask about CareCycle.</h2>
+        <p>You do not need an account to contact us. If contact email is configured, your message and reply address are emailed to support recipients. This form does not store a support ticket or guarantee a response time.</p>
         <div class="contact-points"><div><strong>Useful details</strong><span>Include the listing or account issue</span></div><div><strong>Protect private information</strong><span>Do not include passwords or beneficiary records</span></div></div>
       </aside>
       <div class="contact-form-wrap">
         <% if (message) { %><div class="form-status" role="status"><%= message %></div><% } %>
         <form action="/contact" method="post" class="contact-form">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-          <label for="name">Full name</label><input type="text" id="name" name="name" minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name" required>
-          <label for="email">Email address</label><input type="email" id="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com" required>
-          <label for="message">How can we help?</label><textarea name="message" id="message" minlength="5" maxlength="2000" placeholder="Tell us what you need help with" required></textarea>
+          <label for="name">Full name</label><input type="text" id="name" name="name" minlength="2" maxlength="80" autocomplete="name" placeholder="Your full name" value="<%= contactValues.name || '' %>" required>
+          <label for="email">Email address</label><input type="email" id="email" name="email" maxlength="254" autocomplete="email" placeholder="you@example.com" value="<%= contactValues.email || '' %>" required>
+          <label for="message">How can we help?</label><textarea name="message" id="message" minlength="5" maxlength="2000" placeholder="Tell us what you need help with" required><%= contactValues.message || '' %></textarea>
           <button type="submit">Send message</button>
         </form>
       </div>

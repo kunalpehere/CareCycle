@@ -7,7 +7,7 @@ import { getDashboardPath } from "../services/roleService.js";
 import { AdminAccessRequest } from "../models/AdminAccessRequest.js";
 import { LOGIN_REALMS, roleCanUseRealm } from "../services/loginRealmService.js";
 
-export const showRegister = (req, res) => res.render("register.ejs", { message: "Welcome to CareCycle" });
+export const showRegister = (req, res) => res.render("register.ejs", { message: "", selectedRole: req.query.role === "ngo" ? "ngo" : "donor" });
 export const showLogin = (req, res) => res.render("login.ejs", { message: String(req.query.message || "Welcome back!") });
 export const showAdminLogin = (req, res) => res.render("admin-login.ejs", { message: String(req.query.message || "Authorized CareCycle administrators only.") });
 export const showAdminAccessRequest = (req, res) => res.render("admin-access-request.ejs", { message: String(req.query.message || "") });

@@ -1,4 +1,4 @@
-<% const navRole = typeof currentUser !== 'undefined' && currentUser?.role ? currentUser.role : 'donor'; %>
+<% const navRole = typeof currentUser !== 'undefined' && currentUser?.role ? currentUser.role : 'guest'; %>
 <% if (navRole === 'admin') { %><link rel="stylesheet" href="/admin-identity.css"><% } %>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <header class="site-header <%= navRole === 'admin' ? 'admin-header' : '' %>">
@@ -7,7 +7,12 @@
     <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
     <div class="nav-links" id="primary-nav">
       <% if (navRole !== 'admin') { %><a href="/home" class="<%= activePage === 'home' ? 'active' : '' %>">Home</a><% } %>
-      <% if (navRole === 'donor') { %>
+      <% if (navRole === 'guest') { %>
+        <a href="/about" class="<%= activePage === 'about' ? 'active' : '' %>">About</a>
+        <a href="/contact" class="<%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
+        <a href="/register?role=donor">Register as donor</a>
+        <a href="/register?role=ngo">Register as NGO</a>
+      <% } else if (navRole === 'donor') { %>
         <a href="/about" class="<%= activePage === 'about' ? 'active' : '' %>">About</a>
         <a href="/contact" class="<%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
         <a href="/donor/dashboard" class="<%= activePage === 'donations' ? 'active' : '' %>">My donations</a>
@@ -22,13 +27,15 @@
         <a href="/admin/dashboard" class="<%= activePage === 'admin-dashboard' ? 'active' : '' %>">Admin dashboard</a>
         <a href="/admin/users" class="<%= activePage === 'admin-users' ? 'active' : '' %>">Accounts</a>
       <% } %>
-      <a href="/notifications" class="<%= activePage === 'notifications' ? 'active' : '' %>">Notifications</a>
+      <% if (navRole !== 'guest') { %><a href="/notifications" class="<%= activePage === 'notifications' ? 'active' : '' %>">Notifications</a><% } %>
     </div>
     <div class="nav-actions">
-      <form method="post" action="/logout">
+      <% if (navRole === 'guest') { %>
+        <a class="text-button" href="/login">Sign in</a>
+      <% } else { %><form method="post" action="/logout">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button class="text-button" type="submit">Sign out</button>
-      </form>
+      </form><% } %>
       <% if (navRole === 'donor') { %><a class="nav-cta <%= activePage === 'create' ? 'active-cta' : '' %>" href="/donate">Donate equipment</a><% } %>
     </div>
   </nav>

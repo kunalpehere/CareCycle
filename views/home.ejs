@@ -12,14 +12,17 @@
 <body>
   <%- include('partials/app-nav', { activePage: 'home' }) %>
 
-  <main>
+  <main id="main-content" tabindex="-1">
     <section class="hero">
       <div class="hero-copy">
         <span class="hero-kicker">Donors and verified NGOs</span>
-        <h1>Donate medical equipment.</h1>
-        <p>List equipment you want to give, review requests from verified NGOs, and exchange contact details after accepting a request.</p>
+        <h1>Donate medical equipment to verified NGOs.</h1>
+        <p>CareCycle connects equipment donors with NGOs whose organization evidence has been reviewed. List equipment, review requests, agree on pickup, and record what the NGO receives.</p>
         <div class="hero-actions">
-          <% if (currentUser.role === 'donor') { %>
+          <% if (!currentUser) { %>
+            <a class="button-primary" href="/register?role=donor">Register to donate equipment</a>
+            <a class="button-secondary" href="/register?role=ngo">Register as an NGO</a>
+          <% } else if (currentUser.role === 'donor') { %>
             <a class="button-primary" href="/donate">List equipment</a>
             <a class="button-secondary" href="/donor/dashboard">View my donations</a>
           <% } else if (currentUser.role === 'ngo') { %>
@@ -44,11 +47,14 @@
     </section>
 
     <section class="process-section" aria-labelledby="process-title">
-      <div class="section-heading"><span>How CareCycle works</span><h2 id="process-title">List, request, and review.</h2><p>Pickup scheduling and receipt acknowledgement are planned features.</p></div>
+      <div class="section-heading"><span>How CareCycle works</span><h2 id="process-title">From listing to acknowledged receipt.</h2><p>Donors and NGOs manage the transfer together. CareCycle records their decisions and declarations.</p></div>
       <div class="process-grid">
         <article><span class="step-number">01</span><h3>List your equipment</h3><p>Add the condition, quantity, location, and helpful photos.</p></article>
         <article><span class="step-number">02</span><h3>NGOs request equipment</h3><p>Verified NGOs browse listings and explain the quantity they need.</p></article>
         <article><span class="step-number">03</span><h3>Review the request</h3><p>The donor accepts or rejects. Accepted requests show each party's contact details in their request pages.</p></article>
+        <article><span class="step-number">04</span><h3>Agree on pickup</h3><p>Either participant proposes a collection window, time zone and private pickup details. The other confirms. Rescheduling requires fresh agreement.</p></article>
+        <article><span class="step-number">05</span><h3>Record and acknowledge handover</h3><p>The donor records the quantity transferred. The NGO acknowledges receipt or reports a discrepancy. Partial transfers and cancelled collections retain their history.</p></article>
+        <article><span class="step-number">06</span><h3>Keep a donation receipt</h3><p>Completed, reconciled transfers have private receipts based on NGO-acknowledged quantities. Download HTML or use browser printing to save a PDF.</p></article>
       </div>
     </section>
 
@@ -58,6 +64,6 @@
     </section>
   </main>
 
-  <footer><a class="home-brand footer-brand" href="/home"><span class="home-brand-mark">C</span><span>CareCycle</span></a><p>Medical equipment donation for donors and NGOs.</p></footer>
+  <footer><a class="home-brand footer-brand" href="/home"><span class="home-brand-mark">C</span><span>CareCycle</span></a><p>Equipment condition and outcomes are participant declarations, not independent inspections.</p></footer>
 </body>
 </html>
