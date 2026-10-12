@@ -150,6 +150,13 @@ Suggested commits: `fix(ui): remove decorative and misleading interface elements
 
 ### Day 3 - Reproducible checks and CI
 
+Status: implemented and locally verified; hosted CI execution pending.
+Date: October 12, 2026.
+Commit: the commit containing this update, `ci: add reproducible CareCycle verification`, on `codex/day-3-reproducible-checks`.
+Checks and results: clean-checkout `npm ci` and `npm test` passed; 34 unit tests and syntax checks for 66 JavaScript files. One isolated database smoke and four desktop/mobile browser checks passed. Deliberate unit/browser failures returned exit 1 and useful diagnostics; temporary probes removed. Workflow YAML and diff reviewed.
+Evidence: [reproducible testing instructions](testing.md) and [Day 3 verification record](day-3-verification.md).
+Known limitations and external checks: no hosted GitHub run; local MongoDB smoke used an explicitly selected installed 8.2.5 executable. CI's default binary download/Linux path and uploads remain unverified. Current dependency audit findings are recorded; full lifecycle/race/browser coverage remains later work.
+
 Outcome:
 
 - Define the supported Node environment and clean-checkout installation instructions.

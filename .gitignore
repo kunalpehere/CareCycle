@@ -1,5 +1,10 @@
 /node_modules
 .github-sync/
+
+# Generated verification artifacts and disposable test infrastructure
+/artifacts/
+/playwright-report/
+/test-results/
 .env
 *.log
 /.local-data/

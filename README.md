@@ -119,13 +119,13 @@ CareCycle-main/
 
 Requirements:
 
-- Node.js
+- Node.js 22.x (22.14.0 or later) and npm 10.x
 - MongoDB Community Server or a reachable MongoDB deployment
 - MongoDB Compass is optional
 
 ```powershell
-cd "C:\Users\244234\Desktop\CareCycle-main"
-npm install
+# Run from the repository root.
+npm ci
 ```
 
 Create a `.env` file:
@@ -172,6 +172,8 @@ npm test
 ```
 
 The test suite covers input validation, role separation, ownership, verified-organization access, matching capacity, model contracts, and EJS rendering.
+
+No developer `.env` or running MongoDB service is needed for `npm test`. See [reproducible verification](docs/testing.md) for supported versions, isolated database/browser smoke commands, CI and failure artifacts, and [Day 3 verification evidence](docs/day-3-verification.md) for what has actually passed.
 
 ## Screenshot gallery
 
