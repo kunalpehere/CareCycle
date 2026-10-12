@@ -26,7 +26,7 @@ test("partial acceptance remains discoverable with an accurate request limit", a
         await ngoPage.getByRole("link", { name: "View listing", exact: true }).click();
         await expect(ngoPage.getByRole("spinbutton", { name: "Quantity needed" })).toHaveAttribute("max", "3");
         await expect(ngoPage.locator("main")).not.toContainText(`donor-day6-${project}@example.invalid`);
-        await expect(ngoPage.locator("dl")).toContainText("Available quantity3");
+        await expect(ngoPage.locator(".detail-copy > dl")).toContainText("Available quantity3");
         expect(await ngoPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
         await ngoPage.screenshot({ path: `artifacts/day-6-${project}-remaining-stock.png`, fullPage: true });
         await ngoPage.getByRole("spinbutton", { name: "Quantity needed" }).fill("3");

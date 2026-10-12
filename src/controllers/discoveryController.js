@@ -29,7 +29,7 @@ export const showEquipmentDiscovery = async (req, res, next) => {
         const pageSize = 12;
         const [donations, total] = await Promise.all([
             Donation.find(query).sort({ createdAt: -1 }).skip((page - 1) * pageSize).limit(pageSize)
-                .select("equipment condition quantity allocatedQuantity handedOverQuantity description location images createdAt").lean(),
+                .select("equipment condition quantity allocatedQuantity handedOverQuantity description details location images createdAt").lean(),
             Donation.countDocuments(query)
         ]);
         const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -44,7 +44,7 @@ export const showEquipmentDetail = async (req, res, next) => {
     try {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send("Equipment listing not found");
         const donation = await Donation.findOne({ _id: req.params.id, ...availableListingQuery() })
-            .select("equipment condition quantity allocatedQuantity handedOverQuantity description location images createdAt").lean();
+            .select("equipment condition quantity allocatedQuantity handedOverQuantity description details location images createdAt").lean();
         if (!donation) return res.status(404).send("Equipment listing not found");
         const pair = { donation: donation._id, organization: req.verifiedOrganization._id };
         const existingRequest = await DonationRequest.findOne({ ...pair, status: { $in: BLOCKING_REQUEST_STATUSES } })

@@ -63,3 +63,6 @@
 .donor-page .card-content { overflow-wrap:anywhere; }
 @media(max-width:900px){.workspace-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.task-card{align-items:flex-start;flex-direction:column}}
 @media(max-width:520px){.workspace-filters>div{width:100%}.workspace-filters select{width:100%}.card-actions{flex-wrap:wrap}.card-title{align-items:flex-start;flex-wrap:wrap}}
+
+.equipment-fields { display:grid; gap:.7rem; min-width:0; margin:1rem 0; padding:1rem; border:1px solid var(--line); border-radius:6px; }
+.equipment-fields legend { font-weight:700; padding:0 .4rem; }.equipment-fields[hidden] { display:none; }.field-error { margin:0; color:#842727; font-weight:600; }.equipment-detail-list { margin:0; }.equipment-detail-list div { padding:.5rem 0; border-bottom:1px solid var(--line); }.equipment-detail-list dt { font-weight:700; }.equipment-detail-list dd { margin:.3rem 0 0; white-space:pre-wrap; overflow-wrap:anywhere; }

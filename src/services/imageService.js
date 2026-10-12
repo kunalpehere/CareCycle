@@ -8,15 +8,15 @@ const supportedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const donationUpload = multer({
     storage: multer.memoryStorage(),
-    limits: { fileSize: 5 * 1024 * 1024, files: 3, fields: 20 },
+    limits: { fileSize: 5 * 1024 * 1024, files: 3, fields: 40, fieldSize: 20000 },
     fileFilter(req, file, callback) {
         callback(supportedTypes.has(file.mimetype) ? null : new Error("Only JPEG, PNG, and WebP images are allowed."), supportedTypes.has(file.mimetype));
     }
 }).array("images", 3);
 
 export const uploadDonationImages = (req, res, next) => donationUpload(req, res, (error) => {
-    if (error) error.status = 400;
-    next(error);
+    if (error) req.donationUploadError = "Choose up to three JPEG, PNG or WebP images, each no larger than 5 MB. Check the submitted field sizes too.";
+    next();
 });
 
 const matchesSignature = (file) => {

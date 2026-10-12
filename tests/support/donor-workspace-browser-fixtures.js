@@ -7,6 +7,7 @@ import { DonationRequest } from "../../src/models/DonationRequest.js";
 export const seedDonorWorkspaceBrowserFixtures = async () => {
     const password = await bcrypt.hash("Workspace-fixture-42!", 10);
     for (const project of ["desktop", "mobile"]) {
+        await User.create({ name: "Synthetic Equipment Detail Donor", email: `donor-day17-${project}@example.invalid`, password, role: "donor" });
         const donor = await User.create({ name: "Synthetic Workspace Donor", email: `donor-day15-${project}@example.invalid`, password, role: "donor" });
         await User.create({ name: "Synthetic Empty Donor", email: `empty-day15-${project}@example.invalid`, password, role: "donor" });
         const member = await User.create({ name: "Synthetic Workspace NGO", email: `ngo-day15-${project}@example.invalid`, password, role: "ngo" });

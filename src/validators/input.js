@@ -1,5 +1,6 @@
 import { EQUIPMENT_CONDITIONS, EQUIPMENT_TYPES } from "../models/Donation.js";
 import { SELF_REGISTERABLE_ROLES } from "../services/roleService.js";
+import { scalarText, validateEquipmentDetails, specifications } from "../services/equipmentDetails.js";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const normalizeEmail = (value) => String(value || "").trim().toLowerCase();
@@ -34,14 +35,20 @@ export const validateDonation = (body) => {
             postalCode: String(body.postalCode || "").trim()
         }
     };
-    const valid = EQUIPMENT_TYPES.includes(value.equipment)
-        && EQUIPMENT_CONDITIONS.includes(value.condition)
-        && Number.isInteger(value.quantity) && value.quantity >= 1 && value.quantity <= 100
-        && value.description.length >= 10 && value.description.length <= 1000
-        && value.location.city.length >= 2 && value.location.city.length <= 100
-        && value.location.state.length >= 2 && value.location.state.length <= 100
-        && value.location.postalCode.length >= 3 && value.location.postalCode.length <= 20;
-    return { valid, value };
+    const detailResult = validateEquipmentDetails(body, value.equipment);
+    value.details = detailResult.details;
+    const errors = { ...detailResult.errors };
+    if (typeof body.equipment !== "string" || !EQUIPMENT_TYPES.includes(value.equipment)) errors.equipment = "Choose a supported equipment type.";
+    if (typeof (body.quality || body.condition) !== "string" || !EQUIPMENT_CONDITIONS.includes(value.condition)) errors.quality = "Choose an appearance condition.";
+    if (typeof body.quantity !== "string" || !Number.isInteger(value.quantity) || value.quantity < 1 || value.quantity > 100) errors.quantity = "Enter a whole quantity from 1 to 100.";
+    for (const [field, min, max] of [["description", 10, 1000], ["city", 2, 100], ["state", 2, 100], ["postalCode", 3, 20]]) {
+        if (typeof body[field] !== "string" || scalarText(body[field]).length < min || scalarText(body[field]).length > max) errors[field] = `Use ${min} to ${max} characters.`;
+    }
+    const draft = {};
+    for (const key of ["equipment", "quality", "quantity", "description", "city", "state", "postalCode", "brand", "model", "functionalStatus", "defects", "missingAccessories", "spec_seatWidthCm", "spec_folding", "spec_heightAdjustable", "spec_chestpiece", "spec_tubingCondition"]) draft[key] = scalarText(body[key]).slice(0, 1000);
+    draft.quality = scalarText(body.quality || body.condition).slice(0, 1000);
+    for (const [category, fields] of Object.entries(specifications)) for (const field of fields) draft[`${category}_spec_${field.key}`] = scalarText(body[`${category}_spec_${field.key}`] ?? (category === value.equipment ? body[`spec_${field.key}`] : "")).slice(0, 1000);
+    return { valid: Object.keys(errors).length === 0, value, errors, draft };
 };
 
 export const validateContact = (body) => {

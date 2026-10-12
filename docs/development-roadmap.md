@@ -466,6 +466,9 @@ Suggested commit: `feat(ngo): improve equipment discovery and request tracking`
 
 ### Day 17 - Equipment-specific listing UX
 
+Status: implemented and locally verified on October 12, 2026, at the project owner's request before Day 16. See [Day 17 evidence](day-17-verification.md). Optional reported equipment details, category-specific specifications, field-level validation, escaped draft recovery and clearer image handling are implemented. Older listings remain readable without backfill. Field choices remain provisional because participant research is pending. Day 16 remains planned.
+Commit: the commit containing this update, `feat(listings): add practical equipment details and guided validation`, on `codex/day-17-equipment-details`.
+
 Outcome:
 
 - Add selected fields supported by Day 2 findings: brand/model, functional condition, defects, missing accessories, and category-specific specifications.

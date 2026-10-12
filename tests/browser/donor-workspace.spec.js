@@ -34,7 +34,7 @@ test("donor identifies the next task, reviews only that request and retains quan
     const value = label => listing.locator('.quantity-breakdown > div').filter({ has: page.locator('dt', { hasText: label }) }).locator('dd');
     await expect(value('Available to request')).toHaveText('3');
     await expect(value('Reserved, not handed over')).toHaveText('2');
-    await listing.locator('summary').focus(); await page.keyboard.press('Enter');
+    await listing.locator('summary').filter({ hasText: 'Request progress' }).focus(); await page.keyboard.press('Enter');
     await expect(listing.locator('.progress-timeline')).toContainText('Request accepted');
     await page.getByRole('link', { name: 'Review collection', exact: true }).click();
     await expect(page).toHaveURL(/\/pickup$/);
@@ -65,7 +65,7 @@ test("donor filters and pagination preserve recovery, receipt history and NGO wa
     await page.getByRole('button', { name: 'Apply filters' }).click();
     await expect(page.locator('.donation-card')).toHaveCount(2);
     const complete = page.locator('.donation-card').filter({ has: page.locator('.status-completed') });
-    await complete.locator('summary').click();
+    await complete.locator('summary').filter({ hasText: 'Request progress' }).click();
     await expect(complete.getByRole('link', { name: 'Donation receipt', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Withdraw', exact: true })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

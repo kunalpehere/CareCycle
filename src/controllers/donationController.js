@@ -12,6 +12,7 @@ import { OPEN_LISTING_STATUSES } from "../services/availabilityService.js";
 import { quantityAccounting } from "../services/quantityContract.js";
 import { buildDonorWorkspace } from "../services/donorWorkspaceService.js";
 import { runTransaction } from "../services/transactionService.js";
+import { specifications, functionalOptions, conditionLabels } from "../services/equipmentDetails.js";
 
 const formData = (overrides = {}) => ({
     equipmentTypes: EQUIPMENT_TYPES,
@@ -21,8 +22,17 @@ const formData = (overrides = {}) => ({
     formTitle: "Create donation listing",
     formAction: "/donate",
     submitLabel: "Create listing",
+    specifications, functionalOptions, conditionLabels, errors: {}, draft: null, removedImages: [],
     ...overrides
 });
+
+const listingErrors = (req, res, result, extra = {}) => {
+    const donation = req.ownedDonation?.toObject() || null;
+    const edits = donation ? { donation, formTitle: "Edit donation listing", formAction: `/donations/${donation._id}/edit`, submitLabel: "Save changes" } : {};
+    return res.status(400).render("donate.ejs", formData({ ...edits, draft: result.draft, errors: { ...result.errors, ...extra },
+        removedImages: [req.body.removeImages || []].flat().filter(item => typeof item === "string" && donation?.images.some(image => image.filename === item)),
+        message: "Correct the highlighted fields. Your text entries are kept; oversized entries may be shortened. Select any new image files again." }));
+};
 
 export const showCreateDonation = (req, res) => res.render("donate.ejs", formData());
 
@@ -59,10 +69,11 @@ export const listCurrentUserDonations = async (req, res, next) => {
 export const createDonation = async (req, res, next) => {
     let images = [];
     try {
-        const { valid, value } = validateDonation(req.body);
-        if (!valid) return res.status(400).render("donate.ejs", formData({ donation: req.body, message: "Complete every field with valid listing information." }));
+        const result = validateDonation(req.body), { valid, value } = result;
+        if (!valid || req.donationUploadError) return listingErrors(req, res, result, req.donationUploadError ? { images: req.donationUploadError } : {});
 
-        images = await saveDonationImages(req.files);
+        try { images = await saveDonationImages(req.files); }
+        catch (error) { if (error.status === 400) return listingErrors(req, res, result, { images: "An image does not match its declared format. Choose a valid JPEG, PNG or WebP file." }); throw error; }
         const donation = await Donation.create({ donor: req.auth.userId, ...value, images });
         try {
             await sendDonationMail({ email: req.auth.user.email, equipment: value.equipment, condition: value.condition });
@@ -101,22 +112,17 @@ export const updateDonation = async (req, res, next) => {
         if (expectedVersion !== (donation.__v ?? 0)) return await workflowConflict(req, res, { donor: true, donationId: donation._id,
             message: "This listing changed since you opened the form. Review its current details before editing." });
 
-        const { valid, value } = validateDonation(req.body);
-        if (!valid) return res.status(400).render("donate.ejs", formData({
-            donation: { ...donation.toObject(), ...req.body }, message: "Complete every field with valid listing information.",
-            formTitle: "Edit donation listing", formAction: `/donations/${donation._id}/edit`, submitLabel: "Save changes"
-        }));
+        const validation = validateDonation(req.body), { valid, value } = validation;
+        if (!valid || req.donationUploadError) return listingErrors(req, res, validation, req.donationUploadError ? { images: req.donationUploadError } : {});
         const requestedRemoval = new Set([req.body.removeImages || []].flat().map(String));
         const removedImages = donation.images.filter((image) => requestedRemoval.has(image.filename));
         const retainedImages = donation.images.filter((image) => !requestedRemoval.has(image.filename));
         if (retainedImages.length + (req.files?.length || 0) > 3) {
-            return res.status(400).render("donate.ejs", formData({
-                donation, message: "A listing can have at most three images.", formTitle: "Edit donation listing",
-                formAction: `/donations/${donation._id}/edit`, submitLabel: "Save changes"
-            }));
+            return listingErrors(req, res, validation, { images: "A listing can have at most three images. Remove an existing image or select fewer new files." });
         }
 
-        newImages = await saveDonationImages(req.files);
+        try { newImages = await saveDonationImages(req.files); }
+        catch (error) { if (error.status === 400) return listingErrors(req, res, validation, { images: "An image does not match its declared format. Choose a valid JPEG, PNG or WebP file." }); throw error; }
         const result = await changeListing({ donationId: donation._id, donorId: req.auth.userId,
             expectedVersion, action: "edit", value, images: [...retainedImages, ...newImages] });
         if (!result.changed) {

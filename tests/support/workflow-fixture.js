@@ -80,7 +80,14 @@ export const startWorkflowFixture = async () => {
                 cookie = savedCookie;
             }
             if (!csrf) throw new Error("Workflow fixture could not obtain a CSRF token.");
-            return { get: (url, headers = {}) => request(url, { headers }), post: (url, values = {}) => request(url, { method: "POST",
+            return { get: (url, headers = {}) => request(url, { headers }), postMultipart: (url, form) => {
+                if (!form.has("_csrf")) {
+                    const ordered = new FormData(); ordered.set("_csrf", csrf);
+                    for (const [key, value] of form.entries()) ordered.append(key, value);
+                    form = ordered;
+                }
+                return request(url, { method: "POST", body: form });
+            }, post: (url, values = {}) => request(url, { method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ _csrf: csrf, ...values }) }) };
         };
         const expiredToken = user => jwt.sign({ id: user.id }, env.jwtSecret, { algorithm: "HS256", expiresIn: -1 });

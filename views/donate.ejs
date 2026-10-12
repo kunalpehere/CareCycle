@@ -1,65 +1,32 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= formTitle %> | CareCycle</title>
-  <link rel="stylesheet" href="/app.css">
-  <link rel="stylesheet" href="/donor.css">
-  <script src="/app-nav.js" defer></script>
-</head>
-<body>
-  <%- include('partials/app-nav', { activePage: 'create' }) %>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title><%= formTitle %> | CareCycle</title><link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/donor.css"><script src="/app-nav.js" defer></script><script src="/listing-form.js" defer></script></head><body>
+<%- include('partials/app-nav', { activePage: 'create' }) %>
+<% const fieldErrors = typeof errors === 'undefined' ? {} : errors; const entered = typeof draft === 'undefined' ? null : draft; const removals = typeof removedImages === 'undefined' ? [] : removedImages;
+const specs = typeof specifications === 'undefined' ? {} : specifications; const functions = typeof functionalOptions === 'undefined' ? {} : functionalOptions; const labels = typeof conditionLabels === 'undefined' ? {} : conditionLabels;
+const val = key => entered && Object.hasOwn(entered, key) ? entered[key] : key.includes('_spec_') ? (key.split('_spec_')[0] === donation?.equipment ? donation?.details?.specifications?.[key.split('_spec_')[1]] ?? '' : '') : ['brand','model','functionalStatus','defects','missingAccessories'].includes(key) ? donation?.details?.[key] ?? '' : key === 'quality' ? donation?.condition || '' : ['city','state','postalCode'].includes(key) ? donation?.location?.[key] || '' : donation?.[key] ?? (key === 'quantity' ? 1 : '');
+const err = key => include('partials/listing-error', { field:key, fieldErrors }); const attrs = key => fieldErrors[key] ? `aria-invalid="true" aria-describedby="error-${key}"` : ''; %>
+<main class="app-main donor-page" id="main-content" tabindex="-1"><section class="donor-panel form-panel"><h1><%= formTitle %></h1><p>Describe what you know about the equipment. Optional details help NGOs assess it before requesting. These are donor declarations, not medical inspection or a fitness guarantee.</p>
+<% if (message) { %><p class="form-message" role="status"><%= message %></p><% } %>
+<form action="<%= formAction %>" method="post" enctype="multipart/form-data" class="listing-form">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>"><% if (donation) { %><input type="hidden" name="_version" value="<%= donation.__v || 0 %>"><% } %>
+<% if (Object.keys(fieldErrors).length) { %><div class="validation-summary server-errors" role="alert" tabindex="-1"><strong>Correct these fields:</strong><ul><% for (const [field,error] of Object.entries(fieldErrors)) { %><li><a href="#<%= field %>"><%= error %></a></li><% } %></ul></div><% } %>
+<label for="equipment">Equipment type</label><select name="equipment" id="equipment" required <%- attrs('equipment') %>><% equipmentTypes.forEach(type => { %><option value="<%= type %>" <%= val('equipment') === type ? 'selected' : '' %>><%= type %></option><% }) %></select><%- err('equipment') %>
+<label for="quality">Condition</label><select name="quality" id="quality" required <%- attrs('quality') %>><% conditions.forEach(condition => { %><option value="<%= condition %>" <%= val('quality') === condition ? 'selected' : '' %>><%= labels[condition] || condition %></option><% }) %></select><%- err('quality') %><p class="field-note">This label describes appearance and wear. Report operation, defects and missing parts separately.</p>
+<label for="quantity">Quantity</label><input type="number" name="quantity" id="quantity" min="1" max="100" value="<%= val('quantity') %>" required <%- attrs('quantity') %>><%- err('quantity') %>
+<fieldset class="equipment-fields"><legend>Reported equipment details (optional)</legend>
+<label for="brand">Brand</label><input id="brand" name="brand" maxlength="80" value="<%= val('brand') %>" <%- attrs('brand') %>><%- err('brand') %>
+<label for="model">Model</label><input id="model" name="model" maxlength="80" value="<%= val('model') %>" <%- attrs('model') %>><%- err('model') %>
+<label for="functionalStatus">Reported functional condition</label><select id="functionalStatus" name="functionalStatus" <%- attrs('functionalStatus') %>><% for (const [key,label] of Object.entries(functions)) { %><option value="<%= key %>" <%= (val('functionalStatus') || 'not_checked') === key ? 'selected' : '' %>><%= label %></option><% } %></select><%- err('functionalStatus') %><p class="field-note">Choose not checked if you cannot describe operation. Do not infer safety from appearance or perform tests you are not qualified to carry out.</p>
+<label for="defects">Known defects or faults</label><textarea id="defects" name="defects" maxlength="500" rows="3" <%- attrs('defects') %>><%= val('defects') %></textarea><%- err('defects') %><p class="field-note">Describe known issues. If none are known or you have not checked, say so. Blank means not provided.</p>
+<label for="missingAccessories">Missing accessories or parts</label><textarea id="missingAccessories" name="missingAccessories" maxlength="500" rows="3" <%- attrs('missingAccessories') %>><%= val('missingAccessories') %></textarea><%- err('missingAccessories') %>
+</fieldset>
+<p class="field-note">Category specifications are optional. With JavaScript disabled, all sections appear; only the selected equipment category is saved. Leave unfamiliar measurements blank.</p>
+<% for (const [category, fields] of Object.entries(specs)) { %><fieldset class="equipment-fields category-fields" data-category="<%= category %>"><legend><%= category %> specifications (optional)</legend><% for (const field of fields) { const name = `${category}_spec_${field.key}`; const fieldId = name; %>
+<label for="<%= fieldId %>"><%= field.label %></label><% if (field.options) { %><select id="<%= fieldId %>" name="<%= name %>" data-field="<%= name %>" <%- attrs(name) %>><option value="">Not provided</option><% for (const [key,label] of Object.entries(field.options)) { %><option value="<%= key %>" <%= val(name) === key ? 'selected' : '' %>><%= label %></option><% } %></select><%- err(name) %>
+<% } else { %><input id="<%= fieldId %>" name="<%= name %>" data-field="<%= name %>" type="<%= field.type %>" <%- field.type === 'number' ? `min="${field.min}" max="${field.max}" step="0.1"` : `maxlength="${field.maxLength}"` %> value="<%= val(name) %>" <%- attrs(name) %>><%- err(name) %><% } %>
+<% } %></fieldset><% } %>
+<label for="description">Description</label><textarea id="description" name="description" minlength="10" maxlength="1000" required <%- attrs('description') %>><%= val('description') %></textarea><%- err('description') %><p class="field-note">Add relevant context, such as age, storage or differences between units. Do not include beneficiary details or private contact information.</p>
+<div class="form-grid"><% for (const [key,label,min,max] of [['city','City',2,100],['state','State',2,100],['postalCode','Postal code',3,20]]) { %><div><label for="<%= key %>"><%= label %></label><input id="<%= key %>" name="<%= key %>" minlength="<%= min %>" maxlength="<%= max %>" value="<%= val(key) %>" required <%- attrs(key) %>><%- err(key) %></div><% } %></div>
+<label for="images">Equipment images (JPEG, PNG, or WebP; maximum 3 files and 5 MB each)</label><input type="file" id="images" name="images" accept="image/jpeg,image/png,image/webp" multiple <%- attrs('images') %>><%- err('images') %><p class="field-note">Previews show your selected files, not uploaded records. After a server error, select new files again.</p>
+<% if (donation?.images?.length) { %><div class="image-row"><% donation.images.forEach(image => { %><label class="existing-image"><img src="/donations/images/<%= image.filename %>" alt="Existing image of <%= donation.equipment %>"><span><input type="checkbox" name="removeImages" value="<%= image.filename %>" <%= removals.includes(image.filename) ? 'checked' : '' %>> Remove existing image</span></label><% }) %></div><p class="field-note">New images are added to retained images. Removals take effect only when changes are saved.</p><% } %>
 
-  <main class="app-main donor-page">
-    <section class="donor-panel form-panel">
-      <h1><%= formTitle %></h1>
-      <% if (message) { %><p class="form-message"><%= message %></p><% } %>
-
-      <form action="<%= formAction %>" method="post" enctype="multipart/form-data" class="listing-form">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-        <% if (donation) { %><input type="hidden" name="_version" value="<%= donation.__v || 0 %>"><% } %>
-
-        <label for="equipment">Equipment type</label>
-        <select name="equipment" id="equipment" required>
-          <% equipmentTypes.forEach((type) => { %>
-            <option value="<%= type %>" <%= donation && donation.equipment === type ? "selected" : "" %>><%= type %></option>
-          <% }) %>
-        </select>
-
-        <label for="quality">Condition</label>
-        <select name="quality" id="quality" required>
-          <% conditions.forEach((condition) => { %>
-            <option value="<%= condition %>" <%= donation && (donation.condition === condition || donation.quality === condition) ? "selected" : "" %>><%= condition %></option>
-          <% }) %>
-        </select>
-
-        <label for="quantity">Quantity</label>
-        <input type="number" name="quantity" id="quantity" min="1" max="100" value="<%= donation?.quantity || 1 %>" required>
-
-        <label for="description">Description</label>
-        <textarea name="description" id="description" minlength="10" maxlength="1000" required placeholder="Describe the equipment, its age, and any relevant details"><%= donation?.description || "" %></textarea>
-
-        <div class="form-grid">
-          <div><label for="city">City</label><input name="city" id="city" minlength="2" maxlength="100" value="<%= donation?.location?.city || donation?.city || "" %>" required></div>
-          <div><label for="state">State</label><input name="state" id="state" minlength="2" maxlength="100" value="<%= donation?.location?.state || donation?.state || "" %>" required></div>
-          <div><label for="postalCode">Postal code</label><input name="postalCode" id="postalCode" minlength="3" maxlength="20" value="<%= donation?.location?.postalCode || donation?.postalCode || "" %>" required></div>
-        </div>
-
-        <label for="images">Equipment images (JPEG, PNG, or WebP; maximum 3 files and 5 MB each)</label>
-        <input type="file" name="images" id="images" accept="image/jpeg,image/png,image/webp" multiple>
-        <% if (donation?.images?.length) { %>
-          <div class="image-row">
-            <% donation.images.forEach((image) => { %>
-              <label class="existing-image"><img src="/donations/images/<%= image.filename %>" alt="Existing image of <%= donation.equipment %>"><span><input type="checkbox" name="removeImages" value="<%= image.filename %>"> Remove</span></label>
-            <% }) %>
-          </div>
-          <p class="field-note">New images are added to the existing set. A listing can contain at most three.</p>
-        <% } %>
-
-        <button type="submit" class="primary-button"><%= submitLabel %></button>
-      </form>
-    </section>
-  </main>
-</body>
-</html>
+<button type="submit" class="primary-button"><%= submitLabel %></button></form></section></main></body></html>

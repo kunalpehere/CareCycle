@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { quantityAccounting } from "../services/quantityContract.js";
+import { storedDetailsValid } from "../services/equipmentDetails.js";
 
 export const EQUIPMENT_TYPES = ["wheelchair", "walker", "cane", "stethoscope"];
 export const EQUIPMENT_CONDITIONS = ["brand-new", "good", "used", "old"];
@@ -14,6 +15,12 @@ const donationSchema = new mongoose.Schema({
     handedOverQuantity: { type: Number, min: 0, max: 100, default: 0 },
     accountingVersion: { type: Number, enum: [1], default: 1 },
     description: { type: String, trim: true, maxlength: 1000, default: "" },
+    details: { type: new mongoose.Schema({
+        brand: { type: String, maxlength: 80, default: "" }, model: { type: String, maxlength: 80, default: "" },
+        functionalStatus: { type: String, enum: ["not_checked", "working", "partly_working", "not_working"], default: "not_checked" },
+        defects: { type: String, maxlength: 500, default: "" }, missingAccessories: { type: String, maxlength: 500, default: "" },
+        specifications: { type: new mongoose.Schema({ seatWidthCm: { type: Number, min: 1, max: 100 }, folding: { type: String, enum: ["unknown", "yes", "no"] }, heightAdjustable: { type: String, enum: ["unknown", "yes", "no"] }, chestpiece: { type: String, maxlength: 80 }, tubingCondition: { type: String, enum: ["not_checked", "intact", "worn", "damaged"] } }, { _id: false }), default: () => ({}) }
+    }, { _id: false }), default: null },
     location: {
         city: { type: String, trim: true, maxlength: 100, default: "" },
         state: { type: String, trim: true, maxlength: 100, default: "" },
@@ -37,6 +44,7 @@ donationSchema.path("images").validate((images) => images.length <= 3, "A donati
 // Document validation only. Update operators must use guarded transactional writes
 // in Day 6; Mongoose update validators do not enforce cross-field invariants.
 donationSchema.pre("validate", function () {
+    if (!storedDetailsValid(this.equipment, this.details)) this.invalidate("details", "Equipment details must match the selected category and permitted values.");
     try { quantityAccounting(this); }
     catch (error) { this.invalidate("quantity", error.message); }
 });

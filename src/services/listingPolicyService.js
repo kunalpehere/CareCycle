@@ -4,6 +4,7 @@ import { OPEN_LISTING_STATUSES } from "./availabilityService.js";
 import { quantityAccounting } from "./quantityContract.js";
 import { runTransaction } from "./transactionService.js";
 import { recordRequestEvent } from "./notificationService.js";
+import { storedDetailsValid } from "./equipmentDetails.js";
 
 export const resolvePendingRequests = async ({ donationId, available, withdrawn = false, actor, session, RequestModel = DonationRequest }) => {
     const filter = { donation: donationId, status: "pending" };
@@ -29,6 +30,7 @@ export const changeListing = async ({ donationId, donorId, expectedVersion, acti
         if (!Number.isSafeInteger(value.quantity) || value.quantity < Math.max(1, accounting.allocated) || value.quantity > 100) return { changed: false, reason: "quantity" };
         update = { quantity: value.quantity };
     } else if (action === "edit") {
+        if (!storedDetailsValid(value.equipment || listing.equipment, value.details ?? listing.details)) return { changed: false, reason: "details" };
         const pending = await DonationRequest.exists({ donation: donationId, status: "pending" }).session(session);
         if (pending || accounting.allocated > 0) return { changed: false, reason: "details_locked" };
         quantityAccounting({ ...listing, ...value });
