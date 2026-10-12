@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { quantityAccounting } from "../services/quantityContract.js";
 
 export const EQUIPMENT_TYPES = ["wheelchair", "walker", "cane", "stethoscope"];
 export const EQUIPMENT_CONDITIONS = ["brand-new", "good", "used", "old"];
@@ -10,6 +11,8 @@ const donationSchema = new mongoose.Schema({
     condition: { type: String, enum: EQUIPMENT_CONDITIONS, required: true },
     quantity: { type: Number, required: true, min: 1, max: 100, default: 1 },
     allocatedQuantity: { type: Number, min: 0, max: 100, default: 0 },
+    handedOverQuantity: { type: Number, min: 0, max: 100, default: 0 },
+    accountingVersion: { type: Number, enum: [1], default: 1 },
     description: { type: String, trim: true, maxlength: 1000, default: "" },
     location: {
         city: { type: String, trim: true, maxlength: 100, default: "" },
@@ -30,5 +33,12 @@ donationSchema.index({ donor: 1, createdAt: -1 });
 donationSchema.index({ status: 1, equipment: 1, createdAt: -1 });
 
 donationSchema.path("images").validate((images) => images.length <= 3, "A donation can have at most three images.");
+
+// Document validation only. Update operators must use guarded transactional writes
+// in Day 6; Mongoose update validators do not enforce cross-field invariants.
+donationSchema.pre("validate", function () {
+    try { quantityAccounting(this); }
+    catch (error) { this.invalidate("quantity", error.message); }
+});
 
 export const Donation = mongoose.model("donations", donationSchema);

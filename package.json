@@ -16,6 +16,7 @@
     "db:replica:init": "node scripts/initialize-dev-replica.js",
     "db:replica:prepare": "node scripts/prepare-dev-replica.js",
     "migrate:donations": "node scripts/migrate-embedded-donations.js",
+    "migrate:quantities": "node scripts/backfill-quantity-contracts.js",
     "seed:admin": "node scripts/seed-admin.js",
     "test": "npm run check && node scripts/run-tests.js unit",
     "test:integration": "node scripts/run-tests.js integration",

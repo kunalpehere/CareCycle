@@ -14,6 +14,7 @@ const donationRequestSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 donationRequestSchema.index({ donation: 1, organization: 1 }, { unique: true });
+donationRequestSchema.path("quantity").validate(Number.isSafeInteger, "Request quantity must be a whole number.");
 donationRequestSchema.index({ organization: 1, status: 1, createdAt: -1 });
 donationRequestSchema.index({ donation: 1, status: 1, createdAt: 1 });
 

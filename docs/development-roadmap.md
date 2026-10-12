@@ -200,6 +200,13 @@ Suggested commit: `feat(config): validate runtime and database requirements`
 
 ### Day 5 - Quantity and lifecycle contracts
 
+Status: implemented and locally verified for contracts and migration preparation.
+Date: October 12, 2026.
+Commit: the commit containing this update, `refactor(donations): define quantity and lifecycle invariants`, on `codex/day-5-quantity-contracts`.
+Checks and results: 55 tests and syntax checks for 79 JavaScript files passed; three isolated database checks and four desktop/mobile browser smoke checks passed. Migration CLI dry-run, maintenance refusal, blocked-record/orphan refusal, failed-write rollback and repeat apply verified with synthetic records.
+Evidence: [quantity/lifecycle contracts and migration procedure](quantity-and-lifecycle-contracts.md) and [Day 5 verification](day-5-verification.md).
+Known limitations and external checks: existing application database was not migrated. Contract helpers are not yet integrated into matching/discovery/edit/withdrawal routes. Atomic acceptance/discovery remain Day 6; retry/index/withdrawal enforcement remain Day 7. Pickup and handover routes remain later work. Hosted CI and deployment remain unverified.
+
 Outcome:
 
 - Separate remaining availability from request fulfillment; define total, reserved, handed-over, and released quantity semantics.
