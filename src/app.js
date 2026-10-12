@@ -18,6 +18,7 @@ import { requestRoutes } from "./routes/requestRoutes.js";
 export const createApp = () => {
     const app = express();
     app.disable("x-powered-by");
+    app.set("trust proxy", env.trustProxy);
     app.set("view engine", "ejs");
     app.set("views", path.join(path.resolve(), "views"));
     app.use(securityHeaders);

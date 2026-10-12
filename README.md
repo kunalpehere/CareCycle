@@ -140,6 +140,8 @@ SESSION_SECRET=replace-with-another-different-random-secret
 APP_URL=http://localhost:4000
 ```
 
+Replace both example secrets with independent random values using the [runtime configuration instructions](docs/runtime-configuration.md), then run `npm run config:check`. The check does not start the application or connect to MongoDB.
+
 Start MongoDB and CareCycle:
 
 ```powershell
@@ -174,6 +176,8 @@ npm test
 The test suite covers input validation, role separation, ownership, verified-organization access, matching capacity, model contracts, and EJS rendering.
 
 No developer `.env` or running MongoDB service is needed for `npm test`. See [reproducible verification](docs/testing.md) for supported versions, isolated database/browser smoke commands, CI and failure artifacts, and [Day 3 verification evidence](docs/day-3-verification.md) for what has actually passed.
+
+Runtime settings are now validated before startup. See [configuration and local replica-set setup](docs/runtime-configuration.md) and run `npm run config:check` to validate without starting the app. Generate independent secrets instead of keeping example placeholders. Existing explicit database names are preserved; `.env.example` uses `CareCycle` for new setups. Production settings must be injected explicitly, including HTTPS, secure database access and actual trusted proxy addresses.
 
 ## Screenshot gallery
 

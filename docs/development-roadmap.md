@@ -175,6 +175,13 @@ Suggested commit: `ci: add reproducible CareCycle verification`
 
 ### Day 4 - Runtime configuration
 
+Status: implemented and locally verified; external production/deployment checks pending.
+Date: October 12, 2026.
+Commit: the commit containing this update, `feat(config): validate runtime and database requirements`, on `codex/day-4-runtime-config`.
+Checks and results: 49 tests and syntax checks for 73 JavaScript files passed; 15 final focused config checks, two real database/topology checks and four browser checks passed. Secret-free CLI/connection errors, exact proxy cookie behavior, fresh-directory refusal, replica initialization/repeat/restart and actual runtime connection verified. Owned servers stopped.
+Evidence: [runtime configuration and replica-set instructions](runtime-configuration.md) and [Day 4 verification](day-4-verification.md).
+Known limitations and external checks: existing `.env`/database names preserved; new unsafe settings fail early. Real production TLS/proxy/mail, managed database, hosted CI/Linux and later lifecycle/security gates remain unverified. Existing dependency audit findings remain recorded.
+
 Outcome:
 
 - Validate environment names, port, URLs, independent secrets, and production invariants.

@@ -2,6 +2,8 @@
 
 Current implementation reviewed October 11, 2026, version `0.6.0-alpha.2`. Diagrams describe source behavior, not a verified deployment. See [product scope and permissions](product-foundation.md), [verification evidence](day-1-baseline.md), and the [roadmap](development-roadmap.md).
 
+Configuration evolved in Day 4: see [runtime loading, validated proxy settings and live replica-set gate](runtime-configuration.md) and [current verification evidence](day-4-verification.md). The October 11 baseline below remains a historical architectural review.
+
 ## Runtime and request path
 
 ```mermaid

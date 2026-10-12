@@ -13,7 +13,7 @@ npm ci
 npm test
 ```
 
-`npm ci` installs from the committed lockfile. Do not copy `node_modules`, `.env`, runtime uploads, or production records into the checkout. The unit command needs no MongoDB service, developer `.env`, mail credentials, or browser installation. Installing packages requires access to the npm registry; native bcrypt uses its normal package installation path.
+`npm ci` installs from the committed lockfile. Do not copy `node_modules`, `.env`, runtime uploads, or production records into the checkout. The unit command needs no MongoDB service, developer `.env`, mail credentials, or browser installation. Day 4's configuration/cookie regression briefly uses a localhost HTTP fixture on an ephemeral port, then closes it. Installing packages requires access to the npm registry; native bcrypt uses its normal package installation path.
 
 ## Available commands
 
@@ -51,7 +51,7 @@ npm run test:browser
 
 On Linux CI, `npx playwright install --with-deps chromium` also installs browser OS dependencies. Browser checks run a temporary test app on `127.0.0.1:4183` and refuse to reuse an existing listener. Keep that port free; the normal CareCycle server on 4000 can remain stopped. Only localhost requests are allowed by the smoke tests; external fonts/services are not required.
 
-The browser server copies only views/public assets to an ignored disposable runtime directory, changes its working directory there before importing application configuration, and supplies fresh independent secrets, a test database and blank mail settings. There is no `.env` in that runtime, and uploaded files would stay in its temporary directory. Test credentials are generated at runtime and never committed or logged.
+The browser server copies only views/public assets to an ignored disposable runtime directory, changes its working directory there before importing application configuration, and supplies fresh independent secrets, a test database and blank mail settings. There is no `.env` in that runtime, and uploaded files would stay in its temporary directory. Test credentials are generated at runtime and never committed or logged. Day 4 also validates the runtime database/URL boundaries and verifies the browser app's replica-set primary. See [runtime configuration](runtime-configuration.md).
 
 Normal teardown stops only owned test processes. On Windows Playwright force-stops its web-server process tree because POSIX graceful-shutdown signals are unavailable; disposable runtime directories can remain after forceful shutdown or interruption. `artifacts/runtime` contains test-only files and is ignored. No verification worker is part of `npm start` or `npm run dev`.
 
