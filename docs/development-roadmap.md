@@ -340,6 +340,13 @@ Suggested commit: `feat(pickup): handle cancellations and missed collections`
 
 ### Day 11 - Handover and NGO acknowledgement
 
+Status: implemented and locally verified.
+Date: October 12, 2026.
+Commit: the commit containing this update, `feat(handover): add two-party receipt acknowledgement`, on `codex/day-11-handover-acknowledgement`.
+Checks and results: 69 unit/model/template tests, syntax checks for 110 JavaScript files, 80 isolated database tests and 14 desktop/mobile browser checks passed. Coverage includes full/partial transfers, multi-NGO completion, receipt/cancellation races, two-party corrections, remainder-release agreement/withdrawal, failed-write rollback/retry, legacy reconciliation and privacy.
+Evidence: [Day 11 implementation, policies and verification](day-11-verification.md).
+Known limitations and external checks: printable receipts/outcomes remain Day 12 and durable notifications Day 13. Physical receipt and condition are participant declarations, not independent inspections. Ambiguous legacy handover evidence requires review rather than inferred acknowledgement. Contact escalation is manual. Hosted CI and production remain unverified; original application data, uploads and `.env` were preserved.
+
 Outcome:
 
 - Record donor handover with actual quantity and an equipment checklist.

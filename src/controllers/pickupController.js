@@ -3,6 +3,8 @@ import { DonationRequest } from "../models/DonationRequest.js";
 import { Donation } from "../models/Donation.js";
 import { formatPickupTime, pickupVersion, updatePickup, validatePickupProposal, validatePickupReason, reportPickupIssue } from "../services/pickupService.js";
 import { cancelAcceptedRequest } from "../services/acceptedCancellationService.js";
+import { canArrangePickup, requestAccounting } from "../services/fulfillmentAccounting.js";
+import { changeFulfillment, fulfillmentActions, validateFulfillmentInput } from "../services/fulfillmentService.js";
 
 const ownedRequest = async req => {
     if (!mongoose.Types.ObjectId.isValid(req.params.requestId)) return null;
@@ -13,7 +15,7 @@ const ownedRequest = async req => {
 };
 
 const renderPickup = (req, res, request, message = "", status = 200, values = null) => res.status(status).render("pickup.ejs", {
-    request, message, values, formatPickupTime, role: req.auth.user.role,
+    request, message, values, formatPickupTime, canArrangePickup, requestAccounting, role: req.auth.user.role,
     base: `/${req.auth.user.role}/requests/${request._id}/pickup`
 });
 
@@ -21,7 +23,7 @@ export const showPickup = async (req, res, next) => {
     try {
         const request = await ownedRequest(req);
         if (!request) return res.status(404).send("Request not found");
-        if (request.status !== "accepted" && !(request.status === "cancelled" && request.cancellation)) return res.status(409).send("Pickup arrangements require an accepted request. Return to your request history.");
+        if (request.status !== "accepted" && !(request.status === "cancelled" && request.cancellation) && !(request.status === "completed" && request.fulfillment)) return res.status(409).send("Pickup arrangements require an accepted request. Return to your request history.");
         return renderPickup(req, res, request, String(req.query.message || ""));
     } catch (error) { next(error); }
 };
@@ -31,8 +33,8 @@ export const changePickup = async (req, res, next) => {
         const request = await ownedRequest(req);
         if (!request) return res.status(404).send("Request not found");
         const action = req.params.action;
-        if (!["propose", "confirm", "cancel", "missed", "dispute", "resolve"].includes(action)) return res.status(404).send("Pickup action not found");
-        if (request.status !== "accepted") return request.cancellation ? renderPickup(req, res, request, "This request is already cancelled. The release and history were preserved.", 409) : res.status(409).send("Pickup arrangements require an accepted request. Return to your request history.");
+        if (!["propose", "confirm", "cancel", "missed", "dispute", "resolve", ...fulfillmentActions].includes(action)) return res.status(404).send("Pickup action not found");
+        if (request.status !== "accepted") return request.cancellation || request.fulfillment ? renderPickup(req, res, request, request.cancellation ? "This request is already cancelled. The release and history were preserved." : "This request is already completed. Its quantities and history were preserved.", 409) : res.status(409).send("Pickup arrangements require an accepted request. Return to your request history.");
         const version = pickupVersion(req.body._version);
         if (version === null || version !== (request.pickup?.version || 0)) return renderPickup(req, res, request, "The pickup plan changed or this form is outdated. Review the current plan before submitting again.", 409);
         let proposal;
@@ -45,13 +47,15 @@ export const changePickup = async (req, res, next) => {
         const noHandover = req.body.noHandover === "yes";
         if (issue && (!validatePickupReason(req.body) || (action !== "dispute" && !noHandover))) return renderPickup(req, res, request, "Enter a reason between 10 and 500 characters and confirm that no equipment has been handed over when required.", 422);
         const input = { request, version, actorId: req.auth.userId, actorRole: req.auth.user.role, action, proposal, reason: req.body.reason, noHandover };
-        const changed = action === "cancel" ? await cancelAcceptedRequest({ ...input, requestId: request._id, organizationId: req.verifiedOrganization?._id }) : issue ? await reportPickupIssue(input) : await updatePickup(input);
+        const fulfillment = fulfillmentActions.includes(action);
+        if (fulfillment && !validateFulfillmentInput(action, req.body)) return renderPickup(req, res, request, "Enter valid whole quantities, bounded notes/reasons, and the required checklist or receipt confirmations.", 422);
+        const changed = fulfillment ? await changeFulfillment({ ...input, requestId: request._id, organizationId: req.verifiedOrganization?._id, body: req.body }) : action === "cancel" ? await cancelAcceptedRequest({ ...input, requestId: request._id, organizationId: req.verifiedOrganization?._id }) : issue ? await reportPickupIssue(input) : await updatePickup(input);
         if (!changed) {
             const latest = await ownedRequest(req);
             if (!latest) return res.status(404).send("Request not found");
             return renderPickup(req, res, latest, "This action could not be applied. Review the current state, time window, participant permissions and any disagreement or handover evidence before trying again.", 409);
         }
-        const messages = { confirm: "Pickup confirmation recorded.", propose: "Pickup proposal recorded.", cancel: "Request cancelled. Reserved units released.", missed: "Missed pickup report recorded.", dispute: "Disagreement recorded.", resolve: "Disagreement withdrawal recorded." };
-        return res.redirect(`/${req.auth.user.role}/requests/${request._id}/pickup?message=${encodeURIComponent(messages[action])}`);
+        const messages = { confirm: "Pickup confirmation recorded.", propose: "Pickup proposal recorded.", cancel: "Request cancelled. Reserved units released.", missed: "Missed pickup report recorded.", dispute: "Disagreement recorded.", resolve: "Disagreement withdrawal recorded.", handover: "Handover recorded. NGO receipt confirmation is required.", acknowledge: "Receipt acknowledgement recorded.", "receipt-dispute": "Receipt discrepancy recorded.", "resolution-propose": "Resolution proposed. NGO confirmation is required.", "resolution-confirm": "Receipt resolution confirmed.", "remainder-propose": "Remaining-unit release proposed. Counterparty confirmation is required.", "remainder-confirm": "Remaining reservation released by agreement." };
+        return res.redirect(`/${req.auth.user.role}/requests/${request._id}/pickup?message=${encodeURIComponent(messages[action] || "Remaining-unit release proposal withdrawn.")}`);
     } catch (error) { next(error); }
 };

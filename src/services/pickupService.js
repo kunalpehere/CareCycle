@@ -1,4 +1,5 @@
 import { DonationRequest } from "../models/DonationRequest.js";
+import { canArrangePickup } from "./fulfillmentAccounting.js";
 
 export const pickupVersion = value => typeof value === "string" && /^(0|[1-9]\d*)$/.test(value) && Number.isSafeInteger(Number(value)) ? Number(value) : null;
 export const pickupVersionFilter = version => version ? { "pickup.version": version } : { pickup: null };
@@ -41,15 +42,15 @@ export const validatePickupProposal = (body, now = new Date()) => {
 };
 
 export const updatePickup = async ({ request, version, actorId, actorRole, action, proposal, now = new Date() }) => {
-    if (request.status !== "accepted" || (request.handedOverQuantity || 0) !== 0 || version === null || version !== (request.pickup?.version || 0)) return false;
+    if (!canArrangePickup(request) || version === null || version !== (request.pickup?.version || 0)) return false;
     const current = request.pickup;
-    if (current && (!["proposed", "confirmed", "missed"].includes(current.status) || current.missedReport?.disputed)) return false;
+    if (current && (!["proposed", "confirmed", "missed", "acknowledged"].includes(current.status) || current.missedReport?.disputed)) return false;
     if (action === "confirm" && (!current || current.status !== "proposed" || current.proposal.proposerRole === actorRole || String(current.proposal.proposedBy) === String(actorId) || current.proposal.start <= now)) return false;
     if (action === "propose" && (!proposal || proposal.start <= now || proposal.end <= proposal.start)) return false;
     if (!["propose", "confirm"].includes(action)) return false;
     const nextProposal = action === "propose" ? { ...proposal, proposedBy: actorId, proposerRole: actorRole } : current.proposal;
     const event = { action: action === "confirm" ? "confirmed" : current ? "rescheduled" : "proposed", actor: actorId, actorRole, at: now, version: version + 1, proposal: nextProposal };
-    const filter = { _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...noRecordedHandover() };
+    const filter = { _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...((request.handedOverQuantity ?? 0) === 0 ? noRecordedHandover() : { handedOverQuantity: request.handedOverQuantity }) };
     const fields = { "pickup.status": action === "confirm" ? "confirmed" : "proposed", "pickup.version": version + 1, "pickup.proposal": nextProposal,
         "pickup.confirmedBy": action === "confirm" ? actorId : null, "pickup.confirmedAt": action === "confirm" ? now : null,
         "pickup.missedReport": action === "propose" ? null : current?.missedReport || null };
@@ -60,7 +61,7 @@ export const updatePickup = async ({ request, version, actorId, actorRole, actio
 
 export const reportPickupIssue = async ({ request, version, actorId, actorRole, action, reason, noHandover, now = new Date() }) => {
     const plan = request.pickup;
-    if (request.status !== "accepted" || (request.handedOverQuantity || 0) !== 0 || !plan || version !== plan.version || !validatePickupReason({ reason })) return false;
+    if (!canArrangePickup(request) || !plan || version !== plan.version || !validatePickupReason({ reason })) return false;
     let fields;
     if (action === "missed") {
         if (plan.status !== "confirmed" || !plan.proposal || plan.proposal.end > now || !noHandover) return false;
@@ -72,7 +73,7 @@ export const reportPickupIssue = async ({ request, version, actorId, actorRole, 
         if (plan.status !== "missed" || !plan.missedReport?.disputed || String(plan.missedReport.disputedBy) !== String(actorId) || !noHandover) return false;
         fields = { "pickup.missedReport.disputed": false, "pickup.missedReport.disputedBy": null };
     } else return false;
-    return Boolean(await DonationRequest.findOneAndUpdate({ _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...noRecordedHandover() }, {
+    return Boolean(await DonationRequest.findOneAndUpdate({ _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...((request.handedOverQuantity ?? 0) === 0 ? noRecordedHandover() : { handedOverQuantity: request.handedOverQuantity }) }, {
         $set: fields, $inc: { "pickup.version": 1 }, $push: { "pickup.history": { action: action === "dispute" ? "disputed" : action === "resolve" ? "resolved" : "missed", actor: actorId, actorRole, at: now, version: version + 1, proposal: plan.proposal, reason: reason.trim() } }
     }, { new: true, runValidators: true }));
 };

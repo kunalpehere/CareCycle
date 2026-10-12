@@ -1,0 +1,46 @@
+<% const transfers = request.fulfillment?.transfers || []; const open = request.status === 'accepted'; const release = request.fulfillment?.remainderProposal; %>
+<% if (open && role === 'donor' && plan?.status === 'confirmed' && amounts.settled && !release && amounts.remaining > 0) { %>
+<section class="surface fulfillment-handover"><h2>Record equipment handover</h2><p>Record only equipment physically handed over. This requires NGO acknowledgement and does not declare the request complete.</p>
+<% if (new Date(plan.proposal.start) > new Date()) { %><p>Handover can be recorded once the confirmed pickup window starts.</p><% } else { %>
+<form class="request-form" action="<%= base %>/handover" method="post">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan.version %>">
+<label for="handover-quantity">Actual quantity handed over<input id="handover-quantity" name="quantity" type="number" min="1" max="<%= amounts.remaining %>" step="1" required></label>
+<label class="pickup-check"><input type="checkbox" name="equipmentMatches" value="yes" required> Equipment type matches the accepted listing.</label>
+<label class="pickup-check"><input type="checkbox" name="conditionReviewed" value="yes" required> Equipment condition was reviewed with the receiving NGO.</label>
+<label class="pickup-check"><input type="checkbox" name="accessoriesExplained" value="yes" required> Included accessories and any missing parts were explained.</label>
+<div class="pickup-field"><label for="handover-notes">Handover notes (optional)</label><textarea id="handover-notes" name="notes" maxlength="500" rows="3"></textarea></div>
+<button type="submit">Record handover</button></form><% } %></section><% } %>
+<% if (transfers.length) { %><section class="surface fulfillment-transfers"><h2>Transfer records</h2>
+<% transfers.forEach(transfer => { const id = String(transfer._id); %><article class="transfer-record">
+<h3>Transfer of <%= transfer.quantity %> units</h3><p>Status: <%= transfer.status.replaceAll('_', ' ') %>. Donor originally recorded <%= transfer.declaredQuantity %> units on <%= formatPickupTime(transfer.at, 'UTC') %> (UTC).</p>
+<p>Checklist: equipment type matches, condition reviewed, accessories and missing parts explained.</p>
+<% if (transfer.notes) { %><p class="pickup-private"><strong>Donor notes:</strong> <%= transfer.notes %></p><% } %>
+<% if (transfer.receivedQuantity !== null && transfer.receivedQuantity !== undefined) { %><p>NGO reported received: <%= transfer.receivedQuantity %>.</p><% } %>
+<% if (transfer.receiptNotes) { %><p class="pickup-private"><strong>NGO notes:</strong> <%= transfer.receiptNotes %></p><% } %>
+<% if (transfer.acknowledgedAt) { %><p>Acknowledged by the NGO on <%= formatPickupTime(transfer.acknowledgedAt, 'UTC') %> (UTC).</p><% } %>
+<% if (open && role === 'ngo' && transfer.status === 'awaiting_acknowledgement') { %>
+<form class="request-form" method="post" action="<%= base %>/acknowledge"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan.version %>"><input type="hidden" name="transferId" value="<%= id %>">
+<label for="receipt-<%= id %>">Quantity received<input id="receipt-<%= id %>" name="quantity" type="number" min="0" max="<%= request.quantity %>" required></label>
+<label class="pickup-check"><input type="checkbox" name="receiptConfirmed" value="yes" required> The quantity and equipment condition match the donor's transfer record.</label>
+<div class="pickup-field"><label for="receipt-notes-<%= id %>">Receipt notes (optional)</label><textarea id="receipt-notes-<%= id %>" name="notes" maxlength="500" rows="2"></textarea></div><button type="submit">Acknowledge receipt</button></form>
+<form class="request-form" method="post" action="<%= base %>/receipt-dispute"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan.version %>"><input type="hidden" name="transferId" value="<%= id %>">
+<label for="discrepancy-quantity-<%= id %>">Quantity received with discrepancy<input id="discrepancy-quantity-<%= id %>" name="quantity" type="number" min="0" max="<%= request.quantity %>" required></label>
+<div class="pickup-field"><label for="discrepancy-<%= id %>">Quantity or condition discrepancy</label><textarea id="discrepancy-<%= id %>" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div><button type="submit">Report receipt discrepancy</button></form><% } %>
+<% if (transfer.status === 'disputed') { %><p>Resolve this discrepancy before releasing units or arranging another pickup. Coordinate through your matched contact details. If you cannot agree, use <a href="/contact">Contact</a> and quote request <%= request._id %>. Do not include beneficiary details.</p>
+<% if (transfer.resolution) { %><p><strong>Donor proposed actual quantity: <%= transfer.resolution.quantity %>.</strong></p><p class="pickup-private"><%= transfer.resolution.reason %></p><% } %>
+<% if (open && (role === 'donor' || transfer.resolution)) { %>
+<form class="request-form" method="post" action="<%= base %>/<%= role === 'donor' ? 'resolution-propose' : 'resolution-confirm' %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan.version %>"><input type="hidden" name="transferId" value="<%= id %>">
+<label for="resolved-quantity-<%= id %>"><%= role === 'donor' ? 'Proposed actual transfer quantity' : 'Confirm agreed actual quantity' %><input id="resolved-quantity-<%= id %>" name="quantity" type="number" min="0" max="<%= transfer.quantity + amounts.remaining %>" required></label>
+<div class="pickup-field"><label for="resolution-reason-<%= id %>"><%= role === 'donor' ? 'Resolution explanation' : 'Receipt resolution confirmation note' %></label><textarea id="resolution-reason-<%= id %>" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div>
+<% if (role === 'ngo') { %><label class="pickup-check"><input type="checkbox" name="receiptConfirmed" value="yes" required> The agreed quantity and condition resolution accurately record receipt.</label><% } %>
+<button type="submit"><%= role === 'donor' ? 'Propose receipt resolution' : 'Confirm receipt resolution' %></button></form><% } %><% } %>
+</article><% }) %></section><% } %>
+<% if (open && amounts.settled && amounts.handed > 0 && amounts.remaining > 0) { %>
+<section class="surface fulfillment-remainder"><h2>Resolve remaining reservation</h2><p><%= amounts.remaining %> units remain reserved. Releasing these units needs both participants' agreement and preserves already acknowledged transfers.</p>
+<% if (release) { %><p>Release proposed by the <%= release.actorRole === 'ngo' ? 'NGO' : 'donor' %>. Quantity: <%= release.quantity %>.</p><p class="pickup-private"><%= release.reason %></p><p>Pickup changes are paused until this proposal is confirmed or withdrawn by its proposer.</p><% } %>
+<% const releaseAction = release ? (release.actorRole === role ? 'remainder-withdraw' : 'remainder-confirm') : 'remainder-propose'; %>
+<form class="request-form" method="post" action="<%= base %>/<%= releaseAction %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="_version" value="<%= plan.version %>">
+<div class="pickup-field"><label for="remaining-reason">Remaining-unit resolution reason</label><textarea id="remaining-reason" name="reason" minlength="10" maxlength="500" rows="3" required></textarea></div>
+<% if (releaseAction !== 'remainder-withdraw') { %><label class="pickup-check"><input type="checkbox" name="noFurtherHandover" value="yes" required> No additional equipment has been handed over beyond the acknowledged transfer records.</label><% } %>
+<button type="submit"><%= releaseAction === 'remainder-withdraw' ? 'Withdraw release proposal' : releaseAction === 'remainder-confirm' ? 'Confirm remaining-unit release' : 'Propose remaining-unit release' %></button></form>
+</section><% } %>

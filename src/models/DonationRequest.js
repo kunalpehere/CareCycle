@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import { REQUEST_INDEX_NAME, REQUEST_INDEX_FILTER } from "../services/requestPolicy.js";
 import { EQUIPMENT_TYPES, EQUIPMENT_CONDITIONS } from "./Donation.js";
 import { pickupSchema } from "./pickupSchema.js";
+import { fulfillmentSchema } from "./fulfillmentSchema.js";
+import { requestAccounting } from "../services/fulfillmentAccounting.js";
 
 const listingSnapshotSchema = new mongoose.Schema({
     equipment: { type: String, enum: EQUIPMENT_TYPES, required: true },
@@ -20,6 +22,9 @@ const donationRequestSchema = new mongoose.Schema({
     listingSnapshot: { type: listingSnapshotSchema, default: null },
     pickup: { type: pickupSchema, default: null },
     handedOverQuantity: { type: Number, min: 0, max: 100, default: 0 },
+    acknowledgedQuantity: { type: Number, min: 0, max: 100, default: 0 },
+    releasedQuantity: { type: Number, min: 0, max: 100, default: 0 },
+    fulfillment: { type: fulfillmentSchema, default: null },
     cancellation: { type: new mongoose.Schema({
         actor: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true },
         actorRole: { type: String, enum: ["donor", "ngo"], required: true },
@@ -37,6 +42,10 @@ const donationRequestSchema = new mongoose.Schema({
 donationRequestSchema.index({ donation: 1, organization: 1 }, { unique: true, name: REQUEST_INDEX_NAME, partialFilterExpression: REQUEST_INDEX_FILTER });
 donationRequestSchema.path("quantity").validate(Number.isSafeInteger, "Request quantity must be a whole number.");
 donationRequestSchema.path("handedOverQuantity").validate(function (value) { return Number.isSafeInteger(value) && value <= this.quantity; }, "Request handover quantity must be a whole number within the commitment.");
+donationRequestSchema.pre("validate", function () {
+    try { const accounting = requestAccounting(this); if (this.fulfillment && !accounting.tracked) throw new Error("Transfer records must reconcile with request handover and acknowledgement totals."); }
+    catch (error) { this.invalidate("quantity", error.message); }
+});
 donationRequestSchema.index({ organization: 1, status: 1, createdAt: -1 });
 donationRequestSchema.index({ donation: 1, status: 1, createdAt: 1 });
 

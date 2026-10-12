@@ -19,7 +19,7 @@ export const changeListing = async ({ donationId, donorId, expectedVersion, acti
     const accounting = quantityAccounting(listing);
     let update;
     if (action === "withdraw") {
-        if (accounting.reserved > 0) return { changed: false, reason: "commitment" };
+        if (accounting.reserved > 0 || await DonationRequest.exists({ donation: donationId, status: "accepted" }).session(session)) return { changed: false, reason: "commitment" };
         update = { status: "withdrawn" };
     } else if (action === "quantity") {
         if (!Number.isSafeInteger(value.quantity) || value.quantity < Math.max(1, accounting.allocated) || value.quantity > 100) return { changed: false, reason: "quantity" };

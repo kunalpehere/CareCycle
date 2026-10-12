@@ -37,5 +37,14 @@ export const seedMatchingBrowserFixtures = async () => {
         const changeListing = await Donation.create({ donor: changeDonor._id, equipment: "walker", condition: "good", quantity: 5, allocatedQuantity: 2, description: "Synthetic Day 10 collection fixture", location: { city: `Day10 ${project}`, state: "Maharashtra" } });
         const pastProposal = { start: new Date("2000-01-01T10:00Z"), end: new Date("2000-01-01T12:00Z"), timeZone: "UTC", localStart: "2000-01-01T10:00", localEnd: "2000-01-01T12:00", address: "12 Synthetic Collection Road", instructions: "Synthetic collection instructions", proposedBy: changeDonor._id, proposerRole: "donor" };
         await DonationRequest.create({ donation: changeListing._id, organization: changeOrg, requestedBy: changeNgo._id, quantity: 2, status: "accepted", beneficiary: "Synthetic Day 10 beneficiaries", message: "Synthetic collection changes verification", pickup: { status: "confirmed", version: 2, proposal: pastProposal, confirmedBy: changeNgo._id, confirmedAt: new Date("1999-12-31"), history: [{ action: "proposed", actor: changeDonor._id, actorRole: "donor", at: new Date("1999-12-30"), version: 1, proposal: pastProposal }, { action: "confirmed", actor: changeNgo._id, actorRole: "ngo", at: new Date("1999-12-31"), version: 2, proposal: pastProposal }] } });
+        const transferDonor = await User.create({ name: "Synthetic Transfer Donor", email: `donor-day11-${project}@example.invalid`, password, role: "donor" });
+        const transferNgo = await User.create({ name: "Synthetic Transfer NGO", email: `ngo-day11-${project}@example.invalid`, password, role: "ngo" });
+        const transferOrg = new mongoose.Types.ObjectId();
+        await Organization.collection.insertOne({ _id: transferOrg, owner: transferNgo._id, name: "Synthetic Transfer Organization", verificationStatus: "verified", contactEmail: transferNgo.email, address: { city: "Pune" } });
+        for (const [equipment, quantity] of [["wheelchair", 5], ["stethoscope", 2]]) {
+            const transferListing = await Donation.create({ donor: transferDonor._id, equipment, condition: "good", quantity, allocatedQuantity: 2, description: "Synthetic Day 11 transfer fixture", location: { city: `Day11 ${project}`, state: "Maharashtra" } });
+            const transferProposal = { ...pastProposal, proposedBy: transferDonor._id };
+            await DonationRequest.create({ donation: transferListing._id, organization: transferOrg, requestedBy: transferNgo._id, quantity: 2, status: "accepted", beneficiary: `Synthetic ${equipment} transfer beneficiaries`, message: "Synthetic physical transfer verification", pickup: { status: "confirmed", version: 2, proposal: transferProposal, confirmedBy: transferNgo._id, confirmedAt: new Date("1999-12-31"), history: [{ action: "confirmed", actor: transferNgo._id, actorRole: "ngo", at: new Date("1999-12-31"), version: 2, proposal: transferProposal }] } });
+        }
     }
 };

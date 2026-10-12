@@ -5,14 +5,14 @@ import { quantityAccounting } from "./quantityContract.js";
 export const TRANSITIONS = {
     listing: { available: { withdrawn: ["donor"], completed: ["system"] }, withdrawn: {}, completed: {} },
     request: { pending: { accepted: ["donor"], rejected: ["donor"], cancelled: ["organization", "system"] },
-        accepted: { cancelled: ["donor", "organization"], completed: ["organization"] },
+        accepted: { cancelled: ["donor", "organization"], completed: ["organization", "donor"] },
         rejected: {}, cancelled: {}, completed: {} },
     pickup: { unarranged: { proposed: ["donor", "organization"] },
         proposed: { confirmed: ["counterparty"], cancelled: ["donor", "organization"] },
         confirmed: { proposed: ["donor", "organization"], handed_over: ["donor"], missed: ["donor", "organization"], cancelled: ["donor", "organization"] },
         missed: { proposed: ["donor", "organization"], cancelled: ["donor", "organization"] },
         handed_over: { acknowledged: ["organization"], disputed: ["organization"] },
-        disputed: { acknowledged: ["organization"] }, acknowledged: {}, cancelled: {} }
+        disputed: { acknowledged: ["organization"] }, acknowledged: { proposed: ["donor", "organization"], cancelled: ["donor", "organization"] }, cancelled: {} }
 };
 
 export const assertTransition = ({ record, from, to, actor, evidence = {} }) => {
@@ -21,9 +21,17 @@ export const assertTransition = ({ record, from, to, actor, evidence = {} }) => 
     if (!Array.isArray(actors) || !actors.includes(actor)) throw new Error("Transition or actor is not permitted.");
     if (record === "request" && from === "accepted" && to === "completed" &&
         (evidence.pickupStatus !== "acknowledged" || !Number.isSafeInteger(evidence.quantity) || evidence.quantity < 1 ||
-        evidence.quantity > 100 || evidence.fulfilledQuantity !== evidence.quantity)) {
+        evidence.quantity > 100 || !Number.isSafeInteger(evidence.fulfilledQuantity) || evidence.fulfilledQuantity < 1 ||
+        !Number.isSafeInteger(evidence.releasedQuantity ?? 0) || (evidence.releasedQuantity ?? 0) < 0 ||
+        evidence.fulfilledQuantity + (evidence.releasedQuantity ?? 0) !== evidence.quantity ||
+        (evidence.acknowledgedQuantity ?? evidence.fulfilledQuantity) !== evidence.fulfilledQuantity ||
+        ((evidence.releasedQuantity ?? 0) > 0 && evidence.remainderReleaseConfirmed !== true) ||
+        (actor === "donor" && (evidence.releasedQuantity ?? 0) === 0))) {
         throw new Error("Completion requires NGO acknowledgement of handover.");
     }
+    if (record === "pickup" && from === "acknowledged" && to === "proposed" &&
+        (!Number.isSafeInteger(evidence.remainingQuantity) || evidence.remainingQuantity < 1 || evidence.allTransfersAcknowledged !== true)) throw new Error("Another pickup requires acknowledged transfers and remaining units.");
+    if (record === "pickup" && from === "acknowledged" && to === "cancelled" && evidence.handedOverQuantity !== 0) throw new Error("Transferred units cannot be cancelled.");
     if (record === "request" && from === "accepted" && to === "cancelled" && evidence.handedOverQuantity !== 0) {
         throw new Error("Cancellation requires evidence that no units have been handed over.");
     }
@@ -31,21 +39,22 @@ export const assertTransition = ({ record, from, to, actor, evidence = {} }) => 
         const accounting = quantityAccounting(evidence);
         if (accounting.handedOver !== accounting.total || evidence.allRequestsAcknowledged !== true) throw new Error("Listing completion requires all units acknowledged.");
     }
-    if (record === "listing" && to === "withdrawn" && quantityAccounting(evidence).reserved !== 0) {
+    if (record === "listing" && to === "withdrawn" && (quantityAccounting(evidence).reserved !== 0 || (evidence.unacknowledgedRequests ?? 0) > 0)) {
         throw new Error("Resolve outstanding reservations before withdrawal.");
     }
     return true;
 };
 
-export const listingPolicy = (listing, { pendingRequests = 0 } = {}) => {
+export const listingPolicy = (listing, { pendingRequests = 0, unacknowledgedRequests = 0 } = {}) => {
     const accounting = quantityAccounting(listing);
     if (!["available", "requested", "matched", "pickup_scheduled", "withdrawn", "completed"].includes(listing.status)) throw new Error("Unknown listing status.");
     if (!Number.isSafeInteger(pendingRequests) || pendingRequests < 0) throw new RangeError("Invalid pending request count.");
+    if (!Number.isSafeInteger(unacknowledgedRequests) || unacknowledgedRequests < 0) throw new RangeError("Invalid unacknowledged request count.");
     const open = !["withdrawn", "completed"].includes(listing.status);
     return { requestableQuantity: open ? accounting.available : 0,
         canEditEquipment: open && accounting.allocated === 0 && pendingRequests === 0,
         canEditQuantity: open,
         minimumTotal: Math.max(1, accounting.allocated),
-        canWithdraw: open && accounting.reserved === 0,
+        canWithdraw: open && accounting.reserved === 0 && unacknowledgedRequests === 0,
         pendingRequestsRequireResolution: pendingRequests > 0 };
 };
