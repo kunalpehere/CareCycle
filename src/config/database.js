@@ -7,6 +7,7 @@ import { LifecycleEvent } from "../models/LifecycleEvent.js";
 import { Notification } from "../models/Notification.js";
 import { initializeSecurityStores } from "../services/securityStoreService.js";
 import { initializePrivateStorage } from "../services/privateStorageService.js";
+import { initializeDiagnostics } from "../services/diagnosticsService.js";
 
 mongoose.set("strictQuery", true);
 
@@ -34,6 +35,7 @@ export const connectDatabase = async () => {
         await verifyRequestIndexes(mongoose.connection);
         await initializeSecurityStores(mongoose.connection);
         await initializePrivateStorage(mongoose.connection);
+        await initializeDiagnostics(mongoose.connection);
         return mongoose;
     } catch (error) {
         if (preflight) await preflight.close().catch(() => undefined);

@@ -5,6 +5,7 @@ import { User } from "../models/User.js";
 import { removeDonationImages, saveDonationImages } from "../services/imageService.js";
 import { sendPrivateMedia } from "../services/privateStorageService.js";
 import { sendDonationMail } from "../services/mailService.js";
+import { recordMailOutcome } from "../services/observabilityService.js";
 import { validateDonation } from "../validators/input.js";
 import { changeListing } from "../services/listingPolicyService.js";
 import { expectedListingVersion } from "../services/requestPolicy.js";
@@ -85,9 +86,9 @@ export const createDonation = async (req, res, next) => {
         if (!donation) { await removeDonationImages(images); return res.status(403).send("Your account is unavailable. Sign in again before creating a listing."); }
         persisted = true;
         try {
-            await sendDonationMail({ email: req.auth.user.email, equipment: value.equipment, condition: value.condition });
+            recordMailOutcome("donation", await sendDonationMail());
         } catch (mailError) {
-            console.error("Donation email failed", { message: mailError.message });
+            recordMailOutcome("donation", { sent: false, reason: "delivery-failed" });
         }
         res.redirect(`/donor/dashboard?message=${encodeURIComponent("Listing created. Verified NGOs can review it. Check your requests for the next step.")}`);
     } catch (error) {

@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import { User } from "../models/User.js";
 import { env } from "../config/env.js";
 import { sendAccountMail } from "./mailService.js";
+import { recordMailOutcome } from "./observabilityService.js";
 
 const fields = { reset: "resetCredential", verification: "verificationCredential" };
 export const credentialHash = token => createHash("sha256").update(token).digest("hex");
@@ -31,8 +32,11 @@ export const issueAccountCredential = async (user, purpose, { send = sendAccount
     const url = new URL(purpose === "reset" ? "/reset-password" : "/verify-email", env.appUrl);
     url.searchParams.set("id", user.id);
     url.searchParams.set("token", token);
-    try { return await send({ to: issued.email, purpose, url: url.href }); }
-    catch { return { sent: false, reason: "delivery-failed" }; }
+    let result;
+    try { result = await send({ to: issued.email, purpose, url: url.href }); }
+    catch { result = { sent: false, reason: "delivery-failed" }; }
+    recordMailOutcome("account", result);
+    return result;
 };
 
 export const hasAccountCredential = async (id, purpose, token) => {

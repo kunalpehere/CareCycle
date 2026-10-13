@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import path from "path";
 import { writePrivateMedia, removePrivateMedia } from "./privateStorageService.js";
+import { logEvent } from "./observabilityService.js";
 import multer from "multer";
 
 const supportedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
@@ -48,5 +49,5 @@ export const saveDonationImages = async (files = []) => {
 
 export const removeDonationImages = async (images = []) => {
     const results = await Promise.allSettled(images.map((image) => removePrivateMedia("donations", image)));
-    if (results.some(result => result.status === "rejected")) console.error("Private donation image cleanup deferred. Run the media cleanup dry run after storage recovers.");
+    if (results.some(result => result.status === "rejected")) logEvent("media.cleanup_deferred", { code: "cleanup_deferred" });
 };

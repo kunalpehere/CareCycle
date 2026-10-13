@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import path from "path";
 import { writePrivateMedia, removePrivateMedia } from "./privateStorageService.js";
+import { logEvent } from "./observabilityService.js";
 import multer from "multer";
 
 const allowedTypes = new Set(["application/pdf", "image/jpeg", "image/png"]);
@@ -45,5 +46,5 @@ export const saveVerificationDocument = async (file) => {
 
 export const removeVerificationDocument = async (document) => {
     if (!document?.filename) return;
-    await removePrivateMedia("verification-documents", document).catch(() => console.error("Private verification document cleanup deferred. Run the media cleanup dry run after storage recovers."));
+    await removePrivateMedia("verification-documents", document).catch(() => logEvent("media.cleanup_deferred", { code: "cleanup_deferred" }));
 };

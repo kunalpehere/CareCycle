@@ -7,6 +7,7 @@ import { getDashboardPath } from "../services/roleService.js";
 import { AdminAccessRequest } from "../models/AdminAccessRequest.js";
 import { LOGIN_REALMS, roleCanUseRealm } from "../services/loginRealmService.js";
 import { issueAccountCredential } from "../services/accountRecoveryService.js";
+import { logEvent } from "../services/observabilityService.js";
 
 export const showRegister = (req, res) => res.render("register.ejs", { message: "", selectedRole: req.query.role === "ngo" ? "ngo" : "donor" });
 export const showLogin = (req, res) => res.render("login.ejs", { message: String(req.query.message || "Welcome back!") });
@@ -35,7 +36,7 @@ export const register = async (req, res, next) => {
         await regenerateSession(req);
         await saveLoginSession(req, user);
         setAuthCookie(res, createAccessToken(user.id, user.authVersion));
-        issueAccountCredential(user, "verification").catch(() => console.error("Registration verification email could not be processed."));
+        issueAccountCredential(user, "verification").catch(() => logEvent("task.failed", { code: "internal_failure" }));
         res.redirect(getDashboardPath(user.role));
     } catch (error) {
         if (error?.code === 11000) return res.status(409).render("login.ejs", { message: "Account already exists. Please login." });

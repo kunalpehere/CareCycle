@@ -19,6 +19,8 @@ import { notificationRoutes } from "./routes/notificationRoutes.js";
 import { adminReviewRoutes } from "./routes/adminReviewRoutes.js";
 import { MongoSessionStore, SESSION_LIFETIME_MS } from "./services/securityStoreService.js";
 import { sessionCookieName } from "./services/authCookieService.js";
+import { observeRequest } from "./services/observabilityService.js";
+import { healthRoutes, diagnosticsRoutes } from "./routes/diagnosticsRoutes.js";
 
 export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
     const app = express();
@@ -26,7 +28,10 @@ export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
     app.set("trust proxy", env.trustProxy);
     app.set("view engine", "ejs");
     app.set("views", path.join(path.resolve(), "views"));
+    app.use(observeRequest);
     app.use(securityHeaders);
+    // Probes must work even when persisted sessions/CSRF cannot be established.
+    app.use("/health", healthRoutes);
     app.use(express.static(path.join(path.resolve(), "public")));
     app.use(express.urlencoded({ extended: false, limit: "20kb" }));
     app.use(express.json({ limit: "20kb" }));
@@ -41,6 +46,7 @@ export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
         cookie: { httpOnly: true, secure: env.isProduction, sameSite: "lax", path: "/", maxAge: SESSION_LIFETIME_MS }
     }));
     app.use(issueCsrfToken);
+    app.use(diagnosticsRoutes);
     app.use(authRoutes);
     app.use(adminReviewRoutes);
     app.use(notificationRoutes);

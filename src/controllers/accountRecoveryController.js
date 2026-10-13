@@ -1,6 +1,7 @@
 import { User } from "../models/User.js";
 import { issueAccountCredential, consumeAccountCredential, hasAccountCredential, validRecoveryPassword } from "../services/accountRecoveryService.js";
 import { clearAuthCookie, clearSessionCookie } from "../services/authCookieService.js";
+import { logEvent } from "../services/observabilityService.js";
 
 const render = (res, mode, message = "", extra = {}) => res.render("account-recovery.ejs", { mode, message, id: "", token: "", ...extra });
 export const privateRecoveryPage = (req, res, next) => {
@@ -14,7 +15,7 @@ export const requestPasswordReset = (req, res) => {
     // Respond independently of lookup and provider latency. Never disclose account eligibility.
     if (email.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         User.findOne({ email, status: "active" }).then(user => user && issueAccountCredential(user, "reset"))
-            .catch(() => { console.error("Account recovery request could not be processed."); });
+            .catch(() => logEvent("task.failed", { code: "internal_failure" }));
     }
     return render(res, "forgot", "If an eligible account exists, a reset email will be attempted. Check your inbox and spam folder. Wait at least one minute before retrying. If no email arrives, contact CareCycle through the Contact page.");
 };

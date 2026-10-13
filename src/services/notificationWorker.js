@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 import nodemailer from "nodemailer";
+import mongoose from "mongoose";
+import { logEvent, recordMailOutcome, telemetry, withOperationReference } from "./observabilityService.js";
 import { env } from "../config/env.js";
 import { Notification } from "../models/Notification.js";
 import { eligibleRecipient, processOutboxBatch } from "./notificationService.js";
@@ -32,23 +34,49 @@ export const processEmailBatch = async ({ send = null, now = new Date(), limit =
         attempted += 1;
         try {
             await send(genericNotificationMail({ to: user.email, id: notification._id }));
-            await Notification.updateOne(filter, { $set: { mailStatus: "sent", sentAt: now, leaseToken: null, lockedUntil: null, failureCode: "" } });
         } catch {
+            recordMailOutcome("notification", { sent: false, reason: "delivery-failed" });
             await Notification.updateOne(filter, { $set: { mailStatus: notification.attempts >= MAX_EMAIL_ATTEMPTS ? "failed" : "pending",
                 nextAttemptAt: new Date(now.getTime() + emailRetryDelay(notification.attempts)), leaseToken: null, lockedUntil: null, failureCode: "delivery_failed" } });
+            continue;
         }
+        recordMailOutcome("notification", { sent: true });
+        // A persistence failure after provider acceptance is an infrastructure
+        // failure, not a failed email delivery. The lease remains recoverable.
+        await Notification.updateOne(filter, { $set: { mailStatus: "sent", sentAt: now, leaseToken: null, lockedUntil: null, failureCode: "" } });
     }
     return attempted;
 };
 
 export const startNotificationWorker = ({ intervalMs = 2000, send = createNotificationSender() } = {}) => {
     let running = null, stopped = false;
+    const id = randomUUID();
+    const state = { status: "idle", mailConfigured: Boolean(send), lastSuccessAt: null, lastFailureAt: null, batchStartedAt: null };
+    let publishing = null;
+    const publish = () => {
+        if (publishing) return publishing;
+        const snapshot = { ...state, heartbeatAt: new Date(), expiresAt: new Date(Date.now() + 86400000) };
+        publishing = (async () => {
+            if (mongoose.connection.readyState !== 1) return;
+            await mongoose.connection.db.collection("operational_workers").updateOne({ _id: id }, { $set: snapshot }, { upsert: true, maxTimeMS: 1000, writeConcern: { w: "majority", wtimeout: 1000 } });
+        })().catch(() => logEvent("worker.failed", { reference: id, code: "worker_batch_failed" })).finally(() => { publishing = null; });
+        return publishing;
+    };
+    logEvent("worker.started", { reference: id }); if (!send) logEvent("mail.disabled", { reference: id, channel: "notification", code: "mail_disabled" });
     const tick = () => {
         if (stopped || running) return;
-        running = (async () => { await processOutboxBatch(); await processEmailBatch({ send }); })()
-            .catch(() => console.error("Notification processing failed. Queued updates remain available for retry."))
-            .finally(() => { running = null; });
+        running = withOperationReference(async () => {
+            state.status = "running"; state.batchStartedAt = new Date(); await publish();
+            try {
+                await processOutboxBatch(); await processEmailBatch({ send });
+                state.status = "idle"; state.lastSuccessAt = new Date();
+            } catch {
+                state.status = "failed"; state.lastFailureAt = new Date(); telemetry.increment("workerFailures");
+                logEvent("worker.failed", { code: "worker_batch_failed" });
+            } finally { state.batchStartedAt = null; await publish(); }
+        }).finally(() => { running = null; });
     };
     const timer = setInterval(tick, intervalMs); timer.unref(); tick();
-    return { stop: async () => { stopped = true; clearInterval(timer); if (running) await running; } };
+    const heartbeat = setInterval(() => { void publish(); }, 10000); heartbeat.unref();
+    return { stop: async () => { stopped = true; clearInterval(timer); clearInterval(heartbeat); if (running) await running; if (publishing) await publishing; state.status = "stopped"; await publish(); logEvent("worker.stopped", { reference: id }); } };
 };

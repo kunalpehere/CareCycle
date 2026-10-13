@@ -587,6 +587,8 @@ Suggested commit: `feat(storage): add durable private media persistence`
 
 ### Day 23 - Health, logs, and support diagnostics
 
+Status: implemented and locally verified on October 13, 2026. See [Day 23 evidence](day-23-verification.md) and [operational diagnostics](operational-diagnostics.md). Public liveness/readiness, private administrator diagnostics, bounded metrics, safe correlated JSON logs, worker heartbeats and email failure visibility are implemented. Core readiness remains independent of optional email delivery. Hosted monitoring, alerting and actual deployment outages remain external checks.
+
 Outcome:
 
 - Add correlation IDs, structured error logging, dependency readiness, and notification-worker health.

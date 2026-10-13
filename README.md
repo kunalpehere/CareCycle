@@ -206,6 +206,8 @@ Runtime settings are now validated before startup. See [configuration and local 
 
 New private uploads use MongoDB GridFS rather than the application filesystem. Existing local uploads remain readable until migrated. See [durable private uploads](docs/private-uploads.md) for the manifest dry run, integrity-checked migration, orphan cleanup, and database backup requirements.
 
+Public `/health/live` and `/health/ready` probes report process/dependency health without creating sessions. Administrators can open `/admin/diagnostics` for private aggregate metrics and notification-worker health. See [operational diagnostics](docs/operational-diagnostics.md) for safe structured logs, support references, probe limits and deployment collection requirements.
+
 ## Screenshot gallery
 
 | Participant login | Home | Donation form |

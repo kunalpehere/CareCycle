@@ -1,6 +1,6 @@
-import { startServer } from "./src/server.js";
+import { logEvent, withOperationReference } from "./src/services/observabilityService.js";
 
-startServer().catch((error) => {
-    console.error("Unable to start CareCycle:", error.message);
-    process.exitCode = 1;
+withOperationReference(async () => {
+    try { const { startServer } = await import("./src/server.js"); await startServer(); }
+    catch (error) { logEvent("startup.failed", { code: error.name === "ConfigurationError" ? "configuration_invalid" : "startup_failed" }); process.exitCode = 1; }
 });

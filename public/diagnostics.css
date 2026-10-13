@@ -1,0 +1,8 @@
+.diagnostics-page .surface{padding:clamp(1.25rem,3vw,2rem);margin-top:1.25rem}
+.diagnostics-page h2{margin-top:0;font-family:"Manrope",Arial,sans-serif}
+.diagnostics-page p{line-height:1.6}
+.diagnostics-page a{color:var(--green);font-weight:700}
+.diagnostics-page dl{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem 1.5rem}
+.diagnostics-page dt{font-weight:700;color:var(--muted)}
+.diagnostics-page dd{margin:0;overflow-wrap:anywhere}
+@media(max-width:600px){.diagnostics-page dl{grid-template-columns:1fr;gap:.35rem}.diagnostics-page dd{margin-bottom:.8rem}}

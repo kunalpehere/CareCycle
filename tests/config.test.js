@@ -135,7 +135,9 @@ test("production session cookies require HTTPS from the configured proxy", () =>
             env: { ...isolatedTestEnvironment(), ...production({ TRUST_PROXY }) }, encoding: "utf8", timeout: 30000
         });
         assert.equal(child.status, 0, child.stderr);
-        const result = JSON.parse(child.stdout.trim());
+        // The probe now emits structured request logs as well as its result.
+        const result = child.stdout.trim().split(/\r?\n/).map(line => JSON.parse(line)).find(value => Object.hasOwn(value, "cookieIssued"));
+        assert.ok(result, "Cookie probe result was returned alongside structured logs.");
         assert.equal(result.status, expectedCookie ? 200 : 400);
         assert.equal(result.cookieIssued, expectedCookie);
         if (expectedCookie) {

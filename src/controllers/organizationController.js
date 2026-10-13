@@ -113,7 +113,7 @@ export const updateOrganization = async (req, res, next) => {
         });
         if (!changed) { await removeVerificationDocument(newDocument); return res.status(409).send("This application changed during review. Reload it before submitting again."); }
         committed = true;
-        if (newDocument) await removeVerificationDocument(previousDocument).catch(() => console.error("Previous verification document cleanup failed."));
+        if (newDocument) await removeVerificationDocument(previousDocument);
         res.redirect("/ngo/dashboard?message=Organization%20application%20updated.");
     } catch (error) {
         if (!committed) await removeVerificationDocument(newDocument);
