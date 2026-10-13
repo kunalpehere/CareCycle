@@ -17,6 +17,8 @@ const organizationSchema = new mongoose.Schema({
     },
     verificationStatus: { type: String, enum: ["pending", "verified", "rejected"], default: "pending", index: true },
     verificationDocument: {
+        storage: { type: String, enum: ["gridfs"] },
+        sha256: { type: String, match: /^[a-f0-9]{64}$/ },
         filename: { type: String, required: true },
         originalName: { type: String, required: true, maxlength: 255 },
         mimeType: { type: String, enum: ["application/pdf", "image/jpeg", "image/png"], required: true },

@@ -29,7 +29,7 @@ export const loadNgoRequests = async ({ organizationId, userId, query = {}, dash
     const total = await DonationRequest.countDocuments(filter);
     const pages = Math.max(1, Math.ceil(total / 12)), page = Math.min(positivePage(query.page), pages);
     const requests = await DonationRequest.find(filter).sort(dashboard ? { status: 1, createdAt: 1, _id: 1 } : { createdAt: -1, _id: -1 }).skip((page - 1) * 12).limit(12)
-        .populate({ path: 'donation', select: 'equipment condition quantity allocatedQuantity handedOverQuantity location status donor', populate: { path: 'donor', select: 'name email' } }).lean();
+        .populate({ path: 'donation', select: 'equipment condition quantity allocatedQuantity handedOverQuantity location status donor images', populate: { path: 'donor', select: 'name email' } }).lean();
     for (const request of requests) {
         if (['accepted', 'completed'].includes(request.status) && request.donation?.donor) request.donorContact = { name: request.donation.donor.name, email: request.donation.donor.email };
         if (request.donation) delete request.donation.donor;

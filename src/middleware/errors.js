@@ -1,4 +1,5 @@
 import { SecurityStoreError } from "../services/securityStoreService.js";
+import { MediaStorageError } from "../services/privateStorageService.js";
 export const respondError = (req, res, status, message) => {
     if (req.accepts?.(["html", "json"]) === "html") {
         res.setHeader("Cache-Control", "private, no-store"); res.vary("Cookie");
@@ -11,6 +12,6 @@ export const notFound = (req, res) => respondError(req, res, 404, "Page not foun
 export const errorHandler = (error, req, res, next) => {
     console.error("Request failed", { method: req.method, path: req.path, message: error.message });
     if (res.headersSent) return next(error);
-    const status = error instanceof SecurityStoreError ? 503 : Number.isInteger(error.status) && error.status >= 400 && error.status < 500 ? error.status : 500;
+    const status = error instanceof SecurityStoreError || error instanceof MediaStorageError ? 503 : Number.isInteger(error.status) && error.status >= 400 && error.status < 500 ? error.status : 500;
     return respondError(req, res, status, status === 500 ? "Something went wrong. Please try again later." : error.message);
 };

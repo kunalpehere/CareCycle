@@ -204,6 +204,8 @@ No developer `.env` or running MongoDB service is needed for `npm test`. See [re
 
 Runtime settings are now validated before startup. See [configuration and local replica-set setup](docs/runtime-configuration.md) and run `npm run config:check` to validate without starting the app. Generate independent secrets instead of keeping example placeholders. Existing explicit database names are preserved; `.env.example` uses `CareCycle` for new setups. Production settings must be injected explicitly, including HTTPS, secure database access and actual trusted proxy addresses.
 
+New private uploads use MongoDB GridFS rather than the application filesystem. Existing local uploads remain readable until migrated. See [durable private uploads](docs/private-uploads.md) for the manifest dry run, integrity-checked migration, orphan cleanup, and database backup requirements.
+
 ## Screenshot gallery
 
 | Participant login | Home | Donation form |

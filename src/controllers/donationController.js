@@ -2,7 +2,8 @@ import { guardActiveActor } from "../services/workflowActorService.js";
 import path from "path";
 import { Donation, EQUIPMENT_CONDITIONS, EQUIPMENT_TYPES } from "../models/Donation.js";
 import { User } from "../models/User.js";
-import { donationImageDirectory, removeDonationImages, saveDonationImages } from "../services/imageService.js";
+import { removeDonationImages, saveDonationImages } from "../services/imageService.js";
+import { sendPrivateMedia } from "../services/privateStorageService.js";
 import { sendDonationMail } from "../services/mailService.js";
 import { validateDonation } from "../validators/input.js";
 import { changeListing } from "../services/listingPolicyService.js";
@@ -69,6 +70,7 @@ export const listCurrentUserDonations = async (req, res, next) => {
 
 export const createDonation = async (req, res, next) => {
     let images = [];
+    let persisted = false;
     try {
         const result = validateDonation(req.body), { valid, value } = result;
         if (!valid || req.donationUploadError) return listingErrors(req, res, result, req.donationUploadError ? { images: req.donationUploadError } : {});
@@ -81,6 +83,7 @@ export const createDonation = async (req, res, next) => {
             return created;
         });
         if (!donation) { await removeDonationImages(images); return res.status(403).send("Your account is unavailable. Sign in again before creating a listing."); }
+        persisted = true;
         try {
             await sendDonationMail({ email: req.auth.user.email, equipment: value.equipment, condition: value.condition });
         } catch (mailError) {
@@ -88,7 +91,7 @@ export const createDonation = async (req, res, next) => {
         }
         res.redirect(`/donor/dashboard?message=${encodeURIComponent("Listing created. Verified NGOs can review it. Check your requests for the next step.")}`);
     } catch (error) {
-        await removeDonationImages(images);
+        if (!persisted) await removeDonationImages(images);
         next(error);
     }
 };
@@ -183,9 +186,9 @@ export const serveDonationImage = async (req, res, next) => {
     try {
         const filename = path.basename(req.params.filename);
         if (filename !== req.params.filename || !/^[a-f0-9-]+\.(jpg|png|webp)$/.test(filename)) return res.status(404).send("Image not found");
-        const ownsImage = await Donation.exists({ donor: req.auth.userId, "images.filename": filename });
-        if (!ownsImage) return res.status(404).send("Image not found");
-        res.sendFile(filename, { root: donationImageDirectory });
+        const donation = await Donation.findOne({ donor: req.auth.userId, "images.filename": filename }).select("images").lean();
+        if (!donation) return res.status(404).send("Image not found");
+        await sendPrivateMedia(res, "donations", donation.images.find(image => image.filename === filename));
     } catch (error) {
         next(error);
     }

@@ -1,9 +1,8 @@
 import crypto from "crypto";
 import path from "path";
-import { mkdir, unlink, writeFile } from "fs/promises";
+import { writePrivateMedia, removePrivateMedia } from "./privateStorageService.js";
 import multer from "multer";
 
-export const donationImageDirectory = path.join(path.resolve(), "uploads", "donations");
 const supportedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const donationUpload = multer({
@@ -19,7 +18,7 @@ export const uploadDonationImages = (req, res, next) => donationUpload(req, res,
     next();
 });
 
-const matchesSignature = (file) => {
+export const matchesImageSignature = (file) => {
     const bytes = file.buffer;
     if (file.mimetype === "image/jpeg") return bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
     if (file.mimetype === "image/png") return bytes.length >= 8 && bytes.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
@@ -28,19 +27,17 @@ const matchesSignature = (file) => {
 };
 
 export const saveDonationImages = async (files = []) => {
-    if (files.some((file) => !matchesSignature(file))) {
+    if (files.length > 3 || files.some((file) => !matchesImageSignature(file) || file.size !== file.buffer.length || file.size < 1 || file.size > 5 * 1024 * 1024)) {
         const error = new Error("An uploaded file does not match its declared image type.");
         error.status = 400;
         throw error;
     }
-    await mkdir(donationImageDirectory, { recursive: true });
     const saved = [];
     try {
         for (const file of files) {
             const extension = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" }[file.mimetype];
             const filename = `${crypto.randomUUID()}${extension}`;
-            await writeFile(path.join(donationImageDirectory, filename), file.buffer, { flag: "wx" });
-            saved.push({ filename, originalName: path.basename(file.originalname).slice(0, 255), mimeType: file.mimetype, size: file.size });
+            saved.push(await writePrivateMedia("donations", { filename, originalName: path.basename(file.originalname.replaceAll("\\", "/")).replace(/[\x00-\x1f\x7f]/g, "").slice(0, 255) || "image", mimeType: file.mimetype, size: file.size }, file.buffer));
         }
         return saved;
     } catch (error) {
@@ -50,5 +47,6 @@ export const saveDonationImages = async (files = []) => {
 };
 
 export const removeDonationImages = async (images = []) => {
-    await Promise.all(images.map((image) => unlink(path.join(donationImageDirectory, path.basename(image.filename))).catch(() => undefined)));
+    const results = await Promise.allSettled(images.map((image) => removePrivateMedia("donations", image)));
+    if (results.some(result => result.status === "rejected")) console.error("Private donation image cleanup deferred. Run the media cleanup dry run after storage recovers.");
 };

@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import path from "path";
 import { Donation, EQUIPMENT_CONDITIONS, EQUIPMENT_TYPES } from "../models/Donation.js";
-import { donationImageDirectory } from "../services/imageService.js";
+import { sendPrivateMedia } from "../services/privateStorageService.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { availableListingQuery, withRemainingAvailability, activeListingPipeline } from "../services/availabilityService.js";
 import { BLOCKING_REQUEST_STATUSES } from "../services/requestPolicy.js";
@@ -65,10 +65,23 @@ export const serveDiscoveryImage = async (req, res, next) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(404).send("Image not found");
         const filename = path.basename(req.params.filename);
         if (filename !== req.params.filename || !/^[a-f0-9-]+\.(jpg|png|webp)$/.test(filename)) return res.status(404).send("Image not found");
-        const [listed] = await Donation.aggregate([...activeListingPipeline({ _id: new mongoose.Types.ObjectId(req.params.id), "images.filename": filename }), { $project: { _id: 1 } }]);
+        const [listed] = await Donation.aggregate([...activeListingPipeline({ _id: new mongoose.Types.ObjectId(req.params.id), "images.filename": filename }), { $project: { images: 1 } }]);
         if (!listed) return res.status(404).send("Image not found");
-        res.sendFile(filename, { root: donationImageDirectory });
+        await sendPrivateMedia(res, "donations", listed.images.find(image => image.filename === filename));
     } catch (error) {
         next(error);
     }
+};
+
+export const serveRequestHistoryImage = async (req, res, next) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.requestId)) return res.status(404).send("Image not found");
+        const request = await DonationRequest.findOne({ _id: req.params.requestId, organization: req.verifiedOrganization._id,
+            requestedBy: req.auth.userId, status: { $in: ["accepted", "completed"] } }).select("donation").lean();
+        if (!request) return res.status(404).send("Image not found");
+        const listing = await Donation.findById(request.donation).select("images").lean();
+        const image = listing?.images.find(item => item.filename === req.params.filename);
+        if (!image) return res.status(404).send("Image not found");
+        await sendPrivateMedia(res, "donations", image);
+    } catch (error) { next(error); }
 };

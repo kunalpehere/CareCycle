@@ -568,6 +568,8 @@ Suggested commit: `security: persist sessions and harden deployment boundaries`
 
 ### Day 22 - Durable private uploads
 
+Status: implemented and locally verified on October 13, 2026. See [Day 22 evidence](day-22-verification.md) and [private uploads policy](private-uploads.md). New uploads use private MongoDB GridFS storage with verified bytes, existing authorization and upload limits. Manifest-based migration verifies copies before an atomic reference switch and retains originals; orphan cleanup defaults to a dry run with a 24-hour grace period. Hosted persistence, backup restore and actual redeployment remain external checks.
+
 Outcome:
 
 - Introduce a storage abstraction backed by durable private storage suited to deployment.

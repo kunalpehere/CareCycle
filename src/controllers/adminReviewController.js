@@ -9,7 +9,7 @@ import { positivePage } from "../services/ngoWorkspaceService.js";
 import { guardActiveActor } from "../services/workflowActorService.js";
 import { runTransaction } from "../services/transactionService.js";
 import { respondError } from "../middleware/errors.js";
-import { donationImageDirectory } from "../services/imageService.js";
+import { sendPrivateMedia } from "../services/privateStorageService.js";
 
 const validId = id => typeof id === "string" && mongoose.isValidObjectId(id);
 const historyFor = (targetType, targetId) => AuditLog.find({ targetType, targetId }).sort({ createdAt: -1, _id: -1 }).limit(20).populate("actor", "name").lean();
@@ -96,7 +96,9 @@ export const addAdminReviewNote = async (req, res, next) => {
 export const serveAdminListingImage = async (req, res, next) => {
     try {
         const filename = path.basename(req.params.filename);
-        if (!validId(req.params.id) || filename !== req.params.filename || !await Donation.exists({ _id: req.params.id, "images.filename": filename })) return respondError(req, res, 404, "Image not found.");
-        res.sendFile(filename, { root: donationImageDirectory });
+        if (!validId(req.params.id) || filename !== req.params.filename) return respondError(req, res, 404, "Image not found.");
+        const listing = await Donation.findOne({ _id: req.params.id, "images.filename": filename }).select("images").lean();
+        if (!listing) return respondError(req, res, 404, "Image not found.");
+        await sendPrivateMedia(res, "donations", listing.images.find(image => image.filename === filename));
     } catch (error) { next(error); }
 };

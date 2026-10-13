@@ -1,9 +1,9 @@
-import path from "path";
+import { sendPrivateMedia } from "../services/privateStorageService.js";
 import mongoose from "mongoose";
 import { Organization } from "../models/Organization.js";
 import { validateOrganization } from "../validators/input.js";
 import {
-    removeVerificationDocument, saveVerificationDocument, verificationDocumentDirectory
+    removeVerificationDocument, saveVerificationDocument
 } from "../services/verificationDocumentService.js";
 import { sameOwner } from "../services/authorizationService.js";
 import { respondForbidden } from "../middleware/accessResponses.js";
@@ -130,9 +130,7 @@ export const serveVerificationDocument = async (req, res, next) => {
         const isAdmin = req.auth.user.role === "admin";
         if (!isAdmin && !sameOwner(req.auth.userId, organization.owner)) return respondForbidden(req, res);
         const document = organization.verificationDocument;
-        res.type(document.mimeType);
-        res.setHeader("Content-Disposition", `inline; filename="${path.basename(document.originalName).replaceAll('"', '')}"`);
-        res.sendFile(path.basename(document.filename), { root: verificationDocumentDirectory });
+        await sendPrivateMedia(res, "verification-documents", document);
     } catch (error) {
         next(error);
     }

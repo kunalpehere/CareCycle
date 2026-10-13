@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { startWorkflowFixture } from "../support/workflow-fixture.js";
-import { access, readdir } from "node:fs/promises";
-import path from "node:path";
+import { readPrivateMedia, MEDIA_BUCKET, mediaKey } from "../../src/services/privateStorageService.js";
 
 test("equipment listing create/edit validates details, preserves drafts and protects existing records", { timeout: 180000 }, async t => {
     const f = await startWorkflowFixture();
@@ -41,8 +40,8 @@ test("equipment listing create/edit validates details, preserves drafts and prot
         });
         await t.test("multipart image errors retain text and never save rejected files", async () => {
             const uploader = await f.client(donor);
-            const directory = path.join(f.runtime, 'uploads/donations');
-            const before = await readdir(directory);
+            const files = f.mongoose.connection.db.collection(`${MEDIA_BUCKET}.files`);
+            const before = await files.countDocuments();
             const send = async (bytes, mime = 'image/png', count = 1) => {
                 const form = new FormData();
                 for (const [key,value] of Object.entries(values)) form.set(key, value);
@@ -52,7 +51,8 @@ test("equipment listing create/edit validates details, preserves drafts and prot
             for (const response of [await send(Buffer.from('not a PNG')), await send(Buffer.alloc(5 * 1024 * 1024 + 1)), await send(Buffer.from('synthetic'), 'text/plain'), await send(Buffer.from('synthetic'), 'image/png', 4)]) {
                 assert.equal(response.status, 400); assert.match(response.text, /error-images/); assert.match(response.text, /value="Synthetic Brand"/);
             }
-            assert.deepEqual(await readdir(directory), before);
+            assert.equal(await files.countDocuments(), before);
+            assert.equal(await f.mongoose.connection.db.collection(`${MEDIA_BUCKET}_uploads`).countDocuments(), 0);
         });
         await t.test("failed edits keep trusted image previews/removal choices and successful edits remove only owned images", async () => {
             const imageActor = await f.client(donor);
@@ -62,9 +62,9 @@ test("equipment listing create/edit validates details, preserves drafts and prot
             const response = await imageActor.post(`/donations/${item.id}/edit`, { ...values, equipment: 'cane', _version: 1, quantity: 0, removeImages: image.filename });
             assert.equal(response.status, 400); assert.ok(response.text.includes(`value="${image.filename}" checked`));
             assert.ok(response.text.includes(`/donations/images/${image.filename}`));
-            await access(path.join(f.runtime, 'uploads/donations', image.filename));
+            assert.deepEqual(await readPrivateMedia('donations', image), pixel);
             assert.equal((await imageActor.post(`/donations/${item.id}/edit`, { ...values, equipment: 'cane', _version: 1, removeImages: image.filename, cane_spec_heightAdjustable: 'yes' })).status, 302);
-            await assert.rejects(access(path.join(f.runtime, 'uploads/donations', image.filename)), { code: 'ENOENT' });
+            assert.equal(await f.mongoose.connection.db.collection(`${MEDIA_BUCKET}.files`).findOne({ _id: mediaKey('donations', image.filename) }), null);
         });
         await t.test("pending requests still lock equipment detail edits", async () => {
             const organization = new f.mongoose.Types.ObjectId();

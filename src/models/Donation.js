@@ -27,6 +27,8 @@ const donationSchema = new mongoose.Schema({
         postalCode: { type: String, trim: true, maxlength: 20, default: "" }
     },
     images: [{
+        storage: { type: String, enum: ["gridfs"] },
+        sha256: { type: String, match: /^[a-f0-9]{64}$/ },
         filename: { type: String, required: true },
         originalName: { type: String, required: true, maxlength: 255 },
         mimeType: { type: String, enum: ["image/jpeg", "image/png", "image/webp"], required: true },
