@@ -26,9 +26,11 @@ Use a dedicated database user restricted to the synthetic database. Configure ne
 
 The portable packaging follows the official [Node container guide](https://docs.docker.com/guides/nodejs/develop/) and [Node image practices](https://github.com/nodejs/docker-node/blob/main/docs/BestPractices.md). Database configuration follows the official [MongoDB connection-string reference](https://www.mongodb.com/docs/manual/reference/connection-string/). No particular provider, price or plan has been selected.
 
-## LiveIDE hosting preference
+## Selected hosting approach
 
-The existing LiveIDE chat records Vercel deployment. CareCycle's current continuous worker is designed for a persistent process. Vercel supports Express through functions, but background work must be adapted to its invocation lifecycle or moved to a separate worker/queue. This Day 25 package has **not** added or tested that Vercel adaptation. The included `Dockerfile` and `node index.js` instructions target persistent Node hosting. A hosting decision remains pending: retain the existing runtime on a persistent host, or implement and verify a Vercel adapter and durable worker processing before importing this project there. See [Vercel's Express guidance](https://vercel.com/kb/guide/ship-a-express-app-on-vercel) and [function limits](https://vercel.com/docs/functions/limitations).
+On October 13, 2026, the project owner delegated the hosting choice. **Persistent Node hosting is selected** for CareCycle because it retains the tested Express server and continuous notification worker. Use the included `Dockerfile` or `node index.js` instructions below with a hosted MongoDB replica set. The exact provider/account setup is the next manual deployment step.
+
+LiveIDE used Vercel. Vercel supports Express through functions, but CareCycle's continuous background worker would require a lifecycle adaptation or separate worker/queue. No Vercel adapter is needed for the selected persistent hosting approach. See [Vercel's Express guidance](https://vercel.com/kb/guide/ship-a-express-app-on-vercel).
 
 ## Manual steps, in order
 

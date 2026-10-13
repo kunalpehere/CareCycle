@@ -626,11 +626,11 @@ Suggested commit: `docs(operations): verify backup recovery and data handling`
 
 ### Day 25 - Staging deployment and isolated demo
 
-Status: implemented for local deployment preparation and isolated-demo scope; hosted acceptance and the platform decision remain pending.
+Status: implemented for local deployment preparation and isolated-demo scope; persistent Node hosting selected, hosted acceptance pending.
 Date: October 13, 2026.
 Branch: `codex/day-25-staging-demo`.
 Evidence: [manual staging deployment](staging-deployment.md) and [Day 25 verification](day-25-verification.md).
-The public demo is shared, explicitly synthetic, and bounded; it does not provide public administrative access or real email delivery. The persistent-runtime package is prepared. LiveIDE used Vercel, which requires a separate worker/runtime adaptation before this CareCycle package can use that hosting model. Do not mark the entire stage complete until the hosted checks pass.
+The public demo is shared, explicitly synthetic, and bounded; it does not provide public administrative access or real email delivery. The persistent-runtime package is prepared. On October 13, the project owner delegated the hosting choice; persistent Node hosting was selected to retain the tested server and continuous worker architecture. Do not mark the entire stage complete until the hosted checks pass.
 
 Outcome:
 
