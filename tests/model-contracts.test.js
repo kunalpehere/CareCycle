@@ -34,6 +34,6 @@ test("only a current attempt blocks another organization request", () => {
 });
 
 test("administrative actions have an indexed audit contract", () => {
-    assert.deepEqual(AuditLog.schema.path("targetType").enumValues, ["organization", "user"]);
+    assert.deepEqual(AuditLog.schema.path("targetType").enumValues, ["organization", "user", "donation", "request"]);
     assert.ok(AuditLog.schema.indexes().some(([fields]) => fields.targetType === 1 && fields.targetId === 1 && fields.createdAt === -1));
 });

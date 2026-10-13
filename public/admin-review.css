@@ -1,0 +1,5 @@
+.review-record,.review-history{padding:1.25rem;margin:1rem 0}
+.review-record dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.review-record dt{font-weight:700}.review-record dd{margin:.25rem 0;overflow-wrap:anywhere}
+.review-form{display:grid;gap:.75rem;max-width:36rem;margin-top:1.5rem}.review-form textarea{width:100%;padding:.75rem;background:white;border:1px solid #596d63;border-radius:8px;font:inherit}
+.review-form button{border:1px solid #075a43}.review-history li{margin:1rem 0}.admin-pagination{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0}
+@media(max-width:650px){.review-record dl{grid-template-columns:1fr}}

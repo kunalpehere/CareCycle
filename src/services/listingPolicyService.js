@@ -1,3 +1,4 @@
+import { guardActiveActor } from "./workflowActorService.js";
 import { Donation } from "../models/Donation.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { OPEN_LISTING_STATUSES } from "./availabilityService.js";
@@ -18,6 +19,7 @@ export const resolvePendingRequests = async ({ donationId, available, withdrawn 
 };
 
 export const changeListing = async ({ donationId, donorId, expectedVersion, action, value = {}, images }) => runTransaction(Donation.db, async session => {
+            if (!await guardActiveActor(donorId, session, "donor")) return { changed: false, reason: "unavailable" };
     const listing = await Donation.findOne({ _id: donationId, donor: donorId }).session(session).lean();
     if (!listing) return { changed: false, reason: "ownership" };
     if (!OPEN_LISTING_STATUSES.includes(listing.status) || expectedVersion === null || expectedVersion !== (listing.__v ?? 0)) return { changed: false, reason: "stale" };

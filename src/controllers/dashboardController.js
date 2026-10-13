@@ -17,7 +17,7 @@ export const showNgoDashboard = async (req, res, next) => {
 
 export const showAdminDashboard = async (req, res, next) => {
     try {
-        const data = await loadAdminDashboardData();
+        const data = await loadAdminDashboardData(req.query);
         res.render("admin-dashboard.ejs", { user: req.auth.user, message: String(req.query.message || ''), ...data });
     } catch (error) {
         next(error);

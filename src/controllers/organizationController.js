@@ -9,6 +9,8 @@ import { sameOwner } from "../services/authorizationService.js";
 import { respondForbidden } from "../middleware/accessResponses.js";
 import { runTransaction } from "../services/transactionService.js";
 import { recordOrganizationEvent } from "../services/notificationService.js";
+import { AuditLog } from "../models/AuditLog.js";
+import { guardActiveActor } from "../services/workflowActorService.js";
 
 const organizationFormData = (overrides = {}) => ({
     organization: null,
@@ -43,6 +45,7 @@ export const createOrganization = async (req, res, next) => {
 
         savedDocument = await saveVerificationDocument(req.file);
         const organization = await runTransaction(Organization.db, async session => {
+            if (!await guardActiveActor(req.auth.userId, session, "ngo")) { const error = new Error("Your account is unavailable. Sign in again before submitting an application."); error.status = 403; throw error; }
             const [created] = await Organization.create([{
                 owner: req.auth.userId,
                 ...value,
@@ -102,6 +105,7 @@ export const updateOrganization = async (req, res, next) => {
         if (req.file) newDocument = await saveVerificationDocument(req.file);
         const previousDocument = organization.verificationDocument?.toObject?.() || organization.verificationDocument;
         const changed = await runTransaction(Organization.db, async session => {
+            if (!await guardActiveActor(req.auth.userId, session, "ngo")) return false;
             const current = await Organization.findOneAndUpdate({ _id: organization._id, owner: req.auth.userId, __v: organization.__v, verificationStatus: organization.verificationStatus },
                 { $set: { ...value, ...(newDocument ? { verificationDocument: newDocument } : {}), verificationStatus: "pending", rejectionReason: "", submittedAt: new Date(), verifiedAt: null, verifiedBy: null }, $inc: { __v: 1 } }, { new: true, runValidators: true, session });
             if (!current) return false;
@@ -139,7 +143,8 @@ export const showAdminOrganizationReview = async (req, res, next) => {
         if (!mongoose.Types.ObjectId.isValid(req.params.organizationId)) return res.status(404).send("Organization not found");
         const organization = await Organization.findById(req.params.organizationId).populate("owner", "name email status");
         if (!organization) return res.status(404).send("Organization not found");
-        res.render("admin-organization-review.ejs", { organization, message: String(req.query.message || '') });
+        const history = await AuditLog.find({ targetType: "organization", targetId: organization._id }).sort({ createdAt: -1, _id: -1 }).limit(20).populate("actor", "name").lean();
+        res.render("admin-organization-review.ejs", { organization, history, message: String(req.query.message || '') });
     } catch (error) {
         next(error);
     }

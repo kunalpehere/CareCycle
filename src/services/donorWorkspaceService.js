@@ -100,7 +100,7 @@ export const buildDonorWorkspace = ({ donations, requests, donorId, query = {}, 
             canEdit: donation.status === "available" && !donation.allocatedQuantity && !records.some(request => request.status === "pending"),
             canWithdraw: donation.status === "available" && !donation.allocatedQuantity,
             canChangeQuantity: OPEN_LISTING_STATUSES.includes(donation.status),
-            requestable: accounting && OPEN_LISTING_STATUSES.includes(donation.status) ? accounting.available : 0 };
+            requestable: accounting && OPEN_LISTING_STATUSES.includes(donation.status) && donation.moderationStatus !== "hidden" && !donation.donorSuspended ? accounting.available : 0 };
     });
     const selected = listings.filter(item => (!equipment || item.equipment === equipment) && (filter === "all" || filter === "active" && OPEN_LISTING_STATUSES.includes(item.status) || filter === "history" && ["completed", "withdrawn"].includes(item.status) || item.progress.some(request => request.next?.group === filter)));
     const selectedIds = new Set(selected.map(item => id(item._id)));

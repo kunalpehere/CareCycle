@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const auditLogSchema = new mongoose.Schema({
     actor: { type: mongoose.Schema.Types.ObjectId, ref: "users", required: true, index: true },
     action: { type: String, required: true, trim: true, maxlength: 100, index: true },
-    targetType: { type: String, enum: ["organization", "user"], required: true },
+    targetType: { type: String, enum: ["organization", "user", "donation", "request"], required: true },
     targetId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
     details: { type: mongoose.Schema.Types.Mixed, default: {} }
 }, { timestamps: true, versionKey: false });

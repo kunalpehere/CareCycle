@@ -6,6 +6,7 @@ import { runTransaction } from "./transactionService.js";
 import { resolvePendingRequests } from "./listingPolicyService.js";
 import { BLOCKING_REQUEST_STATUSES } from "./requestPolicy.js";
 import { recordRequestEvent } from "./notificationService.js";
+import { guardActiveActor } from "./workflowActorService.js";
 
 export const buildCapacityReservationQuery = (request, donorId) => ({
     _id: request.donation,
@@ -26,6 +27,7 @@ export const createMatchingService = ({ DonationModel = Donation, RequestModel =
                 if (!Number.isSafeInteger(current.quantity) || current.quantity < 1 || current.quantity > 100) return { accepted: false, reason: "capacity" };
                 const listing = await DonationModel.findOne({ _id: current.donation, donor: donorId }).session(session).lean();
                 if (!listing) return { accepted: false, reason: "ownership" };
+                if (!await guardActiveActor(donorId, session, "donor") || !await guardActiveActor(current.requestedBy, session, "ngo")) return { accepted: false, reason: "unavailable" };
                 quantityAccounting(listing);
                 const donation = await DonationModel.findOneAndUpdate(buildCapacityReservationQuery(current, donorId), {
                     $inc: { allocatedQuantity: current.quantity, __v: 1 }, $set: { status: "available" }
@@ -46,6 +48,9 @@ export const createMatchingService = ({ DonationModel = Donation, RequestModel =
         }
     };
     const createPendingRequest = async data => transact(async session => {
+        if (!await guardActiveActor(data.requestedBy, session, "ngo")) return null;
+        const donor = await DonationModel.findById(data.donation).select("donor").session(session).lean();
+        if (!donor || !await guardActiveActor(donor.donor, session, "donor")) return null;
         const blocking = await RequestModel.exists({ donation: data.donation, organization: data.organization, status: { $in: BLOCKING_REQUEST_STATUSES } }).session(session);
         if (blocking) { const error = new Error("Your organization already has a current request for this listing."); error.code = 11000; throw error; }
         // A version touch serializes creation with allocation without reserving stock.

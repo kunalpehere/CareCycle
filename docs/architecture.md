@@ -88,7 +88,7 @@ flowchart LR
 
 | Model | Stored contract and constraints |
 |---|---|
-| [`User`](../src/models/User.js) | Unique email, hashed password, donor/NGO/admin role, active/suspended/deleted status. Day 19 adds single-use hashed verification/reset credentials, `emailVerifiedAt`, and `authVersion` for password-reset revocation. See [account recovery](account-recovery.md). |
+| [`User`](../src/models/User.js) | Unique email, hashed password, donor/NGO/admin role, active/suspended/deleted status. Day 19 adds single-use hashed verification/reset credentials, `emailVerifiedAt`, and `authVersion`. Day 20 adds versioned moderation and transaction actor guards; suspension/reactivation also revoke earlier authentication. See [account recovery](account-recovery.md) and [administrative review](admin-review.md). |
 | [`Organization`](../src/models/Organization.js) | Unique owner; optional unique registration number; contact/address/profile fields; required document metadata; pending/verified/rejected review, reason and review timestamps/actor. |
 | [`Donation`](../src/models/Donation.js) | Donor, category, condition, quantity 1 to 100, `allocatedQuantity`, description/location, up to three image metadata entries. Status enum: available/requested/matched/pickup_scheduled/completed/withdrawn. Optional unique legacy migration key. |
 | [`DonationRequest`](../src/models/DonationRequest.js) | Donation, organization, requesting user, quantity 1 to 100, beneficiary summary, need message, decision metadata. Status enum: pending/accepted/rejected/cancelled/completed. Unique donation/organization pair across all statuses. |

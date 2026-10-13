@@ -1,3 +1,4 @@
+import { guardActiveActor } from "./workflowActorService.js";
 import ejs from "ejs";
 import path from "node:path";
 import { Donation } from "../models/Donation.js";
@@ -43,6 +44,7 @@ export const validateReceiptInput = (action, body) => {
 export const changeReceipt = async ({ requestId, version, actorId, actorRole, organizationId, action, body, now = new Date() }) => {
     if (!receiptActions.includes(action) || version === null || !validateReceiptInput(action, body) || !["donor", "ngo"].includes(actorRole)) return false;
     return runTransaction(Donation.db, async session => {
+            if (!await guardActiveActor(actorId, session, actorRole)) return false;
         const request = await DonationRequest.findById(requestId).session(session);
         if (!request || !canIssueReceipt(request) || (request.receipt?.version || 0) !== version) return false;
         if (actorRole === "ngo" && String(request.organization) !== String(organizationId)) return false;

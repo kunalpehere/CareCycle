@@ -531,6 +531,8 @@ Suggested commit: `feat(auth): add verified email and secure account recovery`
 
 ### Day 20 - Administrative review and moderation
 
+Status: implemented and locally verified on October 13, 2026. See [Day 20 evidence](day-20-verification.md) and [administrative review policy](admin-review.md). Versioned organization decisions, atomic account/listing moderation, private audit history and commitment exception review are implemented. Core workflow actor guards serialize mutations with suspension. Existing reservations and handover evidence are preserved. Hosted CI, production, real mail and broader external accessibility checks remain unverified.
+
 Outcome:
 
 - Make verification queues, decision evidence, discrepancies, and suspended-account effects clear.

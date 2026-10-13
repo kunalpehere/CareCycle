@@ -1,0 +1,16 @@
+import { Router } from "express";
+import { authenticate } from "../middleware/authenticate.js";
+import { authorizeRoles } from "../middleware/authorize.js";
+import { actionRateLimit } from "../middleware/rateLimit.js";
+import { verifyCsrfToken } from "../middleware/csrf.js";
+import { showAdminUser, showAdminListings, showAdminListing, changeAdminListing, showAdminExceptions, showAdminException, addAdminReviewNote, serveAdminListingImage } from "../controllers/adminReviewController.js";
+export const adminReviewRoutes = Router();
+adminReviewRoutes.use("/admin", authenticate, authorizeRoles("admin"));
+adminReviewRoutes.get("/admin/users/:userId/review", showAdminUser);
+adminReviewRoutes.get("/admin/listings", showAdminListings);
+adminReviewRoutes.get("/admin/listings/:id/review", showAdminListing);
+adminReviewRoutes.get("/admin/listings/:id/images/:filename", serveAdminListingImage);
+adminReviewRoutes.post("/admin/listings/:id/:status", actionRateLimit, verifyCsrfToken, changeAdminListing);
+adminReviewRoutes.get("/admin/exceptions", showAdminExceptions);
+adminReviewRoutes.get("/admin/requests/:requestId/review", showAdminException);
+adminReviewRoutes.post("/admin/requests/:requestId/note", actionRateLimit, verifyCsrfToken, addAdminReviewNote);

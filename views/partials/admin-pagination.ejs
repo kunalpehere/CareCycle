@@ -1,0 +1,4 @@
+<p><%= pagination.total %> records match. Page <%= pagination.page %> of <%= pagination.totalPages %>.</p>
+<nav class="admin-pagination" aria-label="Review queue pages">
+<% if (pagination.page > 1) { %><a href="<%= base %>?<%= filter %>&page=<%= pagination.page - 1 %>">Previous page</a><% } %>
+<% if (pagination.page < pagination.totalPages) { %><a href="<%= base %>?<%= filter %>&page=<%= pagination.page + 1 %>">Next page</a><% } %></nav>

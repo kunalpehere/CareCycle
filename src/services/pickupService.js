@@ -1,3 +1,4 @@
+import { guardActiveActor } from "./workflowActorService.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { canArrangePickup } from "./fulfillmentAccounting.js";
 import { recordRequestEvent } from "./notificationService.js";
@@ -59,6 +60,7 @@ export const updatePickup = async ({ request, version, actorId, actorRole, actio
     // MongoDB cannot set children of null. The initial write creates the whole plan.
     const update = version ? { $set: fields, $push: { "pickup.history": event } } : { $set: { pickup: { status: "proposed", version: 1, proposal: nextProposal, confirmedBy: null, confirmedAt: null, history: [event] } } };
     return runTransaction(DonationRequest.db, async session => {
+            if (!await guardActiveActor(actorId, session, actorRole)) return false;
         const changed = await DonationRequest.findOneAndUpdate(filter, update, { runValidators: true, new: true, session });
         if (changed) await recordRequestEvent({ request: changed, kind: `pickup_${event.action}`, key: `pickup:${version + 1}`, session });
         return Boolean(changed);
@@ -80,6 +82,7 @@ export const reportPickupIssue = async ({ request, version, actorId, actorRole, 
         fields = { "pickup.missedReport.disputed": false, "pickup.missedReport.disputedBy": null };
     } else return false;
     return runTransaction(DonationRequest.db, async session => {
+            if (!await guardActiveActor(actorId, session, actorRole)) return false;
         const changed = await DonationRequest.findOneAndUpdate({ _id: request._id, status: "accepted", ...pickupVersionFilter(version), ...((request.handedOverQuantity ?? 0) === 0 ? noRecordedHandover() : { handedOverQuantity: request.handedOverQuantity }) }, {
             $set: fields, $inc: { "pickup.version": 1 }, $push: { "pickup.history": { action: action === "dispute" ? "disputed" : action === "resolve" ? "resolved" : "missed", actor: actorId, actorRole, at: now, version: version + 1, proposal: plan.proposal, reason: reason.trim() } }
         }, { new: true, runValidators: true, session });

@@ -1,3 +1,4 @@
+import { guardActiveActor } from "../services/workflowActorService.js";
 import path from "path";
 import { Donation, EQUIPMENT_CONDITIONS, EQUIPMENT_TYPES } from "../models/Donation.js";
 import { User } from "../models/User.js";
@@ -74,7 +75,12 @@ export const createDonation = async (req, res, next) => {
 
         try { images = await saveDonationImages(req.files); }
         catch (error) { if (error.status === 400) return listingErrors(req, res, result, { images: "An image does not match its declared format. Choose a valid JPEG, PNG or WebP file." }); throw error; }
-        const donation = await Donation.create({ donor: req.auth.userId, ...value, images });
+        const donation = await runTransaction(Donation.db, async session => {
+            if (!await guardActiveActor(req.auth.userId, session, "donor")) return null;
+            const [created] = await Donation.create([{ donor: req.auth.userId, ...value, images }], { session });
+            return created;
+        });
+        if (!donation) { await removeDonationImages(images); return res.status(403).send("Your account is unavailable. Sign in again before creating a listing."); }
         try {
             await sendDonationMail({ email: req.auth.user.email, equipment: value.equipment, condition: value.condition });
         } catch (mailError) {

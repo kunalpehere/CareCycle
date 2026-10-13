@@ -44,6 +44,8 @@ try {
     await seedAccessibilityFixtures(root);
     const { seedRecoveryBrowserFixtures } = await import("./recovery-browser-fixtures.js");
     await seedRecoveryBrowserFixtures(root);
+    const { seedAdminReviewFixtures } = await import("./admin-review-browser-fixtures.js");
+    await seedAdminReviewFixtures(root);
     const { startNotificationWorker } = await import("../../src/services/notificationWorker.js");
     notificationWorker = startNotificationWorker({ intervalMs: 250, send: null });
     server = createApp().listen(4183, "127.0.0.1");

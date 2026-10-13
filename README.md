@@ -114,6 +114,7 @@ The portfolio release targets one reliable equipment journey from listing throug
 - File size, count, MIME-type, and binary-signature validation
 - Transactional request acceptance and quantity reservation to prevent over-allocation
 - Administrative audit records
+- Accountable organization, account and listing review with private commitment exceptions. See [administrative moderation](docs/admin-review.md).
 - No public administrator registration
 
 ## Project structure

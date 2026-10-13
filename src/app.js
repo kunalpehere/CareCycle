@@ -16,6 +16,7 @@ import { discoveryRoutes } from "./routes/discoveryRoutes.js";
 import { requestRoutes } from "./routes/requestRoutes.js";
 import { receiptRoutes } from "./routes/receiptRoutes.js";
 import { notificationRoutes } from "./routes/notificationRoutes.js";
+import { adminReviewRoutes } from "./routes/adminReviewRoutes.js";
 
 export const createApp = () => {
     const app = express();
@@ -37,6 +38,7 @@ export const createApp = () => {
     }));
     app.use(issueCsrfToken);
     app.use(authRoutes);
+    app.use(adminReviewRoutes);
     app.use(notificationRoutes);
     app.use(pageRoutes);
     app.use(dashboardRoutes);

@@ -1,3 +1,4 @@
+import { guardActiveActor } from "../services/workflowActorService.js";
 import mongoose from "mongoose";
 import { Donation } from "../models/Donation.js";
 import { DonationRequest } from "../models/DonationRequest.js";
@@ -91,6 +92,7 @@ export const decideEquipmentRequest = async (req, res, next) => {
 
         if (decision === "reject") {
             const rejected = await runTransaction(DonationRequest.db, async session => {
+                if (!await guardActiveActor(req.auth.userId, session, req.auth.user.role)) return null;
                 const changed = await DonationRequest.findOneAndUpdate(
                     { _id: request._id, status: "pending" },
                     { $set: { status: "rejected", responseNote: value.responseNote, respondedAt: new Date(), respondedBy: req.auth.userId } },
@@ -106,7 +108,7 @@ export const decideEquipmentRequest = async (req, res, next) => {
         const result = await acceptPendingRequest({ request, donorId: req.auth.userId, responseNote: value.responseNote, respondedBy: req.auth.userId });
         if (!result.accepted) {
             if (result.reason === "ownership") return res.status(403).send("This request belongs to another donor's listing.");
-            const message = result.reason === "capacity" ? "The listing no longer has enough unallocated quantity for this request." : "This request has already been decided.";
+            const message = ["capacity", "unavailable"].includes(result.reason) ? "This listing or participant is unavailable, or there is no longer enough unallocated quantity. Review the current request before continuing." : "This request has already been decided.";
             return await workflowConflict(req, res, { donor: true, donationId: request.donation, message });
         }
         res.redirect("/donor/requests?message=Request%20accepted.%20Contact%20details%20are%20now%20available.");
@@ -121,6 +123,7 @@ export const cancelEquipmentRequest = async (req, res, next) => {
         const owned = await DonationRequest.findOne({ _id: req.params.requestId, organization: req.verifiedOrganization._id }).select("donation");
         if (!owned) return res.status(404).send("Request not found");
         const request = await runTransaction(DonationRequest.db, async session => {
+                if (!await guardActiveActor(req.auth.userId, session, req.auth.user.role)) return null;
             const changed = await DonationRequest.findOneAndUpdate(
                 { _id: req.params.requestId, organization: req.verifiedOrganization._id, status: "pending" },
                 { $set: { status: "cancelled", resolutionReason: "organization_cancelled", responseNote: "Your organization cancelled this pending request.", respondedAt: new Date(), respondedBy: req.auth.userId } },

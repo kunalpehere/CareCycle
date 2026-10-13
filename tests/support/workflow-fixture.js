@@ -57,7 +57,7 @@ export const startWorkflowFixture = async () => {
         await new Promise((resolve, reject) => { server.once("listening", resolve); server.once("error", reject); });
         const origin = `http://127.0.0.1:${server.address().port}`;
         let clientNumber = 0;
-        const client = async (user, { token = user ? createAccessToken(user.id) : "" } = {}) => {
+        const client = async (user, { token = user ? createAccessToken(user.id, user.authVersion) : "" } = {}) => {
             const address = `192.0.2.${++clientNumber}`;
             let cookie = token ? `token=${token}` : "";
             let csrf;

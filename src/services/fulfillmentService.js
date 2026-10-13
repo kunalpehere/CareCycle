@@ -1,3 +1,4 @@
+import { guardActiveActor } from "./workflowActorService.js";
 import mongoose from "mongoose";
 import { Donation } from "../models/Donation.js";
 import { DonationRequest } from "../models/DonationRequest.js";
@@ -25,6 +26,7 @@ export const changeFulfillment = async ({ requestId, version, actorId, actorRole
     if (!fulfillmentActions.includes(action) || version === null || !validateFulfillmentInput(action, body)) return false;
     try {
         return await runTransaction(Donation.db, async session => {
+            if (!await guardActiveActor(actorId, session, actorRole)) return false;
             const request = await DonationRequest.findById(requestId).session(session);
             if (!request || request.status !== "accepted" || !request.pickup || request.pickup.version !== version || request.pickup.missedReport?.disputed) return false;
             if (!["donor", "ngo"].includes(actorRole) || (actorRole === "ngo" && String(request.organization) !== String(organizationId))) return false;

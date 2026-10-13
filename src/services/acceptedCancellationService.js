@@ -1,3 +1,4 @@
+import { guardActiveActor } from "./workflowActorService.js";
 import { Donation } from "../models/Donation.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { runTransaction } from "./transactionService.js";
@@ -12,6 +13,7 @@ export const cancelAcceptedRequest = async ({ requestId, version, actorId, actor
     if (version === null || !["donor", "ngo"].includes(actorRole) || !noHandover || !validatePickupReason({ reason })) return false;
     try {
         return await runTransaction(Donation.db, async session => {
+            if (!await guardActiveActor(actorId, session, actorRole)) return false;
             const request = await DonationRequest.findById(requestId).session(session).lean();
             if (!request || request.status !== "accepted" || (request.handedOverQuantity || 0) !== 0 || (request.pickup?.version || 0) !== version || request.pickup?.missedReport?.disputed || (request.pickup && !["proposed", "confirmed", "missed", "acknowledged"].includes(request.pickup.status))) return false;
             if (actorRole === "ngo" && String(request.organization) !== String(organizationId)) return false;

@@ -33,6 +33,11 @@ const donationSchema = new mongoose.Schema({
         size: { type: Number, required: true, min: 1, max: 5 * 1024 * 1024 }
     }],
     status: { type: String, enum: DONATION_STATUSES, default: "available", index: true },
+    moderationStatus: { type: String, enum: ["visible", "hidden"], default: "visible", index: true },
+    moderationReason: { type: String, maxlength: 500, default: "" },
+    moderatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users", default: null },
+    moderatedAt: { type: Date, default: null },
+    donorSuspended: { type: Boolean, default: false },
     legacySourceKey: { type: String, unique: true, sparse: true }
 }, { timestamps: true });
 

@@ -1,0 +1,5 @@
+<section class="surface review-history"><h2>Decision history</h2><p>Most recent 20 administrative entries. Older entries remain stored.</p>
+<% if (!history.length) { %><p>No administrative decisions recorded.</p><% } else { %><ol><% history.forEach(entry => { %>
+<li><strong><%= entry.action.replaceAll('.', ' ').replaceAll('_', ' ') %></strong><p>By <%= entry.actor?.name || 'Unavailable administrator' %> on <%= new Date(entry.createdAt).toLocaleString() %></p><p><%= entry.details?.reason || 'No reason recorded in this older entry.' %></p>
+<% if (entry.details?.document) { %><p>Reviewed document: <%= entry.details.document.name || 'Unnamed document' %> (<%= entry.details.document.size || 0 %> bytes). Application version <%= entry.details.version %>.</p><% } %></li>
+<% }) %></ol><% } %></section>

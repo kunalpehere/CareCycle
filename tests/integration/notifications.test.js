@@ -103,10 +103,10 @@ test("durable private notification outbox and bounded email delivery", { timeout
             assert.equal(await Notification.countDocuments({ recipient: admin._id, kind: "organization_submitted" }), 1);
             assert.match((await member.get("/notifications")).text, /Organization application submitted/);
             const reviewer = await client(admin);
-            assert.equal((await reviewer.post(`/admin/organizations/${org.id}/approve`)).status, 302);
+            assert.equal((await reviewer.post(`/admin/organizations/${org.id}/approve`, { _version: String((await Organization.findById(org.id)).__v || 0), reason: "Synthetic evidence reviewed and approved", evidenceReviewed: "yes" })).status, 302);
             await processOutboxBatch();
             assert.equal(await Notification.countDocuments({ recipient: ngo._id, kind: "organization_verified" }), 1);
-            assert.equal((await reviewer.post(`/admin/organizations/${org.id}/approve`)).status, 409);
+            assert.equal((await reviewer.post(`/admin/organizations/${org.id}/approve`, { _version: String((await Organization.findById(org.id)).__v || 0), reason: "Synthetic evidence reviewed and approved", evidenceReviewed: "yes" })).status, 409);
         });
         await t.test("pickup proposals and confirmations create distinct durable updates", async () => {
             await accept();

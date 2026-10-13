@@ -1,3 +1,4 @@
+import { User } from "../../src/models/User.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import mongoose from "mongoose";
@@ -16,10 +17,11 @@ test("request index migration and listing policies preserve history on a real re
     const database = await startIsolatedDatabase();
     try {
         await mongoose.connect(database.getUri(), { dbName: process.env.MONGO_DB_NAME, autoIndex: false, autoCreate: false });
-        const donor = new mongoose.Types.ObjectId();
+        const donor = (await User.create({name:"Synthetic Policy Donor",email:"policy-donor@example.invalid",password:"fixture",role:"donor"}))._id;
+        const member = (await User.create({name:"Synthetic Policy NGO",email:"policy-ngo@example.invalid",password:"fixture",role:"ngo"}))._id;
         const org = new mongoose.Types.ObjectId();
         const listing = (values = {}) => Donation.create({ donor, equipment: "walker", condition: "good", quantity: 5, ...values });
-        const data = (item, quantity = 2, organization = org) => ({ donation: item._id, organization, requestedBy: donor, quantity,
+        const data = (item, quantity = 2, organization = org) => ({ donation: item._id, organization, requestedBy: member, quantity,
             beneficiary: "Synthetic beneficiary summary", message: "Synthetic request policy need statement" });
         const collection = mongoose.connection.collection("donation_requests");
         const item = await listing();
