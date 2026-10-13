@@ -14,7 +14,7 @@ export const seedAccessibilityFixtures = async root => {
     const document = await saveVerificationDocument({ buffer: bytes, size: bytes.length, mimetype: 'application/pdf', originalname: 'synthetic.pdf' });
     for (const project of ['desktop','mobile']) {
         const users = {};
-        for (const [kind,role] of [['donor','donor'],['empty','donor'],['ngo','ngo'],['pending','ngo'],['rejected','ngo'],['new','ngo'],['admin','admin']]) users[kind] = await User.create({ name: `Synthetic ${kind} Accessibility`, email: `${kind}-day18-${project}@example.invalid`, password, role });
+        for (const [kind,role] of [['donor','donor'],['empty','donor'],['ngo','ngo'],['pending','ngo'],['rejected','ngo'],['new','ngo'],['admin','admin']]) users[kind] = await User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${kind} Accessibility`, email: `${kind}-day18-${project}@example.invalid`, password, role });
         const organizations = {};
         for (const kind of ['ngo','pending','rejected']) organizations[kind] = await Organization.create({ owner: users[kind]._id, name: `Synthetic ${kind} Organization`, contactPerson: 'Synthetic Coordinator', contactEmail: users[kind].email, description: 'Synthetic organization for accessibility verification only', verificationStatus: kind === 'ngo' ? 'verified' : kind,
             verificationDocument: document, registrationNumber: `SYNTHETIC18-${kind}-${project}`, rejectionReason: kind === 'rejected' ? 'Synthetic corrections: provide updated organization evidence.' : '', address: { line1: 'Synthetic Organization Road', city:'Pune',state:'Maharashtra',postalCode:'411001' } });

@@ -109,6 +109,7 @@ The portfolio release targets one reliable equipment journey from listing throug
 - Session-bound CSRF tokens
 - Authentication and action rate limiting
 - Suspended-account enforcement
+- Single-use email verification and password recovery with authentication revocation. See [account recovery and delivery limits](docs/account-recovery.md).
 - Private verification documents and donation images
 - File size, count, MIME-type, and binary-signature validation
 - Transactional request acceptance and quantity reservation to prevent over-allocation

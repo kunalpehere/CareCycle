@@ -7,7 +7,7 @@ test("private receipt snapshots, revisions and outcome workflows", { timeout: 18
     const { User, Organization, Donation, DonationRequest, mongoose, client } = fixture;
     let seq = 0, owner, member;
     try {
-        const user = role => User.create({ name: `Synthetic ${role}`, email: `day12-${++seq}@example.invalid`, password: "unused-fixture", role });
+        const user = role => User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${role}`, email: `day12-${++seq}@example.invalid`, password: "unused-fixture", role });
         const donor = await user("donor"), ngo = await user("ngo"), otherDonor = await user("donor"), otherNgo = await user("ngo"), admin = await user("admin");
         const orgData = actor => ({ owner: actor._id, name: "Synthetic Day 12 Organization", contactPerson: "Private Coordinator", contactEmail: actor.email, description: "Synthetic receipt verification organization", verificationStatus: "verified", address: { city: "Pune", state: "Maharashtra" }, verificationDocument: { filename: "synthetic.pdf", originalName: "synthetic.pdf", mimeType: "application/pdf", size: 1 } });
         const org = await Organization.create(orgData(ngo)); await Organization.create(orgData(otherNgo));

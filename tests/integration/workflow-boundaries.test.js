@@ -10,7 +10,7 @@ test("database HTTP authorization, privacy and recovery boundaries", { timeout: 
     const imageBytes = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l1kAAAAASUVORK5CYII=", "base64");
     let sequence = 0;
     try {
-        const user = (role, values = {}) => User.create({ name: `Synthetic ${role} ${++sequence}`, email: `day8-${sequence}@example.invalid`, password: "unused-synthetic-fixture", role, ...values });
+        const user = (role, values = {}) => User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${role} ${++sequence}`, email: `day8-${sequence}@example.invalid`, password: "unused-synthetic-fixture", role, ...values });
         const donor = await user("donor"), otherDonor = await user("donor"), ngo = await user("ngo"), otherNgo = await user("ngo"), admin = await user("admin");
         const document = await fixture.saveVerificationDocument({ buffer: documentBytes, size: documentBytes.length, mimetype: "application/pdf", originalname: "synthetic-evidence.pdf" });
         const organization = (owner, values = {}) => Organization.create({ owner: owner._id, name: `Synthetic Organization ${++sequence}`,

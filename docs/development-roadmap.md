@@ -512,6 +512,8 @@ Suggested commit: `fix(ui): improve mobile actions and accessible workflow consi
 
 ### Day 19 - Account recovery and verified email
 
+Status: implemented and locally verified on October 13, 2026. See [Day 19 evidence](day-19-verification.md) and [account recovery policy](account-recovery.md). Email ownership gates new listings and requests while existing commitments retain their current permissions. Password reset atomically consumes hashed credentials and invalidates previous authentication. Real mailbox/provider delivery, hosted CI and production remain unverified.
+
 Outcome:
 
 - Add email verification and expiring, single-use password reset flows.

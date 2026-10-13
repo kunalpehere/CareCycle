@@ -1,0 +1,11 @@
+.recovery-shell {
+    width: min(100% - 2rem, 32rem);
+    margin: 3rem auto;
+}
+.recovery-shell .auth-card {
+    width: 100%;
+    padding: 2rem;
+}
+.recovery-shell a { color: #245c3f; }
+.recovery-shell input { min-width: 0; max-width: 100%; }
+.recovery-shell .auth-primary { box-shadow: none; }

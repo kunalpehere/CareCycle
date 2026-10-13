@@ -10,15 +10,15 @@ export const seedMatchingBrowserFixtures = async () => {
     await Promise.all([User.init(), Organization.init(), Donation.init(), DonationRequest.init()]);
     const password = await bcrypt.hash("Matching-fixture-42!", 10);
     for (const project of ["desktop", "mobile"]) {
-        const noticeDonor = await User.create({ name: "Synthetic Notification Donor", email: `donor-day13-${project}@example.invalid`, password, role: "donor" });
-        const noticeNgo = await User.create({ name: "Synthetic Notification NGO", email: `ngo-day13-${project}@example.invalid`, password, role: "ngo" });
+        const noticeDonor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Notification Donor", email: `donor-day13-${project}@example.invalid`, password, role: "donor" });
+        const noticeNgo = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Notification NGO", email: `ngo-day13-${project}@example.invalid`, password, role: "ngo" });
         const noticeOrg = new mongoose.Types.ObjectId();
         await Organization.collection.insertOne({ _id: noticeOrg, owner: noticeNgo._id, name: "Synthetic Notification Organization", verificationStatus: "verified", contactEmail: noticeNgo.email, address: { city: "Pune" } });
         const noticeListing = await Donation.create({ donor: noticeDonor._id, equipment: "wheelchair", condition: "good", quantity: 5, description: "Synthetic Day 13 notification fixture", location: { city: `Day13 ${project}`, state: "Maharashtra" } });
         await DonationRequest.create({ donation: noticeListing._id, organization: noticeOrg, requestedBy: noticeNgo._id, quantity: 2, status: "pending", beneficiary: "PRIVATE_DAY13_BENEFICIARY", message: "PRIVATE_DAY13_REQUEST_NEED" });
-        const donor = await User.create({ name: "Synthetic Matching Donor", email: `donor-day6-${project}@example.invalid`, password, role: "donor" });
-        const ngo = await User.create({ name: "Synthetic Matching NGO", email: `ngo-day6-${project}@example.invalid`, password, role: "ngo" });
-        const firstOwner = await User.create({ name: "Synthetic First NGO", email: `first-day6-${project}@example.invalid`, password, role: "ngo" });
+        const donor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Matching Donor", email: `donor-day6-${project}@example.invalid`, password, role: "donor" });
+        const ngo = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Matching NGO", email: `ngo-day6-${project}@example.invalid`, password, role: "ngo" });
+        const firstOwner = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic First NGO", email: `first-day6-${project}@example.invalid`, password, role: "ngo" });
         const first = new mongoose.Types.ObjectId();
         await Organization.collection.insertMany([
             { owner: ngo._id, name: "Synthetic Viewing Organization", verificationStatus: "verified", contactEmail: `ngo-day6-${project}@example.invalid`, address: { city: "Pune" } },
@@ -30,21 +30,21 @@ export const seedMatchingBrowserFixtures = async () => {
             beneficiary: "Synthetic community beneficiary summary", message: "Synthetic equipment need for browser verification" });
         await Donation.create({ donor: donor._id, equipment: "walker", condition: "good", quantity: 5,
             description: "Synthetic Day 7 retry and withdrawal fixture", location: { city: `Day7 ${project}`, state: "Maharashtra" } });
-        const pickupDonor = await User.create({ name: "Synthetic Pickup Donor", email: `donor-day9-${project}@example.invalid`, password, role: "donor" });
-        const pickupNgo = await User.create({ name: "Synthetic Pickup NGO", email: `ngo-day9-${project}@example.invalid`, password, role: "ngo" });
+        const pickupDonor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Pickup Donor", email: `donor-day9-${project}@example.invalid`, password, role: "donor" });
+        const pickupNgo = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Pickup NGO", email: `ngo-day9-${project}@example.invalid`, password, role: "ngo" });
         const pickupOrg = new mongoose.Types.ObjectId();
         await Organization.collection.insertOne({ _id: pickupOrg, owner: pickupNgo._id, name: "Synthetic Pickup Organization", verificationStatus: "verified", contactEmail: pickupNgo.email, address: { city: "Pune" } });
         const pickupListing = await Donation.create({ donor: pickupDonor._id, equipment: "wheelchair", condition: "good", quantity: 5, allocatedQuantity: 2, description: "Synthetic Day 9 pickup fixture", location: { city: `Day9 ${project}`, state: "Maharashtra" } });
         await DonationRequest.create({ donation: pickupListing._id, organization: pickupOrg, requestedBy: pickupNgo._id, quantity: 2, status: "accepted", beneficiary: "Synthetic pickup beneficiaries", message: "Synthetic equipment pickup for browser verification" });
-        const changeDonor = await User.create({ name: "Synthetic Collection Donor", email: `donor-day10-${project}@example.invalid`, password, role: "donor" });
-        const changeNgo = await User.create({ name: "Synthetic Collection NGO", email: `ngo-day10-${project}@example.invalid`, password, role: "ngo" });
+        const changeDonor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Collection Donor", email: `donor-day10-${project}@example.invalid`, password, role: "donor" });
+        const changeNgo = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Collection NGO", email: `ngo-day10-${project}@example.invalid`, password, role: "ngo" });
         const changeOrg = new mongoose.Types.ObjectId();
         await Organization.collection.insertOne({ _id: changeOrg, owner: changeNgo._id, name: "Synthetic Collection Organization", verificationStatus: "verified", contactEmail: changeNgo.email, address: { city: "Pune" } });
         const changeListing = await Donation.create({ donor: changeDonor._id, equipment: "walker", condition: "good", quantity: 5, allocatedQuantity: 2, description: "Synthetic Day 10 collection fixture", location: { city: `Day10 ${project}`, state: "Maharashtra" } });
         const pastProposal = { start: new Date("2000-01-01T10:00Z"), end: new Date("2000-01-01T12:00Z"), timeZone: "UTC", localStart: "2000-01-01T10:00", localEnd: "2000-01-01T12:00", address: "12 Synthetic Collection Road", instructions: "Synthetic collection instructions", proposedBy: changeDonor._id, proposerRole: "donor" };
         await DonationRequest.create({ donation: changeListing._id, organization: changeOrg, requestedBy: changeNgo._id, quantity: 2, status: "accepted", beneficiary: "Synthetic Day 10 beneficiaries", message: "Synthetic collection changes verification", pickup: { status: "confirmed", version: 2, proposal: pastProposal, confirmedBy: changeNgo._id, confirmedAt: new Date("1999-12-31"), history: [{ action: "proposed", actor: changeDonor._id, actorRole: "donor", at: new Date("1999-12-30"), version: 1, proposal: pastProposal }, { action: "confirmed", actor: changeNgo._id, actorRole: "ngo", at: new Date("1999-12-31"), version: 2, proposal: pastProposal }] } });
-        const transferDonor = await User.create({ name: "Synthetic Transfer Donor", email: `donor-day11-${project}@example.invalid`, password, role: "donor" });
-        const transferNgo = await User.create({ name: "Synthetic Transfer NGO", email: `ngo-day11-${project}@example.invalid`, password, role: "ngo" });
+        const transferDonor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Transfer Donor", email: `donor-day11-${project}@example.invalid`, password, role: "donor" });
+        const transferNgo = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Transfer NGO", email: `ngo-day11-${project}@example.invalid`, password, role: "ngo" });
         const transferOrg = new mongoose.Types.ObjectId();
         await Organization.collection.insertOne({ _id: transferOrg, owner: transferNgo._id, name: "Synthetic Transfer Organization", verificationStatus: "verified", contactEmail: transferNgo.email, address: { city: "Pune" } });
         for (const [equipment, quantity] of [["wheelchair", 5], ["stethoscope", 2]]) {
@@ -52,8 +52,8 @@ export const seedMatchingBrowserFixtures = async () => {
             const transferProposal = { ...pastProposal, proposedBy: transferDonor._id };
             await DonationRequest.create({ donation: transferListing._id, organization: transferOrg, requestedBy: transferNgo._id, quantity: 2, status: "accepted", beneficiary: `Synthetic ${equipment} transfer beneficiaries`, message: "Synthetic physical transfer verification", pickup: { status: "confirmed", version: 2, proposal: transferProposal, confirmedBy: transferNgo._id, confirmedAt: new Date("1999-12-31"), history: [{ action: "confirmed", actor: transferNgo._id, actorRole: "ngo", at: new Date("1999-12-31"), version: 2, proposal: transferProposal }] } });
         }
-        const receiptDonor = await User.create({ name: "Synthetic Receipt Donor", email: `donor-day12-${project}@example.invalid`, password, role: "donor" });
-        const receiptNgo = await User.create({ name: "Synthetic Receipt NGO", email: `ngo-day12-${project}@example.invalid`, password, role: "ngo" });
+        const receiptDonor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Receipt Donor", email: `donor-day12-${project}@example.invalid`, password, role: "donor" });
+        const receiptNgo = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Receipt NGO", email: `ngo-day12-${project}@example.invalid`, password, role: "ngo" });
         const receiptOrg = new mongoose.Types.ObjectId();
         await Organization.collection.insertOne({ _id: receiptOrg, owner: receiptNgo._id, name: "Synthetic Receipt Organization", verificationStatus: "verified", contactEmail: receiptNgo.email, address: { city: "Pune" } });
         const receiptListing = await Donation.create({ donor: receiptDonor._id, equipment: "walker", condition: "good", quantity: 5, allocatedQuantity: 1, handedOverQuantity: 1, description: "Synthetic Day 12 receipt fixture", location: { city: `Day12 ${project}`, state: "Maharashtra" } });

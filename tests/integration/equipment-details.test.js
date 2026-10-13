@@ -7,8 +7,8 @@ import path from "node:path";
 test("equipment listing create/edit validates details, preserves drafts and protects existing records", { timeout: 180000 }, async t => {
     const f = await startWorkflowFixture();
     try {
-        const donor = await f.User.create({ name: "Synthetic Equipment Donor", email: "details-donor@example.invalid", password: "fixture", role: "donor" });
-        const other = await f.User.create({ name: "Synthetic Other Donor", email: "details-other@example.invalid", password: "fixture", role: "donor" });
+        const donor = await f.User.create({ emailVerifiedAt: new Date(), name: "Synthetic Equipment Donor", email: "details-donor@example.invalid", password: "fixture", role: "donor" });
+        const other = await f.User.create({ emailVerifiedAt: new Date(), name: "Synthetic Other Donor", email: "details-other@example.invalid", password: "fixture", role: "donor" });
         const actor = await f.client(donor), outsider = await f.client(other);
         const values = { equipment: 'wheelchair', quality: 'good', quantity: '3', description: 'Synthetic equipment details', city: 'Pune', state: 'Maharashtra', postalCode: '411001', brand: 'Synthetic Brand', model: 'Model 17', functionalStatus: 'partly_working', defects: 'Brake needs repair', missingAccessories: 'One footrest', wheelchair_spec_seatWidthCm: '42.5', wheelchair_spec_folding: 'yes' };
         let item;

@@ -5,9 +5,9 @@ import { startWorkflowFixture } from '../support/workflow-fixture.js';
 test('NGO workspace, request pagination and discovery retain ownership and privacy', { timeout: 180000 }, async t => {
     const f = await startWorkflowFixture();
     try {
-        const donor = await f.User.create({ name: 'Synthetic Day16 Donor', email: 'private-day16@example.invalid', password: 'fixture', role: 'donor' });
-        const ngo = await f.User.create({ name: 'Synthetic Day16 NGO', email: 'ngo-day16@example.invalid', password: 'fixture', role: 'ngo' });
-        const other = await f.User.create({ name: 'Synthetic Day16 Other', email: 'other-day16@example.invalid', password: 'fixture', role: 'ngo' });
+        const donor = await f.User.create({ emailVerifiedAt: new Date(), name: 'Synthetic Day16 Donor', email: 'private-day16@example.invalid', password: 'fixture', role: 'donor' });
+        const ngo = await f.User.create({ emailVerifiedAt: new Date(), name: 'Synthetic Day16 NGO', email: 'ngo-day16@example.invalid', password: 'fixture', role: 'ngo' });
+        const other = await f.User.create({ emailVerifiedAt: new Date(), name: 'Synthetic Day16 Other', email: 'other-day16@example.invalid', password: 'fixture', role: 'ngo' });
         const bytes = Buffer.from('%PDF-1.4\nSYNTHETIC\n%%EOF');
         const document = await f.saveVerificationDocument({ buffer: bytes, size: bytes.length, mimetype: 'application/pdf', originalname: 'synthetic.pdf' });
         const org = await f.Organization.create({ owner: ngo._id, name: 'Synthetic Day16 Organization', description: 'Synthetic NGO workspace test organization', contactPerson: 'Synthetic Coordinator', contactEmail: ngo.email, verificationStatus: 'verified', verificationDocument: document, address: { city: 'Pune' } });

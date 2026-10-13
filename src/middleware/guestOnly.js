@@ -11,8 +11,8 @@ export const guestOnly = async (req, res, next) => {
         const user = await User.findOne({
             _id: payload.id,
             $or: [{ status: "active" }, { status: { $exists: false } }]
-        }).select("role");
-        if (user) return res.redirect(getDashboardPath(user.role));
+        }).select("role authVersion");
+        if (user && (payload.authVersion ?? 0) === (user.authVersion ?? 0)) return res.redirect(getDashboardPath(user.role));
     } catch (error) {
         // An invalid or expired cookie should not prevent access to authentication pages.
     }

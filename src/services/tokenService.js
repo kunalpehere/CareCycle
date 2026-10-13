@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 
-export const createAccessToken = (userId) => jwt.sign({ id: userId }, env.jwtSecret, {
+export const createAccessToken = (userId, authVersion = 0) => jwt.sign({ id: userId, authVersion }, env.jwtSecret, {
     algorithm: "HS256",
     expiresIn: "30m"
 });

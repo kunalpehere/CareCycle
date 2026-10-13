@@ -17,13 +17,13 @@ const resolveAuthentication = async (req, res, next, optional) => {
         const user = await User.findOne({
             _id: payload.id,
             $or: [{ status: "active" }, { status: { $exists: false } }]
-        }).select("_id email name role");
-        if (!user) {
+        }).select("_id email name role authVersion emailVerifiedAt");
+        if (!user || (payload.authVersion ?? 0) !== (user.authVersion ?? 0)) {
             clearAuthCookie(res);
             return optional ? next() : respondUnauthorized(req, res, "Your account is unavailable. Please sign in again.");
         }
         req.auth = { userId: user.id, user };
-        res.locals.currentUser = { id: user.id, name: user.name, email: user.email, role: user.role };
+        res.locals.currentUser = { id: user.id, name: user.name, email: user.email, role: user.role, emailVerifiedAt: user.emailVerifiedAt };
         next();
     } catch (error) {
         clearAuthCookie(res);

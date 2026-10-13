@@ -7,7 +7,7 @@ test("physical handover, receipt, correction and remainder transactions", { time
     const { User, Organization, Donation, DonationRequest, mongoose, client } = fixture;
     let sequence = 0, owner, member;
     try {
-        const user = role => User.create({ name: `Synthetic ${role}`, email: `day11-${++sequence}@example.invalid`, password: "unused-fixture", role });
+        const user = role => User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${role}`, email: `day11-${++sequence}@example.invalid`, password: "unused-fixture", role });
         const donor = await user("donor"), ngo = await user("ngo"), otherDonor = await user("donor"), otherNgo = await user("ngo"), admin = await user("admin");
         const orgData = actor => ({ owner: actor._id, name: "Synthetic Day 11 NGO", contactPerson: "Synthetic Coordinator", contactEmail: actor.email, description: "Synthetic handover verification organization", verificationStatus: "verified", address: { city: "Pune", state: "Maharashtra" }, verificationDocument: { filename: "synthetic.pdf", originalName: "synthetic.pdf", mimeType: "application/pdf", size: 1 } });
         const org = await Organization.create(orgData(ngo)), otherOrg = await Organization.create(orgData(otherNgo));

@@ -3,8 +3,21 @@ import { adminLogin, login, logout, register, requestAdminAccess, showAdminAcces
 import { authRateLimit } from "../middleware/rateLimit.js";
 import { verifyCsrfToken } from "../middleware/csrf.js";
 import { guestOnly } from "../middleware/guestOnly.js";
+import { authenticate } from "../middleware/authenticate.js";
+import { createRateLimiter } from "../middleware/rateLimit.js";
+import { privateRecoveryPage, showForgotPassword, requestPasswordReset, showResetPassword, resetPassword, showEmailVerification, resendVerification, showVerifyEmail, verifyEmail } from "../controllers/accountRecoveryController.js";
 
 export const authRoutes = Router();
+const recoveryRateLimit = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10 });
+for (const route of ["/forgot-password", "/reset-password", "/account/email", "/verify-email"]) authRoutes.use(route, privateRecoveryPage);
+authRoutes.get("/forgot-password", showForgotPassword);
+authRoutes.post("/forgot-password", recoveryRateLimit, verifyCsrfToken, requestPasswordReset);
+authRoutes.get("/reset-password", recoveryRateLimit, showResetPassword);
+authRoutes.post("/reset-password", recoveryRateLimit, verifyCsrfToken, resetPassword);
+authRoutes.get("/account/email", authenticate, showEmailVerification);
+authRoutes.post("/account/email", authenticate, recoveryRateLimit, verifyCsrfToken, resendVerification);
+authRoutes.get("/verify-email", recoveryRateLimit, showVerifyEmail);
+authRoutes.post("/verify-email", recoveryRateLimit, verifyCsrfToken, verifyEmail);
 authRoutes.get("/register", guestOnly, showRegister);
 authRoutes.get("/login", guestOnly, showLogin);
 authRoutes.get("/admin/login", guestOnly, showAdminLogin);

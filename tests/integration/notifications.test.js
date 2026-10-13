@@ -14,7 +14,7 @@ test("durable private notification outbox and bounded email delivery", { timeout
     const { runTransaction } = await import("../../src/services/transactionService.js");
     let sequence = 0;
     try {
-        const user = role => User.create({ name: `Synthetic ${role}`, email: `day13-${++sequence}@example.invalid`, password: "unused-fixture", role });
+        const user = role => User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${role}`, email: `day13-${++sequence}@example.invalid`, password: "unused-fixture", role });
         const donor = await user("donor"), ngo = await user("ngo"), stranger = await user("donor"), admin = await user("admin");
         const org = await Organization.create({ owner: ngo._id, name: "Synthetic Day 13 NGO", contactPerson: "Synthetic Coordinator", contactEmail: ngo.email, description: "Synthetic notification organization", verificationStatus: "verified", address: { city: "Pune", state: "Maharashtra" }, verificationDocument: { filename: "synthetic.pdf", originalName: "synthetic.pdf", mimeType: "application/pdf", size: 1 } });
         let owner, member, foreign, listing, request;

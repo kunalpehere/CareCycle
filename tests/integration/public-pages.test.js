@@ -28,7 +28,7 @@ test("public pages preserve authentication and guest contact boundaries", { time
         assert.equal(limited.status, 429);
         assert.ok(Number(limited.headers.get("retry-after")) > 0);
         for (const role of ["donor", "ngo", "admin"]) {
-            const user = await fixture.User.create({ name: `Synthetic ${role}`, email: `${role}@example.invalid`, password: "unused-fixture", role });
+            const user = await fixture.User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${role}`, email: `${role}@example.invalid`, password: "unused-fixture", role });
             const actor = await fixture.client(user);
             for (const url of ["/home", "/about", "/contact"]) {
                 const response = await actor.get(url);

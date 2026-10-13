@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account access | CareCycle</title><link rel="stylesheet" href="/defaultEntry.css"><link rel="stylesheet" href="/ui-consistency.css"><link rel="stylesheet" href="/account-recovery.css"><script src="/accessibility.js" defer></script>
+</head><body class="auth-page"><a class="skip-link" href="#main-content">Skip to main content</a>
+<main id="main-content" class="recovery-shell" tabindex="-1"><section class="auth-card">
+<a href="/home">CareCycle home</a>
+<h1><%= ({forgot:'Forgot password',reset:'Set a new password',email:'Email verification',verify:'Confirm email verification',done:'Email verified',invalid:'Link unavailable'})[mode] %></h1>
+<% if (message) { %><p class="auth-message" role="status"><%= message %></p><% } %>
+<% if (mode === 'forgot') { %>
+<p>Enter your account email. Donors, NGO members and administrators can request recovery here.</p>
+<form class="auth-form" action="/forgot-password" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<label for="email">Account email</label><input id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+<button class="auth-primary" type="submit">Request reset email</button></form>
+<% } else if (mode === 'reset') { %>
+<p>Use at least 8 characters and no more than 72 UTF-8 bytes. All previous sign-ins will expire after the reset.</p>
+<form class="auth-form" action="/reset-password" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="id" value="<%= id %>"><input type="hidden" name="token" value="<%= token %>">
+<label for="password">New password</label><input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+<label for="confirmation">Confirm new password</label><input id="confirmation" name="confirmation" type="password" autocomplete="new-password" minlength="8" maxlength="72" required>
+<button class="auth-primary" type="submit">Reset password</button></form>
+<% } else if (mode === 'email') { %>
+<p>Account email: <%= currentUser.email %></p>
+<form class="auth-form" action="/account/email" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="auth-primary" type="submit">Send verification email</button></form>
+<% } else if (mode === 'verify') { %>
+<form class="auth-form" action="/verify-email" method="post"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="id" value="<%= id %>"><input type="hidden" name="token" value="<%= token %>"><button class="auth-primary" type="submit">Verify email address</button></form>
+<% } %>
+<p><a href="/forgot-password">Request a new password reset link</a></p><p><a href="/account/email">Review email verification</a></p>
+<p><a href="/login">Participant sign in</a> | <a href="/admin/login">Administrator sign in</a></p><p><a href="/contact">Contact CareCycle</a></p>
+</section></main></body></html>

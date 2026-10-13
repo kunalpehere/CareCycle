@@ -18,9 +18,9 @@ test("transactional matching and remaining stock on an isolated replica set", { 
     try {
         await mongoose.connect(database.getUri(), { dbName: process.env.MONGO_DB_NAME });
         await Promise.all([Donation.init(), DonationRequest.init(), User.init(), Organization.init()]);
-        const donor = await User.create({ name: "Synthetic Donor", email: "private-donor@example.invalid", password: "unused-fixture", role: "donor" });
-        const otherDonor = await User.create({ name: "Other Donor", email: "other@example.invalid", password: "unused-fixture", role: "donor" });
-        const ngo = await User.create({ name: "Synthetic NGO", email: "ngo@example.invalid", password: "unused-fixture", role: "ngo" });
+        const donor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Donor", email: "private-donor@example.invalid", password: "unused-fixture", role: "donor" });
+        const otherDonor = await User.create({ emailVerifiedAt: new Date(), name: "Other Donor", email: "other@example.invalid", password: "unused-fixture", role: "donor" });
+        const ngo = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic NGO", email: "ngo@example.invalid", password: "unused-fixture", role: "ngo" });
         const organizationId = new mongoose.Types.ObjectId();
         await Organization.collection.insertOne({ _id: organizationId, owner: ngo._id, name: "Synthetic Organization", verificationStatus: "verified",
             contactEmail: "private-org@example.invalid", contactPerson: "Synthetic Coordinator", description: "Synthetic community equipment organization", address: { city: "Pune", state: "Maharashtra" } });

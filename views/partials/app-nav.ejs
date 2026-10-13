@@ -28,7 +28,7 @@
         <a href="/admin/dashboard" class="<%= activePage === 'admin-dashboard' ? 'active' : '' %>">Admin dashboard</a>
         <a href="/admin/users" class="<%= activePage === 'admin-users' ? 'active' : '' %>">Accounts</a>
       <% } %>
-      <% if (navRole !== 'guest') { %><a href="/notifications" class="<%= activePage === 'notifications' ? 'active' : '' %>">Notifications</a><% } %>
+      <% if (navRole !== 'guest') { %><a href="/notifications" class="<%= activePage === 'notifications' ? 'active' : '' %>">Notifications</a><a href="/account/email">Email verification</a><% } %>
     </div>
     <div class="nav-actions">
       <% if (navRole === 'guest') { %>

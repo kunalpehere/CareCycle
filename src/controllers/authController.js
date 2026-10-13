@@ -6,6 +6,7 @@ import { validateAdminAccessRequest, validateLogin, validateRegistration } from 
 import { getDashboardPath } from "../services/roleService.js";
 import { AdminAccessRequest } from "../models/AdminAccessRequest.js";
 import { LOGIN_REALMS, roleCanUseRealm } from "../services/loginRealmService.js";
+import { issueAccountCredential } from "../services/accountRecoveryService.js";
 
 export const showRegister = (req, res) => res.render("register.ejs", { message: "", selectedRole: req.query.role === "ngo" ? "ngo" : "donor" });
 export const showLogin = (req, res) => res.render("login.ejs", { message: String(req.query.message || "Welcome back!") });
@@ -27,7 +28,8 @@ export const register = async (req, res, next) => {
         const password = await bcrypt.hash(value.password, 12);
         const user = await User.create({ name: value.name, email: value.email, password, role: value.role });
         await regenerateSession(req);
-        setAuthCookie(res, createAccessToken(user.id));
+        setAuthCookie(res, createAccessToken(user.id, user.authVersion));
+        issueAccountCredential(user, "verification").catch(() => console.error("Registration verification email could not be processed."));
         res.redirect(getDashboardPath(user.role));
     } catch (error) {
         if (error?.code === 11000) return res.status(409).render("login.ejs", { message: "Account already exists. Please login." });
@@ -49,7 +51,7 @@ export const login = async (req, res, next) => {
         user.lastLoginAt = new Date();
         await user.save();
         await regenerateSession(req);
-        setAuthCookie(res, createAccessToken(user.id));
+        setAuthCookie(res, createAccessToken(user.id, user.authVersion));
         res.redirect(getDashboardPath(user.role));
     } catch (error) {
         next(error);
@@ -65,7 +67,7 @@ export const adminLogin = async (req, res, next) => {
         if (!matches) return res.status(401).render('admin-login.ejs', { message: 'Invalid administrator credentials.' });
         if (user.status !== 'active') return res.status(403).render('admin-login.ejs', { message: 'This CareCycle Administration account is unavailable.' });
         user.lastLoginAt = new Date(); await user.save(); await regenerateSession(req);
-        setAuthCookie(res, createAccessToken(user.id)); res.redirect('/admin/dashboard');
+        setAuthCookie(res, createAccessToken(user.id, user.authVersion)); res.redirect('/admin/dashboard');
     } catch (error) { next(error); }
 };
 

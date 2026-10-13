@@ -7,10 +7,10 @@ import { DonationRequest } from "../../src/models/DonationRequest.js";
 export const seedDonorWorkspaceBrowserFixtures = async () => {
     const password = await bcrypt.hash("Workspace-fixture-42!", 10);
     for (const project of ["desktop", "mobile"]) {
-        await User.create({ name: "Synthetic Equipment Detail Donor", email: `donor-day17-${project}@example.invalid`, password, role: "donor" });
-        const donor = await User.create({ name: "Synthetic Workspace Donor", email: `donor-day15-${project}@example.invalid`, password, role: "donor" });
-        await User.create({ name: "Synthetic Empty Donor", email: `empty-day15-${project}@example.invalid`, password, role: "donor" });
-        const member = await User.create({ name: "Synthetic Workspace NGO", email: `ngo-day15-${project}@example.invalid`, password, role: "ngo" });
+        await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Equipment Detail Donor", email: `donor-day17-${project}@example.invalid`, password, role: "donor" });
+        const donor = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Workspace Donor", email: `donor-day15-${project}@example.invalid`, password, role: "donor" });
+        await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Empty Donor", email: `empty-day15-${project}@example.invalid`, password, role: "donor" });
+        const member = await User.create({ emailVerifiedAt: new Date(), name: "Synthetic Workspace NGO", email: `ngo-day15-${project}@example.invalid`, password, role: "ngo" });
         const org = { _id: new User.base.Types.ObjectId() };
         await Organization.collection.insertOne({ _id: org._id, owner: member._id, name: "Synthetic Workspace Organization", verificationStatus: "verified", contactEmail: member.email, address: { city: "Pune", state: "Maharashtra" } });
         const at = new Date("2026-01-01T10:00Z"), acknowledgedAt = new Date("2026-01-01T11:00Z");

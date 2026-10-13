@@ -7,6 +7,9 @@ const userSchema = new mongoose.Schema({
     role: { type: String, enum: ["donor", "ngo", "admin"], default: "donor", index: true },
     status: { type: String, enum: ["active", "suspended", "deleted"], default: "active", index: true },
     emailVerifiedAt: { type: Date, default: null },
+    authVersion: { type: Number, default: 0, min: 0 },
+    resetCredential: { type: mongoose.Schema.Types.Mixed, select: false },
+    verificationCredential: { type: mongoose.Schema.Types.Mixed, select: false },
     notificationEmailEnabled: { type: Boolean, default: false },
     lastLoginAt: { type: Date, default: null }
 }, { timestamps: true });
@@ -14,6 +17,8 @@ const userSchema = new mongoose.Schema({
 userSchema.set("toJSON", {
     transform(document, result) {
         delete result.password;
+        delete result.resetCredential;
+        delete result.verificationCredential;
         delete result.__v;
         return result;
     }

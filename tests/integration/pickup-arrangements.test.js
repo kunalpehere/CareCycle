@@ -7,7 +7,7 @@ test("pickup HTTP/database arrangement boundaries", { timeout: 180000 }, async t
     const { User, Organization, Donation, DonationRequest, client } = fixture;
     let sequence = 0;
     try {
-        const user = role => User.create({ name: `Synthetic ${role}`, email: `day9-${++sequence}@example.invalid`, password: "unused-fixture", role });
+        const user = role => User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${role}`, email: `day9-${++sequence}@example.invalid`, password: "unused-fixture", role });
         const donor = await user("donor"), ngo = await user("ngo"), otherDonor = await user("donor"), otherNgo = await user("ngo"), admin = await user("admin");
         const organization = owner => Organization.create({ owner: owner._id, name: "Synthetic Day 9 NGO", contactPerson: "Synthetic Coordinator", contactEmail: owner.email, description: "Synthetic pickup test organization", verificationStatus: "verified", address: { city: "Pune", state: "Maharashtra" }, verificationDocument: { filename: "synthetic.pdf", originalName: "synthetic.pdf", mimeType: "application/pdf", size: 1 } });
         const org = await organization(ngo), otherOrg = await organization(otherNgo);

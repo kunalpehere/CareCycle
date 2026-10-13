@@ -8,7 +8,7 @@ test("accepted cancellation and missed pickup HTTP/database workflows", { timeou
     const { User, Organization, Donation, DonationRequest, mongoose, client } = fixture;
     let seq = 0, owner, member;
     try {
-        const user = role => User.create({ name: `Synthetic ${role}`, email: `day10-${++seq}@example.invalid`, password: "unused-fixture", role });
+        const user = role => User.create({ emailVerifiedAt: new Date(), name: `Synthetic ${role}`, email: `day10-${++seq}@example.invalid`, password: "unused-fixture", role });
         const donor = await user("donor"), ngo = await user("ngo"), foreignDonor = await user("donor"), foreignNgo = await user("ngo"), admin = await user("admin");
         const orgData = actor => ({ owner: actor._id, name: "Synthetic Day 10 NGO", contactPerson: "Synthetic Coordinator", contactEmail: actor.email, description: "Synthetic collection test organization", verificationStatus: "verified", address: { city: "Pune", state: "Maharashtra" }, verificationDocument: { filename: "synthetic.pdf", originalName: "synthetic.pdf", mimeType: "application/pdf", size: 1 } });
         const org = await Organization.create(orgData(ngo)), foreignOrg = await Organization.create(orgData(foreignNgo));

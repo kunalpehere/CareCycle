@@ -40,3 +40,15 @@ export const sendContactMail = async ({ name, email, message }) => {
     });
     return { sent: true };
 };
+
+export const sendAccountMail = async ({ to, purpose, url }) => {
+    if (!env.mailUser || !env.mailPassword) return { sent: false, reason: "not-configured" };
+    const transporter = nodemailer.createTransport({ service: env.mailService,
+        auth: { user: env.mailUser, pass: env.mailPassword }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 });
+    const title = purpose === "reset" ? "Reset your CareCycle password" : "Verify your CareCycle email";
+    const lifetime = purpose === "reset" ? "30 minutes" : "24 hours";
+    await transporter.sendMail({ from: env.mailFrom, to, subject: title,
+        text: `${title}\n${url}\nThis link expires in ${lifetime} and can be used once. If you did not request this, ignore this message.`,
+        html: `<h1>${title}</h1><p><a href="${escapeHtml(url)}">${title}</a></p><p>This link expires in ${lifetime} and can be used once. If you did not request this, ignore this message.</p>` });
+    return { sent: true };
+};

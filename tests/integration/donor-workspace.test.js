@@ -5,9 +5,9 @@ import { startWorkflowFixture } from "../support/workflow-fixture.js";
 test("donor workspace reflects committed workflow states and stays owner scoped", { timeout: 180000 }, async t => {
     const f = await startWorkflowFixture();
     try {
-        const donor = await f.User.create({ name: "Synthetic Workspace Donor", email: "workspace-donor@example.invalid", password: "fixture", role: "donor" });
-        const outsider = await f.User.create({ name: "Synthetic Other Donor", email: "workspace-other@example.invalid", password: "fixture", role: "donor" });
-        const ngo = await f.User.create({ name: "Synthetic Workspace NGO", email: "workspace-ngo@example.invalid", password: "fixture", role: "ngo" });
+        const donor = await f.User.create({ emailVerifiedAt: new Date(), name: "Synthetic Workspace Donor", email: "workspace-donor@example.invalid", password: "fixture", role: "donor" });
+        const outsider = await f.User.create({ emailVerifiedAt: new Date(), name: "Synthetic Other Donor", email: "workspace-other@example.invalid", password: "fixture", role: "donor" });
+        const ngo = await f.User.create({ emailVerifiedAt: new Date(), name: "Synthetic Workspace NGO", email: "workspace-ngo@example.invalid", password: "fixture", role: "ngo" });
         const evidence = Buffer.from("%PDF-1.4\nSYNTHETIC_WORKSPACE_EVIDENCE\n%%EOF");
         const document = await f.saveVerificationDocument({ buffer: evidence, size: evidence.length, mimetype: "application/pdf", originalname: "synthetic-workspace.pdf" });
         const org = await f.Organization.create({ owner: ngo._id, name: "Synthetic Workspace Organization", description: "Synthetic workspace organization for regression checks", contactPerson: "Synthetic Coordinator", verificationDocument: document, verificationStatus: "verified", contactEmail: ngo.email, address: { city: "Pune", state: "Maharashtra" } });
