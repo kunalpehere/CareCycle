@@ -1,6 +1,9 @@
 /node_modules
 .github-sync/
 .env
+.env.*
+*.env
+*.env.*
 *.log
 /.local-data/
 /uploads/donations/*
