@@ -26,6 +26,8 @@ The restricted Render logs show:
 - `render.setup.started`: the actual assigned public origin, with no credentials.
 - `render.setup.proxy`: only observed private/loopback socket peer addresses and whether the peer supplied exactly `X-Forwarded-Proto: https`.
 
+Proxy observations also distinguish GET/HEAD, health probes, and missing/HTTP/HTTPS/other protocol headers. Public or unknown socket peers produce a category-only record with no address. This prevents startup probes from hiding a different browser-request path; category-only observations are not sufficient to authorize a proxy.
+
 These are observations, not automatic proxy authorization. Public socket addresses are omitted; forwarded client IPs, query strings, headers, emails, cookies and environment secrets are never logged. The address log is bounded to 32 distinct observations per process. Visit the assigned public HTTPS origin to obtain an edge observation. Do not substitute Atlas network-access addresses or Render outbound addresses for inbound proxy peers; these serve different purposes.
 
 Review Render's routing boundary and observed HTTPS peer(s) before supplying `TRUST_PROXY` as explicit observed IPs/CIDRs. Do not infer a whole private network from a single address, use `true`, set a hop count or guess a range. Peer addresses can change during platform routing/deployment; unknown peers remain rejected. Deployed edge checks must confirm secure cookies and forwarded-header handling before sharing the demo. See [Express proxy guidance](https://expressjs.com/en/guide/behind-proxies/) and [Render web-service routing](https://render.com/docs/web-services).

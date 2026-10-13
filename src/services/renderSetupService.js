@@ -11,6 +11,22 @@ export const infrastructurePeer = value => {
     try { return infrastructure.check(address, address.includes(":") ? "ipv6" : "ipv4") ? address : null; } catch { return null; }
 };
 
+export const setupProxyObservation = req => {
+    const address = infrastructurePeer(req.socket.remoteAddress);
+    const header = req.headers["x-forwarded-proto"];
+    const forwardedProtocol = header === undefined ? "missing" : header === "https" ? "https" : header === "http" ? "http" : "other";
+    const route = req.url?.split("?")[0];
+    return {
+        event: "render.setup.proxy",
+        ...(address ? { address } : {}),
+        peerClass: address ? "infrastructure" : "public_or_unknown",
+        httpsForwarded: header === "https",
+        forwardedProtocol,
+        method: ["GET", "HEAD"].includes(req.method) ? req.method : "OTHER",
+        probe: ["/health/live", "/health/ready"].includes(route) ? "health" : "other"
+    };
+};
+
 // This setup server has no application routes, DB connection, cookies or worker.
 // Forwarded client addresses, credentials, query strings and headers are not logged.
 export const startRenderSetup = async ({ source = process.env, write = line => console.log(line) } = {}) => {
@@ -21,11 +37,10 @@ export const startRenderSetup = async ({ source = process.env, write = line => c
     if (!/^\d+$/.test(portText) || port < 1 || port > 65535) throw new Error("Invalid setup port.");
     const seen = new Set();
     const server = http.createServer((req, res) => {
-        const peer = infrastructurePeer(req.socket.remoteAddress);
-        const httpsForwarded = req.headers["x-forwarded-proto"] === "https";
-        if (peer && !seen.has(`${peer}:${httpsForwarded}`) && seen.size < 32) {
-            seen.add(`${peer}:${httpsForwarded}`);
-            write(JSON.stringify({ event: "render.setup.proxy", address: peer, httpsForwarded }));
+        const observation = JSON.stringify(setupProxyObservation(req));
+        if (!seen.has(observation) && seen.size < 32) {
+            seen.add(observation);
+            write(observation);
         }
         res.setHeader("Cache-Control", "no-store"); res.setHeader("X-Content-Type-Options", "nosniff");
         res.setHeader("Content-Type", "application/json");
