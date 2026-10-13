@@ -17,6 +17,17 @@ test("Day 25 isolated demo deployment and reset boundaries", { timeout: 180000 }
             const probe = spawnSync(process.execPath, ["--input-type=module", "-e", "import { connectDatabase } from './src/config/database.js'; try { await connectDatabase(); process.exitCode=1; } catch(error) { process.exitCode=error.name==='DemoIsolationError' ? 0 : 2; }"], { env: { ...process.env, DEMO_MODE: "false" }, encoding: "utf8", timeout: 15000, windowsHide: true });
             assert.equal(probe.status, 0, "The non-demo startup must specifically reject the demo marker.");
         });
+        await t.test("Render initializer preserves existing records/generation and refuses confirmation or maintenance", async () => {
+            const { initializeConnectedDemo } = await import("../../src/services/renderDemoService.js");
+            const before = await db.collection("demo_control").findOne({ _id: "isolated-demo-v1" });
+            assert.equal(await initializeConnectedDemo(f.mongoose.connection, f.mongoose.connection.name), "existing");
+            assert.equal((await db.collection("demo_control").findOne({ _id: before._id })).generation, before.generation);
+            assert.equal(await User.countDocuments(), 2);
+            await assert.rejects(initializeConnectedDemo(f.mongoose.connection, "CareCycle"));
+            await db.collection("demo_control").updateOne({ _id: before._id }, { $set: { state: "maintenance" } });
+            await assert.rejects(initializeConnectedDemo(f.mongoose.connection, f.mongoose.connection.name));
+            await db.collection("demo_control").updateOne({ _id: before._id }, { $set: { state: "ready" } });
+        });
         await t.test("fresh visitor has labelled synthetic entry, safe role switching and CSRF", async () => {
             assert.equal((await guest.get("/login")).headers.get("location"), "/demo");
             const page = await guest.get("/demo");
@@ -152,6 +163,18 @@ test("Day 25 isolated demo deployment and reset boundaries", { timeout: 180000 }
                 assert.ok(await db.collection("operational_workers").findOne({ status: "stopped" }));
                 assert.equal((await guest.get("/health/ready")).status, 200);
             } finally { await running.shutdown(); }
+        });
+        await t.test("Render connection wrapper verifies topology and preserves seeded data across startup", async () => {
+            const { initializeRenderDemo } = await import("../../src/services/renderDemoService.js");
+            const { connectDatabase } = await import("../../src/config/database.js");
+            const name = f.mongoose.connection.name;
+            const before = await db.collection("demo_control").findOne({ _id: "isolated-demo-v1" });
+            await initializeRenderDemo(name);
+            assert.equal(f.mongoose.connection.readyState, 0);
+            await connectDatabase(); db = f.mongoose.connection.db;
+            assert.equal((await db.collection("demo_control").findOne({ _id: before._id })).generation, before.generation);
+            assert.equal(await Donation.countDocuments(), 1); assert.equal(await User.countDocuments(), 2);
+            assert.equal((await guest.get("/health/ready")).status, 200);
         });
     } finally { await f.close(); }
 });

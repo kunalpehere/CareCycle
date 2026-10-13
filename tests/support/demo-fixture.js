@@ -21,8 +21,9 @@ export const startDemoFixture = async ({ port = 0 } = {}) => {
         mongoose.set("strictQuery", true);
         const { env } = await import("../../src/config/env.js");
         const { prepareDemo, DEMO_IDS } = await import("../../src/services/demoService.js");
+        const { initializeConnectedDemo } = await import("../../src/services/renderDemoService.js");
         await mongoose.connect(env.mongoUri, { dbName: env.mongoDbName, autoIndex: false, autoCreate: false });
-        await prepareDemo(mongoose.connection, { confirmation: env.mongoDbName });
+        if (await initializeConnectedDemo(mongoose.connection, env.mongoDbName) !== "initialized") throw new Error("The fresh demo fixture must initialize exactly once.");
         // Normal connection path must accept initialized indexes and marker.
         await mongoose.disconnect();
         const { connectDatabase } = await import("../../src/config/database.js");

@@ -3,6 +3,7 @@ import { isIP } from "node:net";
 import path from "node:path";
 import dotenv from "dotenv";
 import { ConnectionString } from "mongodb-connection-string-url";
+import { renderOrigin } from "./renderPlatform.js";
 
 export class ConfigurationError extends Error {
     constructor(problems) {
@@ -74,7 +75,7 @@ export const parseRuntimeEnvironment = source => {
 
     let appUrl;
     try {
-        const rawUrl = source.APP_URL === undefined && !isProduction ? `http://localhost:${port}` : text("APP_URL");
+        const rawUrl = source.APP_URL === undefined ? (isProduction && source.RENDER === "true" ? renderOrigin(source) : !isProduction ? `http://localhost:${port}` : "") : text("APP_URL");
         const parsed = new URL(rawUrl);
         if (!["http:", "https:"].includes(parsed.protocol) || parsed.username || parsed.password || parsed.search || parsed.hash || parsed.pathname !== "/") throw new Error();
         if (isProduction && (parsed.protocol !== "https:" || loopback(parsed.hostname) || ["0.0.0.0", "[::]"].includes(parsed.hostname))) throw new Error();

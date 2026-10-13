@@ -28,6 +28,8 @@ The portable packaging follows the official [Node container guide](https://docs.
 
 ## Selected hosting approach
 
+For the selected Render Free service, follow [Render deployment setup](render-deployment.md). Its start command obtains the assigned URL, uses a setup-only phase to observe the proxy boundary and initializes a fresh synthetic database without a private shell. Complete the hosted checks below after actual application startup.
+
 On October 13, 2026, the project owner delegated the hosting choice. **Persistent Node hosting is selected** for CareCycle because it retains the tested Express server and continuous notification worker. Use the included `Dockerfile` or `node index.js` instructions below with a hosted MongoDB replica set. The exact provider/account setup is the next manual deployment step.
 
 LiveIDE used Vercel. Vercel supports Express through functions, but CareCycle's continuous background worker would require a lifecycle adaptation or separate worker/queue. No Vercel adapter is needed for the selected persistent hosting approach. See [Vercel's Express guidance](https://vercel.com/kb/guide/ship-a-express-app-on-vercel).

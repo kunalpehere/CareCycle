@@ -10,6 +10,7 @@
   },
   "scripts": {
     "start": "node index.js",
+    "start:render": "node scripts/start-render.js",
     "dev": "nodemon index.js",
     "check": "node scripts/check-source.js",
     "config:check": "node scripts/check-config.js",
