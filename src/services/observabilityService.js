@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 
 const context = new AsyncLocalStorage();
 const events = new Set(["request.completed", "request.failed", "mail.sent", "mail.failed", "mail.disabled", "worker.started", "worker.stopped", "worker.failed", "media.cleanup_deferred", "server.started", "startup.failed", "task.failed", "task.completed"]);
-const codes = new Set(["input_invalid", "not_found", "forbidden", "unauthenticated", "conflict", "rate_limited", "payload_too_large", "security_unavailable", "media_unavailable", "database_unavailable", "internal_failure", "delivery_failed", "mail_disabled", "worker_batch_failed", "cleanup_deferred", "startup_failed", "configuration_invalid"]);
+const codes = new Set(["input_invalid", "not_found", "forbidden", "unauthenticated", "conflict", "rate_limited", "payload_too_large", "security_unavailable", "media_unavailable", "database_unavailable", "internal_failure", "delivery_failed", "mail_disabled", "worker_batch_failed", "cleanup_deferred", "startup_failed", "configuration_invalid", "recovery_quarantined"]);
 const methods = new Set(["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]);
 const channels = new Set(["notification", "account", "contact", "donation"]);
 const uuid = value => typeof value === "string" && /^[a-f0-9-]{36}$/.test(value);

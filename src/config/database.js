@@ -8,6 +8,7 @@ import { Notification } from "../models/Notification.js";
 import { initializeSecurityStores } from "../services/securityStoreService.js";
 import { initializePrivateStorage } from "../services/privateStorageService.js";
 import { initializeDiagnostics } from "../services/diagnosticsService.js";
+import { assertRecoveryReleased, RecoveryQuarantineError } from "../services/recoveryGuardService.js";
 
 mongoose.set("strictQuery", true);
 
@@ -18,6 +19,7 @@ export const connectDatabase = async () => {
         preflight = mongoose.createConnection(env.mongoUri, { dbName: env.mongoDbName, autoIndex: false, autoCreate: false, serverSelectionTimeoutMS: 10000 });
         await preflight.asPromise();
         await verifyReplicaSet(preflight, env.mongoRequireReplicaSet);
+        await assertRecoveryReleased(preflight);
         const requestCollectionExists = await preflight.db.listCollections({ name: "donation_requests" }, { nameOnly: true }).hasNext();
         if (requestCollectionExists) await verifyRequestIndexes(preflight);
         else if (env.isProduction) throw new RequestIndexError();
@@ -40,7 +42,7 @@ export const connectDatabase = async () => {
     } catch (error) {
         if (preflight) await preflight.close().catch(() => undefined);
         await mongoose.disconnect().catch(() => undefined);
-        if (error instanceof DatabaseTopologyError || error instanceof RequestIndexError) throw error;
+        if (error instanceof DatabaseTopologyError || error instanceof RequestIndexError || error instanceof RecoveryQuarantineError) throw error;
         throw new Error("MongoDB connection failed. Check MONGO_URI, credentials, TLS and network access. Connection details are not printed.");
     }
 };

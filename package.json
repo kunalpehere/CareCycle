@@ -21,6 +21,7 @@
     "media:manifest": "node scripts/maintain-private-media.js manifest",
     "media:migrate": "node scripts/maintain-private-media.js migrate",
     "media:cleanup": "node scripts/maintain-private-media.js cleanup",
+    "recovery": "node scripts/recovery.js",
     "seed:admin": "node scripts/seed-admin.js",
     "test": "npm run check && node scripts/run-tests.js unit",
     "test:integration": "node scripts/run-tests.js integration",

@@ -605,6 +605,8 @@ Suggested commit: `feat(observability): add health checks and correlated failure
 
 ### Day 24 - Backup, privacy, and restore drill
 
+Status: implemented and locally verified on October 13, 2026. See [Day 24 evidence](day-24-verification.md), [backup/recovery procedures](backup-recovery.md) and [data-handling rules](data-handling.md). Encrypted coordinated packages, integrity/consistency checks, fresh quarantined restores and reviewed release are implemented. A synthetic drill recovered records and private files across two separately owned replica sets; historical mail/session state was disabled. Hosted RPO/RTO, off-host key/backup recovery, named ownership and independent pilot privacy/safety approval remain external checks.
+
 Outcome:
 
 - Document coordinated backup/restore for database records and stored files.

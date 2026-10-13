@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import { env } from "../config/env.js";
+import mongoose from "mongoose";
+import { assertRecoveryReleased } from "./recoveryGuardService.js";
 
 const escapeHtml = (value) => String(value)
     .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
@@ -19,6 +21,7 @@ const getConfiguration = () => {
 export const sendDonationMail = async () => {
     const configuration = getConfiguration();
     if (!configuration) return { sent: false, reason: "not-configured" };
+    await assertRecoveryReleased(mongoose.connection);
     await configuration.transporter.sendMail({
         from: env.mailFrom,
         to: configuration.recipients,
@@ -31,6 +34,7 @@ export const sendDonationMail = async () => {
 export const sendContactMail = async ({ name, email, message }) => {
     const configuration = getConfiguration();
     if (!configuration) return { sent: false, reason: "not-configured" };
+    await assertRecoveryReleased(mongoose.connection);
     await configuration.transporter.sendMail({
         from: env.mailFrom,
         to: configuration.recipients,
@@ -43,6 +47,7 @@ export const sendContactMail = async ({ name, email, message }) => {
 
 export const sendAccountMail = async ({ to, purpose, url }) => {
     if (!env.mailUser || !env.mailPassword) return { sent: false, reason: "not-configured" };
+    await assertRecoveryReleased(mongoose.connection);
     const transporter = nodemailer.createTransport({ service: env.mailService,
         auth: { user: env.mailUser, pass: env.mailPassword }, connectionTimeout: 10000, greetingTimeout: 10000, socketTimeout: 15000 });
     const title = purpose === "reset" ? "Reset your CareCycle password" : "Verify your CareCycle email";

@@ -208,6 +208,8 @@ New private uploads use MongoDB GridFS rather than the application filesystem. E
 
 Public `/health/live` and `/health/ready` probes report process/dependency health without creating sessions. Administrators can open `/admin/diagnostics` for private aggregate metrics and notification-worker health. See [operational diagnostics](docs/operational-diagnostics.md) for safe structured logs, support references, probe limits and deployment collection requirements.
 
+Encrypted coordinated backups and fresh quarantined restores are available through `npm run recovery`. See [backup/recovery procedures](docs/backup-recovery.md) and [data-handling rules](docs/data-handling.md). Restored sessions and historical outbound notifications are disabled; operational verification and explicit review are required before release. The isolated drill's measured results are recorded in [Day 24 evidence](docs/day-24-verification.md).
+
 ## Screenshot gallery
 
 | Participant login | Home | Donation form |

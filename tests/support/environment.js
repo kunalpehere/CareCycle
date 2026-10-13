@@ -19,6 +19,7 @@ export const isolatedTestEnvironment = () => ({
     MAIL_PASSWORD: "",
     MAIL_FROM: "",
     MAIL_RECIPIENTS: "",
+    CARECYCLE_BACKUP_KEY: "",
     // Do not accept an externally supplied database binary or download mirror.
     MONGOMS_SYSTEM_BINARY: "",
     MONGOMS_DOWNLOAD_URL: "",

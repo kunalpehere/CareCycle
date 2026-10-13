@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import nodemailer from "nodemailer";
 import mongoose from "mongoose";
+import { assertRecoveryReleased } from "./recoveryGuardService.js";
 import { logEvent, recordMailOutcome, telemetry, withOperationReference } from "./observabilityService.js";
 import { env } from "../config/env.js";
 import { Notification } from "../models/Notification.js";
@@ -18,6 +19,7 @@ export const createNotificationSender = () => {
     return message => transport.sendMail(message);
 };
 export const processEmailBatch = async ({ send = null, now = new Date(), limit = 25, leaseMs = 120000 } = {}) => {
+    if (send) await assertRecoveryReleased(mongoose.connection);
     await Notification.updateMany({ mailStatus: "pending", attempts: { $gte: MAX_EMAIL_ATTEMPTS }, lockedUntil: { $lte: now } }, { $set: { mailStatus: "failed", lockedUntil: null, leaseToken: null, failureCode: "attempt_limit" } });
     if (!send) return 0; // Disabled configuration does not consume an attempt.
     let attempted = 0;
