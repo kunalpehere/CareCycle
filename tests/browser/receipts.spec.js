@@ -37,7 +37,13 @@ test("receipt downloads, outcome revisions, agreed corrections and A4 printing",
         expect(await (await page.request.get(originalUrl)).body()).toEqual(initial);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
         const documentUrl = await page.getByRole("link", { name: "Open printable receipt / Save as PDF", exact: true }).getAttribute("href");
-        const printPage = await page.context().newPage(); await printPage.goto(documentUrl);
+        const printPage = await page.context().newPage();
+        await printPage.addInitScript(() => { window.receiptPolicyViolations = []; document.addEventListener("securitypolicyviolation", event => window.receiptPolicyViolations.push(event.effectiveDirective)); });
+        const receiptResponse = await printPage.goto(documentUrl);
+        expect(receiptResponse.headers()["content-security-policy"]).toContain("sha256-");
+        expect(receiptResponse.headers()["content-security-policy"]).not.toContain("unsafe-inline");
+        expect(await printPage.evaluate(() => window.receiptPolicyViolations)).toEqual([]);
+        expect(await printPage.locator(".quantity").evaluate(element => getComputedStyle(element).fontWeight)).toBe("700");
         await expect(printPage.locator(".quantity")).toContainText("NGO: 1");
         expect(await printPage.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
         await printPage.screenshot({ path: `artifacts/day-12-${project}-receipt.png`, fullPage: true });

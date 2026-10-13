@@ -17,8 +17,10 @@ import { requestRoutes } from "./routes/requestRoutes.js";
 import { receiptRoutes } from "./routes/receiptRoutes.js";
 import { notificationRoutes } from "./routes/notificationRoutes.js";
 import { adminReviewRoutes } from "./routes/adminReviewRoutes.js";
+import { MongoSessionStore, SESSION_LIFETIME_MS } from "./services/securityStoreService.js";
+import { sessionCookieName } from "./services/authCookieService.js";
 
-export const createApp = () => {
+export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
     const app = express();
     app.disable("x-powered-by");
     app.set("trust proxy", env.trustProxy);
@@ -30,11 +32,13 @@ export const createApp = () => {
     app.use(express.json({ limit: "20kb" }));
     app.use(cookieParser());
     app.use(session({
-        name: "carecycle.sid",
+        store: sessionStore,
+        name: sessionCookieName,
         secret: env.sessionSecret,
         resave: false,
         saveUninitialized: false,
-        cookie: { httpOnly: true, secure: env.isProduction, sameSite: "lax", maxAge: 30 * 60 * 1000 }
+        rolling: true,
+        cookie: { httpOnly: true, secure: env.isProduction, sameSite: "lax", path: "/", maxAge: SESSION_LIFETIME_MS }
     }));
     app.use(issueCsrfToken);
     app.use(authRoutes);

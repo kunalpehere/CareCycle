@@ -132,13 +132,16 @@ test("replica-set verification distinguishes a primary from standalone or second
 test("production session cookies require HTTPS from the configured proxy", () => {
     for (const [TRUST_PROXY, expectedCookie] of [["127.0.0.1", true], ["192.0.2.1", false]]) {
         const child = spawnSync(process.execPath, ["tests/support/production-cookie-check.js"], {
-            env: { ...isolatedTestEnvironment(), ...production({ TRUST_PROXY }) }, encoding: "utf8", timeout: 15000
+            env: { ...isolatedTestEnvironment(), ...production({ TRUST_PROXY }) }, encoding: "utf8", timeout: 30000
         });
         assert.equal(child.status, 0, child.stderr);
         const result = JSON.parse(child.stdout.trim());
-        assert.equal(result.status, 200);
+        assert.equal(result.status, expectedCookie ? 200 : 400);
         assert.equal(result.cookieIssued, expectedCookie);
-        if (expectedCookie) assert.equal(result.secureCookie, true);
+        if (expectedCookie) {
+            for (const flag of ["secureCookie", "hostCookie", "httpOnly", "sameSiteLax", "rootPath", "domainAbsent"]) assert.equal(result[flag], true, flag);
+            assert.equal(result.hsts, "max-age=31536000");
+        }
     }
 });
 

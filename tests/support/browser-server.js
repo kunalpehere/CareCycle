@@ -30,6 +30,7 @@ try {
     process.env.TRUST_PROXY = "127.0.0.1";
     await cp(path.join(root, "views"), path.join(runtime, "views"), { recursive: true });
     await cp(path.join(root, "public"), path.join(runtime, "public"), { recursive: true });
+    await cp(path.join(root, "node_modules/axe-core/axe.min.js"), path.join(runtime, "public/__test-axe.js"));
     // dotenv sees no .env, and all upload paths are within disposable runtime.
     process.chdir(runtime);
     const { createApp } = await import("../../src/app.js");

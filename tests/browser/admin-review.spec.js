@@ -1,7 +1,5 @@
 import { test, expect } from "@playwright/test";
 import { readFile, mkdir } from "node:fs/promises";
-import path from "node:path";
-const axeSource = await readFile(path.resolve("node_modules/axe-core/axe.min.js"), "utf8");
 
 test("administrator reviews evidence, moderation and commitments with private accessible history", async ({ page }, info) => {
     test.setTimeout(90000);
@@ -9,7 +7,7 @@ test("administrator reviews evidence, moderation and commitments with private ac
     await page.context().setExtraHTTPHeaders({ "X-Forwarded-For": info.project.name === "desktop" ? "192.0.2.201" : "192.0.2.202" });
     await page.goto("/admin/login"); await page.getByLabel("Administration email", { exact: true }).fill(data.adminEmail); await page.getByLabel("Password", { exact: true }).fill("Review-fixture-20!"); await page.getByRole("button", { name: "Enter CareCycle Administration" }).click();
     const audit = async name => {
-        await page.addScriptTag({ content: axeSource });
+        await page.addScriptTag({ url: "/__test-axe.js" });
         const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "best-practice"] } })).violations);
         expect(violations, name).toEqual([]);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);

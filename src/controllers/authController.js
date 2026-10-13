@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import { User } from "../models/User.js";
 import { createAccessToken } from "../services/tokenService.js";
-import { clearAuthCookie, setAuthCookie } from "../services/authCookieService.js";
+import { clearAuthCookie, clearSessionCookie, setAuthCookie } from "../services/authCookieService.js";
 import { validateAdminAccessRequest, validateLogin, validateRegistration } from "../validators/input.js";
 import { getDashboardPath } from "../services/roleService.js";
 import { AdminAccessRequest } from "../models/AdminAccessRequest.js";
@@ -12,6 +12,11 @@ export const showRegister = (req, res) => res.render("register.ejs", { message: 
 export const showLogin = (req, res) => res.render("login.ejs", { message: String(req.query.message || "Welcome back!") });
 export const showAdminLogin = (req, res) => res.render("admin-login.ejs", { message: String(req.query.message || "Authorized CareCycle administrators only.") });
 export const showAdminAccessRequest = (req, res) => res.render("admin-access-request.ejs", { message: String(req.query.message || "") });
+
+const saveLoginSession = async (req, user) => {
+    req.session.auth = { userId: user.id, authVersion: user.authVersion ?? 0 };
+    await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
+};
 
 const regenerateSession = (req) => new Promise((resolve, reject) => {
     req.session.regenerate((error) => error ? reject(error) : resolve());
@@ -28,6 +33,7 @@ export const register = async (req, res, next) => {
         const password = await bcrypt.hash(value.password, 12);
         const user = await User.create({ name: value.name, email: value.email, password, role: value.role });
         await regenerateSession(req);
+        await saveLoginSession(req, user);
         setAuthCookie(res, createAccessToken(user.id, user.authVersion));
         issueAccountCredential(user, "verification").catch(() => console.error("Registration verification email could not be processed."));
         res.redirect(getDashboardPath(user.role));
@@ -51,6 +57,7 @@ export const login = async (req, res, next) => {
         user.lastLoginAt = new Date();
         await user.save();
         await regenerateSession(req);
+        await saveLoginSession(req, user);
         setAuthCookie(res, createAccessToken(user.id, user.authVersion));
         res.redirect(getDashboardPath(user.role));
     } catch (error) {
@@ -67,6 +74,7 @@ export const adminLogin = async (req, res, next) => {
         if (!matches) return res.status(401).render('admin-login.ejs', { message: 'Invalid administrator credentials.' });
         if (user.status !== 'active') return res.status(403).render('admin-login.ejs', { message: 'This CareCycle Administration account is unavailable.' });
         user.lastLoginAt = new Date(); await user.save(); await regenerateSession(req);
+        await saveLoginSession(req, user);
         setAuthCookie(res, createAccessToken(user.id, user.authVersion)); res.redirect('/admin/dashboard');
     } catch (error) { next(error); }
 };
@@ -87,6 +95,7 @@ export const requestAdminAccess = async (req, res, next) => {
 
 export const logout = (req, res, next) => {
     clearAuthCookie(res);
+    clearSessionCookie(res);
     req.session.destroy((error) => {
         if (error) return next(error);
         res.redirect("/login");

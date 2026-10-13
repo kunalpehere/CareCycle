@@ -1,5 +1,7 @@
 # Runtime configuration and MongoDB topology
 
+Day 21 adds database-backed session/rate state, host-only production cookies, HTTPS enforcement and CSP. See [persistent security](persistent-security.md). Existing environment keys remain unchanged; earlier memory sessions require fresh sign-in on the first launch after this change.
+
 Day 4 implementation, October 12, 2026. Validation and local topology checks do not establish production readiness.
 
 ## Loading and checking settings

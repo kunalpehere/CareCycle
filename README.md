@@ -107,6 +107,7 @@ The portfolio release targets one reliable equipment journey from listing throug
 - Verified-organization middleware
 - HTTP-only authentication cookies
 - Session-bound CSRF tokens
+- MongoDB-backed sessions and shared limits, secure production cookies and an enforced browser policy. See [persistent security](docs/persistent-security.md).
 - Authentication and action rate limiting
 - Suspended-account enforcement
 - Single-use email verification and password recovery with authentication revocation. See [account recovery and delivery limits](docs/account-recovery.md).

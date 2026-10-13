@@ -550,6 +550,8 @@ Suggested commit: `feat(admin): improve accountable review and exception handlin
 
 ### Day 21 - Persistent sessions, rate limits, and browser security
 
+Status: implemented and locally verified on October 13, 2026. See [Day 21 evidence](day-21-verification.md) and [persistent security policy](persistent-security.md). MongoDB-backed sessions, atomic shared limits, login-session revocation, host-only production cookies, HTTPS/proxy checks and enforced CSP are implemented. Two independent processes and process replacement were tested. Actual production TLS/proxy behavior, hosted CI and external provider delivery remain unverified.
+
 Outcome:
 
 - Replace process-memory sessions and rate limiting with appropriate shared persistent stores for the intended deployment.

@@ -1,6 +1,6 @@
 import { User } from "../models/User.js";
 import { verifyAccessToken } from "../services/tokenService.js";
-import { clearAuthCookie } from "../services/authCookieService.js";
+import { clearAuthCookie, authCookieName } from "../services/authCookieService.js";
 import { respondUnauthorized } from "./accessResponses.js";
 
 const resolveAuthentication = async (req, res, next, optional) => {
@@ -9,7 +9,7 @@ const resolveAuthentication = async (req, res, next, optional) => {
     res.setHeader("Cache-Control", "private, no-store");
     res.vary("Cookie");
     try {
-        const token = req.cookies.token;
+        const token = req.cookies[authCookieName];
         res.locals.currentUser = null;
         if (!token) return optional ? next() : respondUnauthorized(req, res);
 
@@ -18,7 +18,7 @@ const resolveAuthentication = async (req, res, next, optional) => {
             _id: payload.id,
             $or: [{ status: "active" }, { status: { $exists: false } }]
         }).select("_id email name role authVersion emailVerifiedAt");
-        if (!user || (payload.authVersion ?? 0) !== (user.authVersion ?? 0)) {
+        if (!user || (payload.authVersion ?? 0) !== (user.authVersion ?? 0) || req.session?.auth?.userId !== user.id || req.session.auth.authVersion !== (user.authVersion ?? 0)) {
             clearAuthCookie(res);
             return optional ? next() : respondUnauthorized(req, res, "Your account is unavailable. Please sign in again.");
         }

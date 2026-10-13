@@ -19,13 +19,14 @@ const blockExternal = page => page.route('**/*',route=>new URL(route.request().u
 test('all rendered page families pass accessibility and responsive content audits', async ({ browser },testInfo) => {
     test.setTimeout(300000);
     const project=testInfo.project.name, fixture=JSON.parse(await readFile('artifacts/day-18-fixtures.json','utf8'))[project];
-    const context=await browser.newContext({baseURL:'http://127.0.0.1:4183',bypassCSP:true,extraHTTPHeaders:{'X-Forwarded-For':project==='desktop'?'192.0.2.181':'192.0.2.182'}});
+    const context=await browser.newContext({baseURL:'http://127.0.0.1:4183',extraHTTPHeaders:{'X-Forwarded-For':project==='desktop'?'192.0.2.181':'192.0.2.182'}});
     const page=await context.newPage(); await blockExternal(page);
     const reports=[];
     const audit=async (name,url) => {
         if(url) await page.goto(url);
         if(name==='donor-dashboard') await page.locator('details').evaluateAll(items=>items.forEach(item=>item.open=true));
-        await page.addScriptTag({content:axeSource});
+        if (name === 'receipt-document') await page.evaluate(axeSource);
+        else await page.addScriptTag({url:"/__test-axe.js"});
         const result=await page.evaluate(async()=>{
             const result=await window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa','best-practice']}});
             const effects=[...document.querySelectorAll('body *')].filter(element=>{const style=getComputedStyle(element);return style.backgroundImage.includes('gradient')||style.animationName!=='none';}).map(element=>element.tagName+'.'+element.className);

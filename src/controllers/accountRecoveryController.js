@@ -1,6 +1,6 @@
 import { User } from "../models/User.js";
 import { issueAccountCredential, consumeAccountCredential, hasAccountCredential, validRecoveryPassword } from "../services/accountRecoveryService.js";
-import { clearAuthCookie } from "../services/authCookieService.js";
+import { clearAuthCookie, clearSessionCookie } from "../services/authCookieService.js";
 
 const render = (res, mode, message = "", extra = {}) => res.render("account-recovery.ejs", { mode, message, id: "", token: "", ...extra });
 export const privateRecoveryPage = (req, res, next) => {
@@ -33,6 +33,7 @@ export const resetPassword = async (req, res, next) => {
         });
         if (!await consumeAccountCredential({ id, token, password, purpose: "reset" })) return render(res.status(400), "invalid", "This link is invalid, expired, or already used. Request a new link.");
         clearAuthCookie(res);
+        clearSessionCookie(res);
         req.session.destroy(error => {
             if (error) return next(error);
             res.redirect("/login?message=Password%20updated.%20Sign%20in%20again.%20Administrators%20must%20use%20the%20admin%20portal.");

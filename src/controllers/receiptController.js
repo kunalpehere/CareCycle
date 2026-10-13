@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import mongoose from "mongoose";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { Donation } from "../models/Donation.js";
@@ -32,7 +33,8 @@ export const receiptDocument = async (req, res, next) => {
         if (!request) return res.status(404).send("Receipt request not found");
         const revision = req.query.revision === undefined ? request.receipt?.revisions.at(-1) : typeof req.query.revision === "string" && /^[1-9]\d*$/.test(req.query.revision) ? request.receipt?.revisions.find(value => value.number === Number(req.query.revision)) : null;
         if (!revision) return res.status(404).send("Receipt revision not found");
-        res.setHeader("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'");
+        const styles = [...revision.html.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(match => `'sha256-${createHash("sha256").update(match[1].replace(/\r\n?/g, "\n")).digest("base64")}'`);
+        res.setHeader("Content-Security-Policy", `default-src 'none'; style-src ${styles.join(" ") || "'none'"}; style-src-attr 'none'; script-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'`);
         if (req.path.endsWith("/download")) res.setHeader("Content-Disposition", `attachment; filename="${request.receipt.reference}-r${revision.number}.html"`);
         return res.type("html").send(revision.html);
     } catch (error) { next(error); }

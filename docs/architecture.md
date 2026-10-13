@@ -32,8 +32,8 @@ flowchart TD
     Services --> Files[Private local uploads]
     Services --> SMTP[Optional Nodemailer delivery]
     App --> Static[Public CSS, scripts and promotional images]
-    App --> Sessions[In-process session store]
-    Middleware --> Limits[In-process rate-limit maps]
+    App --> Sessions[MongoDB session store]
+    Middleware --> Limits[MongoDB atomic rate limits]
 ```
 
 [`index.js`](../index.js) starts [`src/server.js`](../src/server.js), which connects MongoDB before listening. [`src/app.js`](../src/app.js) configures Express, EJS, public static files, size-limited body parsing, cookies, sessions, CSRF token issuance, routes, and error handlers. Run from the repository root because views, static assets, and upload directories are resolved from the working directory. No frontend build is currently defined.
@@ -43,10 +43,10 @@ Controllers assemble model queries and render EJS or redirect forms; `/donateinf
 ## Authentication and request boundaries
 
 - Public registration creates donor or NGO accounts. Participant and administrator login endpoints restrict the allowed roles, using [`loginRealmService.js`](../src/services/loginRealmService.js). Both sign-in flows issue the same authentication cookie mechanism; they are separate entry points, not independent simultaneous sessions.
-- Passwords are bcrypt hashes. JWT authentication uses the `token` cookie and loads the user from MongoDB on authenticated requests. Active users and legacy users with no status field are accepted; suspended/deleted users are refused. See [`authenticate.js`](../src/middleware/authenticate.js).
-- Express sessions hold CSRF state separately from JWT authentication. Login regenerates the session; logout clears the authentication cookie and destroys the session. Forms require session-bound CSRF verification, including after multipart parsing for uploads.
+- Passwords are bcrypt hashes. JWT authentication uses `token` locally and `__Host-carecycle.token` in production, requires matching persisted login context and loads current account status/role/version from MongoDB. Suspended/deleted users are refused. See [`authenticate.js`](../src/middleware/authenticate.js).
+- MongoDB-backed Express sessions hold CSRF and login context. Login regenerates/persists the session; logout clears both cookies and revokes the session. Forms require session-bound CSRF verification, including multipart uploads.
 - Role guards, ownership middleware, verified-organization middleware, and controller predicates determine access. Declared strings in [`authorizationService.js`](../src/services/authorizationService.js), including `donation:moderate`, do not create endpoints or bypass those guards.
-- Session state uses Express's default memory store; rate limits use local `Map` instances. Restart or multiple instances do not preserve/share those stores. Existing browser security headers do not establish the later deployment/CSP requirements.
+- Day 21 replaces memory stores with persistent sessions and atomic shared limits, and enforces CSP/production HTTPS boundaries. See [persistent security](persistent-security.md) for expiry, revocation, proxy configuration and external deployment checks.
 
 ## Current route inventory
 

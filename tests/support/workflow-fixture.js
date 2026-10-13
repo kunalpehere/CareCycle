@@ -49,6 +49,8 @@ export const startWorkflowFixture = async () => {
         const { DonationRequest } = await import("../../src/models/DonationRequest.js");
         await Promise.all([User.init(), Organization.init(), Donation.init(), DonationRequest.init()]);
         const { createAccessToken } = await import("../../src/services/tokenService.js");
+        const { verifyAccessToken } = await import("../../src/services/tokenService.js");
+        const { syntheticSession } = await import("./authenticated-session.js");
         const { env } = await import("../../src/config/env.js");
         const { default: jwt } = await import("jsonwebtoken");
         const { saveVerificationDocument } = await import("../../src/services/verificationDocumentService.js");
@@ -59,7 +61,9 @@ export const startWorkflowFixture = async () => {
         let clientNumber = 0;
         const client = async (user, { token = user ? createAccessToken(user.id, user.authVersion) : "" } = {}) => {
             const address = `192.0.2.${++clientNumber}`;
-            let cookie = token ? `token=${token}` : "";
+            let sessionUser = user;
+            if (!sessionUser && token) { try { sessionUser = await User.findById(verifyAccessToken(token).id); } catch {} }
+            let cookie = sessionUser ? (await syntheticSession(sessionUser, token)).cookie : token ? `token=${token}` : "";
             let csrf;
             const request = async (url, options = {}) => {
                 const response = await fetch(origin + url, { redirect: "manual", ...options,

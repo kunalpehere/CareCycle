@@ -8,7 +8,7 @@ import { createRateLimiter } from "../middleware/rateLimit.js";
 import { privateRecoveryPage, showForgotPassword, requestPasswordReset, showResetPassword, resetPassword, showEmailVerification, resendVerification, showVerifyEmail, verifyEmail } from "../controllers/accountRecoveryController.js";
 
 export const authRoutes = Router();
-const recoveryRateLimit = createRateLimiter({ windowMs: 15 * 60 * 1000, max: 10 });
+const recoveryRateLimit = createRateLimiter({ namespace: "recovery", windowMs: 15 * 60 * 1000, max: 10 });
 for (const route of ["/forgot-password", "/reset-password", "/account/email", "/verify-email"]) authRoutes.use(route, privateRecoveryPage);
 authRoutes.get("/forgot-password", showForgotPassword);
 authRoutes.post("/forgot-password", recoveryRateLimit, verifyCsrfToken, requestPasswordReset);

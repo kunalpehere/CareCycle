@@ -1,14 +1,12 @@
 import { test, expect } from "@playwright/test";
 import { readFile, mkdir } from "node:fs/promises";
-import path from "node:path";
-const axeSource = await readFile(path.resolve("node_modules/axe-core/axe.min.js"), "utf8");
 
 test("email confirmation, new-action gate, recovery and expired authentication", async ({ page, browser }, info) => {
     test.setTimeout(90000);
     const fixture = JSON.parse(await readFile("artifacts/day-19-fixtures.json", "utf8"))[info.project.name];
     await page.context().setExtraHTTPHeaders({ "X-Forwarded-For": info.project.name === "desktop" ? "192.0.2.191" : "192.0.2.192" });
     const audit = async name => {
-        await page.addScriptTag({ content: axeSource });
+        await page.addScriptTag({ url: "/__test-axe.js" });
         const violations = await page.evaluate(async () => (await window.axe.run(document, { runOnly: { type: "tag", values: ["wcag2a", "wcag2aa", "wcag21aa", "best-practice"] } })).violations);
         expect(violations, name).toEqual([]);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);

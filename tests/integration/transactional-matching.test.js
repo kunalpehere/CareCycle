@@ -1,3 +1,4 @@
+import { syntheticSession } from "../support/authenticated-session.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import mongoose from "mongoose";
@@ -33,13 +34,13 @@ test("transactional matching and remaining stock on an isolated replica set", { 
         server = createApp().listen(0, "127.0.0.1");
         await new Promise((resolve, reject) => { server.once("listening", resolve); server.once("error", reject); });
         const origin = `http://127.0.0.1:${server.address().port}`;
-        const get = (path, user = ngo) => fetch(origin + path, { headers: { Cookie: `token=${createAccessToken(user.id)}` }, redirect: "manual" });
+        const get = async (path, user = ngo) => fetch(origin + path, { headers: { Cookie: (await syntheticSession(user)).cookie }, redirect: "manual" });
         const form = async (path, user = ngo) => {
-            const response = await get(path, user);
+            const state = await syntheticSession(user);
+            const response = await fetch(origin + path, { headers: { Cookie: state.cookie }, redirect: "manual" });
             const html = await response.text();
             const token = html.match(/name="_csrf" value="([^"]+)"/)?.[1];
-            const session = response.headers.getSetCookie().map(cookie => cookie.split(";")[0]).join("; ");
-            return { html, token, cookie: `token=${createAccessToken(user.id)}; ${session}` };
+            return { html, token, cookie: state.cookie };
         };
         const post = (path, state, values = {}) => fetch(origin + path, { method: "POST", redirect: "manual",
             headers: { Cookie: state.cookie, "Content-Type": "application/x-www-form-urlencoded" },
