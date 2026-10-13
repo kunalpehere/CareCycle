@@ -1,4 +1,5 @@
 <% const navRole = typeof currentUser !== 'undefined' && currentUser?.role ? currentUser.role : 'guest'; %>
+<% const isDemo = typeof demoMode !== 'undefined' && demoMode; %>
 <% if (navRole === 'admin') { %><link rel="stylesheet" href="/admin-identity.css"><% } %>
 <a class="skip-link" href="#main-content">Skip to main content</a>
 <header class="site-header <%= navRole === 'admin' ? 'admin-header' : '' %>">
@@ -10,8 +11,7 @@
       <% if (navRole === 'guest') { %>
         <a href="/about" class="<%= activePage === 'about' ? 'active' : '' %>">About</a>
         <a href="/contact" class="<%= activePage === 'contact' ? 'active' : '' %>">Contact</a>
-        <a href="/register?role=donor">Register as donor</a>
-        <a href="/register?role=ngo">Register as NGO</a>
+        <% if (isDemo) { %><a href="/demo">Try the demo</a><% } else { %><a href="/register?role=donor">Register as donor</a><a href="/register?role=ngo">Register as NGO</a><% } %>
       <% } else if (navRole === 'donor') { %>
         <a class="mobile-create" href="/donate">Create listing</a>
         <a href="/about" class="<%= activePage === 'about' ? 'active' : '' %>">About</a>
@@ -28,7 +28,7 @@
         <a href="/admin/dashboard" class="<%= activePage === 'admin-dashboard' ? 'active' : '' %>">Admin dashboard</a>
         <a href="/admin/listings">Listings</a><a href="/admin/exceptions">Exceptions</a><a href="/admin/users" class="<%= activePage === 'admin-users' ? 'active' : '' %>">Accounts</a>
       <% } %>
-      <% if (navRole !== 'guest') { %><a href="/notifications" class="<%= activePage === 'notifications' ? 'active' : '' %>">Notifications</a><a href="/account/email">Email verification</a><% } %>
+      <% if (navRole !== 'guest') { %><a href="/notifications" class="<%= activePage === 'notifications' ? 'active' : '' %>">Notifications</a><% if (!isDemo) { %><a href="/account/email">Email verification</a><% } %><% } %>
     </div>
     <div class="nav-actions">
       <% if (navRole === 'guest') { %>
@@ -41,4 +41,5 @@
     </div>
   </nav>
 </header>
+<% if (isDemo) { %><aside class="demo-notice" aria-label="Synthetic demo"><strong>Synthetic demo.</strong> Shared fictional records. Do not enter personal information. <a href="/demo">Try or switch roles</a></aside><% } %>
 <script src="/accessibility.js" defer></script>

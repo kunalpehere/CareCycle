@@ -5,6 +5,7 @@ import { randomBytes } from "node:crypto";
 export const isolatedTestEnvironment = () => ({
     ...process.env,
     NODE_ENV: "test",
+    DEMO_MODE: "false",
     NODE_OPTIONS: "",
     PORT: "4183",
     MONGO_URI: "mongodb://127.0.0.1:1",

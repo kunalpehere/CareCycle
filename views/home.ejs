@@ -20,8 +20,7 @@
         <p>CareCycle connects equipment donors with NGOs whose organization evidence has been reviewed. List equipment, review requests, agree on pickup, and record what the NGO receives.</p>
         <div class="hero-actions">
           <% if (!currentUser) { %>
-            <a class="button-primary" href="/register?role=donor">Register to donate equipment</a>
-            <a class="button-secondary" href="/register?role=ngo">Register as an NGO</a>
+            <% if (typeof demoMode !== 'undefined' && demoMode) { %><a class="button-primary" href="/demo">Try the synthetic donation workflow</a><% } else { %><a class="button-primary" href="/register?role=donor">Register to donate equipment</a><a class="button-secondary" href="/register?role=ngo">Register as an NGO</a><% } %>
           <% } else if (currentUser.role === 'donor') { %>
             <a class="button-primary" href="/donate">List equipment</a>
             <a class="button-secondary" href="/donor/dashboard">View my donations</a>

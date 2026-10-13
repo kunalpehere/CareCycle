@@ -21,6 +21,8 @@ import { MongoSessionStore, SESSION_LIFETIME_MS } from "./services/securityStore
 import { sessionCookieName } from "./services/authCookieService.js";
 import { observeRequest } from "./services/observabilityService.js";
 import { healthRoutes, diagnosticsRoutes } from "./routes/diagnosticsRoutes.js";
+import { demoBoundary } from "./middleware/demo.js";
+import { demoRoutes } from "./routes/demoRoutes.js";
 
 export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
     const app = express();
@@ -46,6 +48,8 @@ export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
         cookie: { httpOnly: true, secure: env.isProduction, sameSite: "lax", path: "/", maxAge: SESSION_LIFETIME_MS }
     }));
     app.use(issueCsrfToken);
+    app.use(demoBoundary);
+    app.use(demoRoutes);
     app.use(diagnosticsRoutes);
     app.use(authRoutes);
     app.use(adminReviewRoutes);

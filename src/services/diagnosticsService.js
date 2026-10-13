@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { env } from "../config/env.js";
 import { MEDIA_BUCKET } from "./privateStorageService.js";
 import { telemetry } from "./observabilityService.js";
+import { assertDemoDatabase } from "./demoGuardService.js";
 
 const bound = async callback => {
     let timer;
@@ -17,7 +18,7 @@ const probeDependencies = async () => {
     const db = mongoose.connection.db;
     const probe = async callback => { try { await callback(); return "ready"; } catch { return "unavailable"; } };
     const [database, security, storage] = await Promise.all([
-        probe(async () => { const hello = await db.command({ hello: 1 }, { maxTimeMS: 1000 }); if (!hello.isWritablePrimary || (env.mongoRequireReplicaSet && !hello.setName)) throw new Error(); }),
+        probe(async () => { const hello = await db.command({ hello: 1 }, { maxTimeMS: 1000 }); if (!hello.isWritablePrimary || (env.mongoRequireReplicaSet && !hello.setName)) throw new Error(); if (env.demoMode) await assertDemoDatabase(mongoose.connection); }),
         probe(async () => { for (const name of ["security_sessions", "security_limits"]) { const indexes = await db.collection(name).listIndexes({ maxTimeMS: 1000 }).toArray(); if (!indexes.some(index => index.key.expiresAt === 1 && index.expireAfterSeconds === 0)) throw new Error(); await db.collection(name).findOne({}, { projection: { _id: 1 }, maxTimeMS: 1000 }); } }),
         probe(async () => { for (const name of [`${MEDIA_BUCKET}.files`, `${MEDIA_BUCKET}.chunks`]) { const indexes = await db.collection(name).listIndexes({ maxTimeMS: 1000 }).toArray(); if (!indexes.some(index => name.endsWith("chunks") ? index.unique && index.key.files_id === 1 && index.key.n === 1 : index.key.filename === 1 && index.key.uploadDate === 1)) throw new Error(); await db.collection(name).findOne({}, { projection: { _id: 1 }, maxTimeMS: 1000 }); } })
     ]);

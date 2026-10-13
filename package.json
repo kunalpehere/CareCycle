@@ -13,6 +13,8 @@
     "dev": "nodemon index.js",
     "check": "node scripts/check-source.js",
     "config:check": "node scripts/check-config.js",
+    "demo:prepare": "node scripts/prepare-demo.js",
+    "deploy:check": "node scripts/check-deployment.js",
     "db:replica:init": "node scripts/initialize-dev-replica.js",
     "db:replica:prepare": "node scripts/prepare-dev-replica.js",
     "migrate:donations": "node scripts/migrate-embedded-donations.js",
@@ -26,6 +28,7 @@
     "test": "npm run check && node scripts/run-tests.js unit",
     "test:integration": "node scripts/run-tests.js integration",
     "test:browser": "node scripts/run-tests.js browser",
+    "test:demo-browser": "node scripts/run-demo-browser.js",
     "notifications:process": "node scripts/process-notifications.js --once",
     "test:failure-probe": "node scripts/check-test-failure.js"
   },

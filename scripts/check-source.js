@@ -2,7 +2,7 @@ import { readdirSync, statSync } from "fs";
 import path from "path";
 import { spawnSync } from "child_process";
 
-const roots = ["index.js", "src", "scripts", "public", "tests", "playwright.config.js"];
+const roots = ["index.js", "src", "scripts", "public", "tests", "playwright.config.js", "playwright.demo.config.js"];
 const files = [];
 
 const collect = (entry) => {

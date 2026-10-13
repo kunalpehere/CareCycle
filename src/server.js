@@ -12,6 +12,16 @@ export const startServer = async () => {
     catch (error) { await disconnectDatabase(); throw error; }
     logEvent("server.started");
     const worker = startNotificationWorker();
-    server.once("close", () => { void worker.stop(); });
+    let shuttingDown;
+    server.shutdown = () => {
+        if (!shuttingDown) shuttingDown = (async () => {
+            const drained = new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+            server.closeIdleConnections();
+            await drained;
+            await worker.stop();
+            await disconnectDatabase();
+        })();
+        return shuttingDown;
+    };
     return server;
 };

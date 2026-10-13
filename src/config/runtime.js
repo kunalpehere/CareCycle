@@ -119,8 +119,14 @@ export const parseRuntimeEnvironment = source => {
     const mailService = text("MAIL_SERVICE") || "gmail";
     const mailEnabled = Boolean(mailUser || mailPassword || text("MAIL_FROM") || recipients.length);
     if (mailEnabled && (!mailUser || !mailPassword || !mailFrom || !recipients.length || !bareEmail(mailFrom) || recipients.some(value => !bareEmail(value)) || !/^[a-z0-9_-]+$/i.test(mailService))) problems.push("MAIL_USER, MAIL_PASSWORD, MAIL_FROM and MAIL_RECIPIENTS must form a complete mail configuration with bare email addresses and a valid MAIL_SERVICE name, or all be blank.");
+    const demoFlag = text("DEMO_MODE");
+    if (source.DEMO_MODE !== undefined && !["true", "false"].includes(demoFlag)) problems.push("DEMO_MODE must be true or false.");
+    const demoMode = demoFlag === "true";
+    if (demoMode && !(nodeEnv === "test" ? /^carecycle_test_[a-z0-9_-]+$/ : /^carecycle_demo_[a-z0-9_-]+$/).test(mongoDbName)) problems.push("DEMO_MODE requires a dedicated carecycle_demo_ database (carecycle_test_ in isolated tests).");
+    if (demoMode && mailEnabled) problems.push("DEMO_MODE requires all mail credentials and recipients to be blank.");
+    if (demoMode && !mongoRequireReplicaSet) problems.push("DEMO_MODE requires MONGO_REQUIRE_REPLICA_SET=true.");
     if (problems.length) throw new ConfigurationError(problems);
-    return Object.freeze({ nodeEnv, isProduction, port, mongoUri, mongoDbName, mongoRequireReplicaSet, jwtSecret: secrets.JWT_SECRET, sessionSecret: secrets.SESSION_SECRET, appUrl, trustProxy, mailService, mailUser, mailPassword, mailFrom, mailRecipients: Object.freeze(recipients) });
+    return Object.freeze({ nodeEnv, isProduction, demoMode, port, mongoUri, mongoDbName, mongoRequireReplicaSet, jwtSecret: secrets.JWT_SECRET, sessionSecret: secrets.SESSION_SECRET, appUrl, trustProxy, mailService, mailUser, mailPassword, mailFrom, mailRecipients: Object.freeze(recipients) });
 };
 
 export const loadRuntimeConfiguration = ({ source = process.env, envPath = path.resolve(".env") } = {}) => {

@@ -1,6 +1,7 @@
 import { guardActiveActor } from "./workflowActorService.js";
 import ejs from "ejs";
 import path from "node:path";
+import { env } from "../config/env.js";
 import { Donation } from "../models/Donation.js";
 import { DonationRequest } from "../models/DonationRequest.js";
 import { User } from "../models/User.js";
@@ -93,7 +94,7 @@ export const changeReceipt = async ({ requestId, version, actorId, actorRole, or
         if (snapshot) {
             const number = request.receipt.revisions.length + 1;
             const revisionHistory = [...request.receipt.revisions.map(revision => ({ number: revision.number, at: iso(revision.at), actorRole: revision.actorRole, reason: revision.reason, amendmentEvidence: revision.amendmentEvidence })), { number, at: iso(now), actorRole, reason, amendmentEvidence }];
-            const html = await ejs.renderFile(path.resolve("views/receipt-document.ejs"), { snapshot, number, revisedAt: iso(now), revisionHistory });
+            const html = await ejs.renderFile(path.resolve("views/receipt-document.ejs"), { snapshot, number, revisedAt: iso(now), revisionHistory, demoMode: env.demoMode });
             request.receipt.revisions.push({ number, at: now, actor: actorId, actorRole, reason, amendmentEvidence, snapshot, html });
         }
         await request.save({ session });

@@ -222,6 +222,8 @@ Encrypted coordinated backups and fresh quarantined restores are available throu
 
 ## Planned work
 
+Day 25's isolated demo and deployment preparation are implemented locally. See [manual staging deployment](docs/staging-deployment.md) and [Day 25 verification](docs/day-25-verification.md). Hosting and its acceptance checks remain pending. The demo uses shared synthetic donor/NGO accounts, disabled email/uploads/administration, persistent activity limits, and a private operator reset.
+
 See the [daily development roadmap](docs/development-roadmap.md) for 28 ordered development stages, acceptance checks, and suggested commits. It builds on the current prototype, prioritizing matching correctness, a complete pickup and handover journey, usable interfaces, and a verified portfolio demo. Stages are planned work, not completed features or fixed calendar deadlines.
 
 - Release `0.6B`: notifications and NGO acknowledgement

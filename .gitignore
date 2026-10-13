@@ -6,6 +6,9 @@
 /playwright-report/
 /test-results/
 .env
+.env.*
+!.env.example
+/deploy/staging.env
 *.log
 /.local-data/
 /uploads/donations/*

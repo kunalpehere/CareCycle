@@ -1,0 +1,13 @@
+**
+!Dockerfile
+!package.json
+!package-lock.json
+!index.js
+!src/
+!src/**
+!views/
+!views/**
+!public/
+!public/**
+!scripts/
+!scripts/**

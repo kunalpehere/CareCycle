@@ -29,3 +29,13 @@ input[type=checkbox],input[type=radio] { accent-color:var(--green); }
 
 .ngo-history-filter{display:flex;align-items:end;gap:1rem;flex-wrap:wrap;padding:1rem;margin:1rem 0}.ngo-history-filter label{display:grid;gap:.5rem}.ngo-task-list{padding-left:1.25rem}.ngo-task-list li{margin:.8rem 0;overflow-wrap:anywhere}
 .ngo-task-list a{color:#075a43}.ngo-history-filter select{padding:.65rem;background:white;border:1px solid #596d63;border-radius:8px}.ngo-history-filter button{padding:.65rem 1rem;background:#075a43;color:white;border:1px solid #075a43;border-radius:8px}
+/* Persistent, plain-language label for the isolated portfolio demo. */
+.demo-notice { margin-top: 6rem; padding: .75rem 1rem; background: #edf5ee; color: #183b27; border-bottom: 1px solid #b9cbbc; line-height: 1.5; }
+.demo-notice a { text-decoration: underline; color: inherit; }
+.demo-notice ~ main { padding-top: 2rem; }
+.demo-page .surface { padding: clamp(1.25rem, 3vw, 2.5rem); max-width: 900px; margin: auto; }
+.demo-page h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+.demo-page p { line-height: 1.6; }
+.demo-page form { display: flex; flex-wrap: wrap; gap: .75rem; }
+.demo-page button { padding: .7rem 1.1rem; border: 1px solid #176b4b; border-radius: 8px; background: #176b4b; color: white; font-weight: 600; }
+.demo-page button[value=donor] { background: white; color: #176b4b; }

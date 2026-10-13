@@ -6,6 +6,7 @@
 </style></head><body>
 <header class="print-help">Use your browser's Print command to print this receipt or save it as a PDF. This downloaded HTML document works offline.</header>
 <main class="document">
+<% if (typeof demoMode !== 'undefined' && demoMode) { %><p><strong>SYNTHETIC DEMO RECEIPT.</strong> Fictional equipment and handover. This document is not evidence of a real transfer.</p><% } %>
 <div class="brand">CareCycle</div><h1>Donation handover receipt</h1>
 <p class="reference"><strong>Reference:</strong> <%= snapshot.reference %><br><strong>Revision:</strong> <%= number %></p>
 <p class="date">First issued: <%= snapshot.issuedAt.replace('T', ' ').replace('.000Z', ' UTC').replace('Z', ' UTC') %><br>Revision recorded: <%= revisedAt %> (UTC)<br>Commitment completed: <%= snapshot.completedAt %> (UTC)</p>

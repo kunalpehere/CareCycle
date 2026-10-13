@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow"><title>Synthetic demo | CareCycle</title>
+  <link rel="stylesheet" href="/app.css"><link rel="stylesheet" href="/content-pages.css"><link rel="stylesheet" href="/ui-consistency.css">
+  <script src="/app-nav.js" defer></script>
+</head>
+<body>
+  <%- include('partials/app-nav', { activePage: 'demo' }) %>
+  <main class="app-main demo-page" id="main-content" tabindex="-1">
+    <section class="surface">
+      <h1>Try the equipment donation workflow</h1>
+      <p>This is a shared synthetic demo. All accounts, NGO verification, equipment, handovers, receipts and counts are fictional. Other visitors can see and change demo records. Do not enter personal information or real beneficiary details.</p>
+      <p>Start as the NGO to request one of the three fictional wheelchairs. Switch to the donor to accept. Use both roles to confirm pickup, record handover, acknowledge receipt and view the receipt.</p>
+      <p>Pickup uses the normal timing rules: choose a future window, confirm it as the other participant, then wait until its start before recording the fictional handover. For a short demonstration, choose the next minute in UTC. Use a fictional pickup address.</p>
+      <form method="post" action="/demo/login">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-primary" name="role" value="ngo" type="submit">Try as NGO</button>
+        <button class="btn btn-secondary" name="role" value="donor" type="submit">Try as donor</button>
+      </form>
+      <h2>Demo limits</h2>
+      <p>Each shared account allows <%= writeLimit %> workflow submissions between operator resets. Invalid attempts can use this allowance. Existing action rate limits also apply. Registration, account recovery, administration, organization changes, contact messages, and uploads are disabled. No email is sent.</p>
+      <p>Switch roles here whenever needed. Logging out ends your browser session. The operator can reset this separate database, which removes demo activity and ends previous sessions.</p>
+      <p><a href="/home">Read how CareCycle works</a></p>
+    </section>
+  </main>
+</body>
+</html>
