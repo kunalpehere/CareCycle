@@ -36,6 +36,6 @@ Organization verification does not certify equipment condition or medical suitab
 
 ## Live demo
 
-The public portfolio demo is being prepared. Its link will be added here after deployment is verified.
+[Try the live CareCycle demo](https://carecycle-demo.onrender.com/demo)
 
-The demo will use clearly labelled fictional accounts and equipment. Visitors will be able to try donor and NGO roles. Real donations, personal registration, uploads and administrative access will remain unavailable in the public demo.
+The demo uses clearly labelled fictional accounts and equipment. Visitors can try donor and NGO roles. Real donations, personal registration, uploads and administrative access are unavailable in the public demo.
