@@ -23,6 +23,7 @@ import { observeRequest } from "./services/observabilityService.js";
 import { healthRoutes, diagnosticsRoutes } from "./routes/diagnosticsRoutes.js";
 import { demoBoundary } from "./middleware/demo.js";
 import { demoRoutes } from "./routes/demoRoutes.js";
+import { createRenderProxyObserver } from "./services/renderSetupService.js";
 
 export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
     const app = express();
@@ -31,6 +32,7 @@ export const createApp = ({ sessionStore = new MongoSessionStore() } = {}) => {
     app.set("view engine", "ejs");
     app.set("views", path.join(path.resolve(), "views"));
     app.use(observeRequest);
+    if (env.isProduction && process.env.RENDER === "true") app.use(createRenderProxyObserver());
     app.use(securityHeaders);
     // Probes must work even when persisted sessions/CSRF cannot be established.
     app.use("/health", healthRoutes);

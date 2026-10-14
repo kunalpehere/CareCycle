@@ -27,6 +27,19 @@ export const setupProxyObservation = req => {
     };
 };
 
+export const createRenderProxyObserver = ({ write = line => console.log(line) } = {}) => {
+    const seen = new Set();
+    return (req, res, next) => {
+        const observation = setupProxyObservation(req);
+        const record = JSON.stringify({ ...observation, event: "render.app.proxy", trustedPeer: Boolean(req.app.get("trust proxy fn")(req.socket.remoteAddress, 0)), secure: req.secure });
+        if (!seen.has(record) && seen.size < 32) {
+            seen.add(record);
+            try { write(record); } catch { /* Diagnostics must not affect requests. */ }
+        }
+        next();
+    };
+};
+
 // This setup server has no application routes, DB connection, cookies or worker.
 // Forwarded client addresses, credentials, query strings and headers are not logged.
 export const startRenderSetup = async ({ source = process.env, write = line => console.log(line) } = {}) => {

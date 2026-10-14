@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { execFile, spawnSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { startDemoFixture } from "../support/demo-fixture.js";
 
@@ -14,8 +14,9 @@ test("Day 25 isolated demo deployment and reset boundaries", { timeout: 180000 }
         const { consumeDemoBudget, DEMO_WRITE_LIMIT } = await import("../../src/services/demoService.js");
         const guest = f.client();
         await t.test("disabling demo mode cannot serve the marked synthetic database", async () => {
-            const probe = spawnSync(process.execPath, ["--input-type=module", "-e", "import { connectDatabase } from './src/config/database.js'; try { await connectDatabase(); process.exitCode=1; } catch(error) { process.exitCode=error.name==='DemoIsolationError' ? 0 : 2; }"], { env: { ...process.env, DEMO_MODE: "false" }, encoding: "utf8", timeout: 15000, windowsHide: true });
-            assert.equal(probe.status, 0, "The non-demo startup must specifically reject the demo marker.");
+            // Keep the fixture's worker and MongoDB child pipes draining while
+            // the separate process verifies that the demo marker is refused.
+            await promisify(execFile)(process.execPath, ["--input-type=module", "-e", "import { connectDatabase } from './src/config/database.js'; try { await connectDatabase(); process.exitCode=1; } catch(error) { process.exitCode=error.name==='DemoIsolationError' ? 0 : 2; }"], { env: { ...process.env, DEMO_MODE: "false" }, encoding: "utf8", timeout: 15000, windowsHide: true });
         });
         await t.test("Render initializer preserves existing records/generation and refuses confirmation or maintenance", async () => {
             const { initializeConnectedDemo } = await import("../../src/services/renderDemoService.js");

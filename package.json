@@ -11,7 +11,7 @@
   "scripts": {
     "start": "node index.js",
     "start:render": "node scripts/start-render.js",
-    "dev": "nodemon index.js",
+    "dev": "node --watch index.js",
     "check": "node scripts/check-source.js",
     "config:check": "node scripts/check-config.js",
     "demo:prepare": "node scripts/prepare-demo.js",
@@ -46,12 +46,11 @@
     "mongodb-connection-string-url": "2.6.0",
     "mongoose": "^6.11.2",
     "multer": "^2.2.0",
-    "nodemailer": "^9.0.4"
+    "nodemailer": "10.1.1"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",
     "axe-core": "4.14.0",
-    "mongodb-memory-server-core": "11.3.0",
-    "nodemon": "^3.1.14"
+    "mongodb-memory-server-core": "11.3.0"
   }
 }

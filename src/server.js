@@ -7,7 +7,9 @@ import { logEvent } from "./services/observabilityService.js";
 export const startServer = async () => {
     await connectDatabase();
     const app = createApp();
-    const server = app.listen(env.port);
+    // Match the setup listener: localhost proxy traffic must use the observed
+    // IPv4 peer rather than switching to ::1 on a dual-stack listener.
+    const server = app.listen(env.port, env.isProduction ? "0.0.0.0" : undefined);
     try { await new Promise((resolve, reject) => { server.once("listening", resolve); server.once("error", reject); }); }
     catch (error) { await disconnectDatabase(); throw error; }
     logEvent("server.started");

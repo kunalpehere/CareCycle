@@ -4,7 +4,7 @@ import { createServer } from "node:net";
 import { spawnSync } from "node:child_process";
 import { renderOrigin } from "../src/config/renderPlatform.js";
 import { parseRuntimeEnvironment } from "../src/config/runtime.js";
-import { infrastructurePeer, setupProxyObservation, startRenderSetup } from "../src/services/renderSetupService.js";
+import { infrastructurePeer, setupProxyObservation, createRenderProxyObserver, startRenderSetup } from "../src/services/renderSetupService.js";
 import { isolatedTestEnvironment } from "./support/environment.js";
 
 const metadata = { RENDER: "true", RENDER_SERVICE_TYPE: "web", RENDER_EXTERNAL_URL: "https://synthetic-carecycle.onrender.com", RENDER_EXTERNAL_HOSTNAME: "synthetic-carecycle.onrender.com" };
@@ -33,6 +33,22 @@ test("setup distinguishes browser requests from probes and redacts public peers 
     for (const value of ["203.0.113.5", "PRIVATE_HEADER_MARKER", "PRIVATE_CLIENT_MARKER", "PRIVATE_QUERY_MARKER", "private-path"]) assert.ok(!text.includes(value));
     assert.equal(setupProxyObservation({ ...request, method: "HEAD", url: "/health/live", socket: { remoteAddress: "127.0.0.1" }, headers: {} }).forwardedProtocol, "missing");
     assert.equal(setupProxyObservation({ ...request, headers: { "x-forwarded-proto": "https" } }).httpsForwarded, true);
+});
+
+test("application proxy diagnostics show trust decisions without changing them or leaking request input", () => {
+    const output = [];
+    const observe = createRenderProxyObserver({ write: line => output.push(JSON.parse(line)) });
+    let continued = 0;
+    const request = { socket: { remoteAddress: "::1" }, headers: { "x-forwarded-proto": "https", cookie: "PRIVATE_COOKIE_MARKER" }, method: "GET", url: "/?secret=PRIVATE_QUERY_MARKER", secure: false, app: { get: () => () => false } };
+    observe(request, {}, () => continued++);
+    observe(request, {}, () => continued++);
+    assert.equal(continued, 2);
+    assert.equal(output.length, 1);
+    assert.equal(output[0].address, "::1");
+    assert.equal(output[0].trustedPeer, false);
+    assert.equal(output[0].secure, false);
+    assert.equal(output[0].event, "render.app.proxy");
+    assert.ok(!JSON.stringify(output).includes("PRIVATE_"));
 });
 
 test("Render entry command refuses missing provider metadata and wrong database confirmation without echoing secrets", () => {

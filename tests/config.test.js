@@ -130,8 +130,8 @@ test("replica-set verification distinguishes a primary from standalone or second
 });
 
 test("production session cookies require HTTPS from the configured proxy", () => {
-    for (const [TRUST_PROXY, expectedCookie] of [["127.0.0.1", true], ["192.0.2.1", false]]) {
-        const child = spawnSync(process.execPath, ["tests/support/production-cookie-check.js"], {
+    for (const [TRUST_PROXY, expectedCookie, ipv6] of [["127.0.0.1", true, false], ["192.0.2.1", false, false], ["127.0.0.1", false, true], ["::1", true, true]]) {
+        const child = spawnSync(process.execPath, ["tests/support/production-cookie-check.js", ...(ipv6 ? ["--ipv6"] : [])], {
             env: { ...isolatedTestEnvironment(), ...production({ TRUST_PROXY }) }, encoding: "utf8", timeout: 30000
         });
         assert.equal(child.status, 0, child.stderr);

@@ -32,6 +32,8 @@ These are observations, not automatic proxy authorization. Public socket address
 
 Review Render's routing boundary and observed HTTPS peer(s) before supplying `TRUST_PROXY` as explicit observed IPs/CIDRs. Do not infer a whole private network from a single address, use `true`, set a hop count or guess a range. Peer addresses can change during platform routing/deployment; unknown peers remain rejected. Deployed edge checks must confirm secure cookies and forwarded-header handling before sharing the demo. See [Express proxy guidance](https://expressjs.com/en/guide/behind-proxies/) and [Render web-service routing](https://render.com/docs/web-services).
 
+Both setup and application listeners bind explicitly to `0.0.0.0`. This keeps the observed IPv4 loopback path consistent; an implicit dual-stack listener can accept `::1`, which an IPv4-only trust entry correctly rejects. Bounded `render.app.proxy` observations report the effective trust and HTTPS decisions using the same redaction rules as setup, without changing either decision.
+
 ## Atlas access and actual application startup
 
 After the service exists, obtain its outbound IP ranges from Render's dashboard. Add those actual ranges to the CareCycle Atlas project's IP Access List. Do not replace this with worldwide access. The existing local IP entry is for the project owner's computer, not the hosted service. See [Render outbound IPs](https://render.com/docs/outbound-ip-addresses).
